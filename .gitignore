@@ -8,3 +8,6 @@ Thumbs.db
 # 動作確認の一時ファイル
 .playwright-mcp/
 *.log
+
+# アイコンのソース（1024px）。公開は縮小版 icon-180.png のみ
+icon-1024.png
