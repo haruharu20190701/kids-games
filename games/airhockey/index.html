@@ -112,6 +112,7 @@ let mode="cpu";
 let scoreTop=0, scoreBottom=0;
 let state="play";          // play | serve | over
 let serveTimer=0, serveDir=1;
+let stuckT=0, anchorX=150, anchorY=200;   // パックが おなじ ばしょに とどまる じかん（コーナー はさまり よぼう）
 
 const puck={x:150,y:200,vx:0,vy:0};
 const padB={x:150,y:360,px:150,py:360,vx:0,vy:0,ctrl:null};  // した＝プレイヤー1
@@ -157,7 +158,7 @@ window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(
 // ── パック サーブ（ちゅうおうから）──
 function serve(dir){
   puck.x=W/2; puck.y=H/2; puck.vx=0; puck.vy=0;
-  state="serve"; serveTimer=0.8; serveDir=dir;
+  state="serve"; serveTimer=0.8; serveDir=dir; stuckT=0; anchorX=puck.x; anchorY=puck.y;
 }
 function launch(){
   const sp=H*0.55;
@@ -191,11 +192,17 @@ canvas.addEventListener("pointercancel",release);
 
 // ── CPU ──
 function cpu(dt){
-  const home={x:W/2,y:PR*1.4};
-  let tx=home.x, ty=home.y;
+  let tx, ty;
   if(puck.y < H*0.55){                 // パックが じぶんの はんぶんに きたら おいかける
-    tx=puck.x; ty=Math.min(puck.y-R, H/2-PR);
+    tx=puck.x; ty=Math.min(puck.y-(R+PR)*0.7, H/2-PR);
+  }else{                               // それいがいは ゴールまえで まもる
+    tx=W/2; ty=PR*1.3;
   }
+  // コーナーに はまらないよう、x を 内側に せいげん
+  tx=Math.min(Math.max(tx, PR*1.5), W-PR*1.5);
+  ty=Math.min(Math.max(ty, PR), H/2-PR);
+  // パックが パドルより うしろ（うえ）に あるときは、はさまず パックの したへ まわる
+  if(puck.y < padT.y) ty=Math.min(H/2-PR, puck.y+(R+PR));
   const speed=H*0.9;                   // やさしめ
   const dx=tx-padT.x, dy=ty-padT.y, d=Math.hypot(dx,dy);
   if(d>1){ const step=Math.min(d, speed*dt); padT.x+=dx/d*step; padT.y+=dy/d*step; }
@@ -211,6 +218,10 @@ function collide(pad){
     const rvx=puck.vx-pad.vx, rvy=puck.vy-pad.vy, dot=rvx*nx+rvy*ny;
     if(dot<0){ puck.vx-=2*dot*nx; puck.vy-=2*dot*ny; }
     puck.vx+=pad.vx*0.6; puck.vy+=pad.vy*0.6;
+    // パドルから かならず そとむきに さいてい そくどで はなす（はさみこみ ぼうし）
+    const outMin=H*0.32, outv=puck.vx*nx+puck.vy*ny;
+    if(outv<outMin){ puck.vx+=(outMin-outv)*nx; puck.vy+=(outMin-outv)*ny; }
+    stuckT=0;
     speedClamp(); sHit();
   }
 }
@@ -272,6 +283,18 @@ function loop(t){
       else { puck.y=H-R; puck.vy=-Math.abs(puck.vy)*0.92; sWall(); }
     }
     collide(padB); collide(padT);
+    // あんぜん そうち：パックが おなじ ばしょに とどまったら（その場で往復ふくむ）ちゅうおうへ にがす
+    if(Math.abs(puck.x-anchorX)<R*1.6 && Math.abs(puck.y-anchorY)<R*1.6){
+      stuckT+=dt;
+      if(stuckT>0.9){
+        const dx=W/2-puck.x, dy=H/2-puck.y, d=Math.hypot(dx,dy)||1;
+        puck.vx=dx/d*H*0.6; puck.vy=dy/d*H*0.6;
+        puck.x+=dx/d*(R*2); puck.y+=dy/d*(R*2);
+        if(Math.hypot(padT.x-puck.x,padT.y-puck.y)<PR+R) padT.y=Math.max(PR,padT.y-PR*1.5);
+        if(Math.hypot(padB.x-puck.x,padB.y-puck.y)<PR+R) padB.y=Math.min(H-PR,padB.y+PR*1.5);
+        stuckT=0; anchorX=puck.x; anchorY=puck.y;
+      }
+    } else { stuckT=0; anchorX=puck.x; anchorY=puck.y; }
   }
   draw();
   requestAnimationFrame(loop);
