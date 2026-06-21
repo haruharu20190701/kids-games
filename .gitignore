@@ -1,0 +1,10 @@
+# ローカル設定・メモリ（公開しない）
+.claude/
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+
+# 動作確認の一時ファイル
+.playwright-mcp/
+*.log
