@@ -152,56 +152,59 @@ function circle(g,x,y,r){ g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); }
 function tri(g,ax,ay,bx,by,cx,cy){ g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by); g.lineTo(cx,cy); g.closePath(); g.stroke(); }
 function rrect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); g.stroke(); }
 
+// 線画はすべて画像（lines/*.png）。読み込み時に暗いピクセルを線として取り込む。
 const PICS=[
-  {emoji:"🦖", name:"きょうりゅう", src:"lines/dino.png", ratio:1.189},
-  {emoji:"🐱", name:"ねこ", ratio:1, draw:(g,S)=>{
-    tri(g,S*0.33,S*0.30,S*0.28,S*0.08,S*0.46,S*0.22);
-    tri(g,S*0.67,S*0.30,S*0.72,S*0.08,S*0.54,S*0.22);
-    circle(g,S*0.5,S*0.40,S*0.20);
-    circle(g,S*0.43,S*0.38,S*0.025); circle(g,S*0.57,S*0.38,S*0.025);
-    tri(g,S*0.475,S*0.45,S*0.525,S*0.45,S*0.5,S*0.49);
-    g.beginPath(); g.moveTo(S*0.33,S*0.57); g.quadraticCurveTo(S*0.5,S*0.51,S*0.67,S*0.57); g.lineTo(S*0.72,S*0.86); g.lineTo(S*0.28,S*0.86); g.closePath(); g.stroke();
-    g.beginPath(); g.moveTo(S*0.71,S*0.80); g.quadraticCurveTo(S*0.93,S*0.74,S*0.85,S*0.56); g.stroke();
-  }},
-  {emoji:"🚗", name:"くるま", ratio:1, draw:(g,S)=>{
-    rrect(g,S*0.12,S*0.45,S*0.76,S*0.22,S*0.06);
-    g.beginPath(); g.moveTo(S*0.28,S*0.45); g.lineTo(S*0.38,S*0.28); g.lineTo(S*0.66,S*0.28); g.lineTo(S*0.74,S*0.45); g.closePath(); g.stroke();
-    g.beginPath(); g.moveTo(S*0.52,S*0.28); g.lineTo(S*0.52,S*0.45); g.stroke();
-    circle(g,S*0.30,S*0.69,S*0.09); circle(g,S*0.70,S*0.69,S*0.09);
-  }},
-  {emoji:"🐟", name:"さかな", ratio:1, draw:(g,S)=>{
-    g.beginPath(); g.ellipse(S*0.46,S*0.5,S*0.28,S*0.18,0,0,7); g.stroke();
-    g.beginPath(); g.moveTo(S*0.74,S*0.5); g.lineTo(S*0.90,S*0.36); g.lineTo(S*0.90,S*0.64); g.closePath(); g.stroke();
-    circle(g,S*0.34,S*0.46,S*0.03);
-    g.beginPath(); g.moveTo(S*0.50,S*0.34); g.quadraticCurveTo(S*0.58,S*0.24,S*0.66,S*0.36); g.stroke();
-    g.beginPath(); g.arc(S*0.46,S*0.5,S*0.28,-0.5,0.5); g.stroke();
-  }},
-  {emoji:"🌷", name:"はな", ratio:1, draw:(g,S)=>{
-    circle(g,S*0.5,S*0.30,S*0.10);
-    circle(g,S*0.34,S*0.34,S*0.10); circle(g,S*0.66,S*0.34,S*0.10);
-    circle(g,S*0.40,S*0.48,S*0.10); circle(g,S*0.60,S*0.48,S*0.10);
-    circle(g,S*0.5,S*0.40,S*0.08);
-    g.beginPath(); g.moveTo(S*0.5,S*0.48); g.lineTo(S*0.5,S*0.86); g.stroke();
-    g.beginPath(); g.moveTo(S*0.5,S*0.66); g.quadraticCurveTo(S*0.30,S*0.62,S*0.26,S*0.74); g.quadraticCurveTo(S*0.42,S*0.78,S*0.5,S*0.70); g.closePath(); g.stroke();
-    g.beginPath(); g.moveTo(S*0.5,S*0.72); g.quadraticCurveTo(S*0.70,S*0.70,S*0.74,S*0.82); g.quadraticCurveTo(S*0.58,S*0.84,S*0.5,S*0.76); g.closePath(); g.stroke();
-  }},
-  {emoji:"🏠", name:"おうち", ratio:1, draw:(g,S)=>{
-    rrect(g,S*0.22,S*0.46,S*0.56,S*0.40,S*0.02);
-    g.beginPath(); g.moveTo(S*0.16,S*0.46); g.lineTo(S*0.5,S*0.18); g.lineTo(S*0.84,S*0.46); g.closePath(); g.stroke();
-    rrect(g,S*0.42,S*0.62,S*0.16,S*0.24,S*0.02);
-    rrect(g,S*0.27,S*0.54,S*0.12,S*0.12,S*0.02);
-    rrect(g,S*0.61,S*0.54,S*0.12,S*0.12,S*0.02);
-    circle(g,S*0.78,S*0.22,S*0.07);
-  }},
-  {emoji:"🦋", name:"ちょうちょ", ratio:1, draw:(g,S)=>{
-    g.beginPath(); g.ellipse(S*0.49,S*0.5,S*0.025,S*0.16,0,0,7); g.stroke();
-    g.beginPath(); g.ellipse(S*0.33,S*0.38,S*0.15,S*0.12,-0.5,0,7); g.stroke();
-    g.beginPath(); g.ellipse(S*0.67,S*0.38,S*0.15,S*0.12,0.5,0,7); g.stroke();
-    g.beginPath(); g.ellipse(S*0.35,S*0.62,S*0.12,S*0.10,0.5,0,7); g.stroke();
-    g.beginPath(); g.ellipse(S*0.65,S*0.62,S*0.12,S*0.10,-0.5,0,7); g.stroke();
-    g.beginPath(); g.moveTo(S*0.49,S*0.34); g.quadraticCurveTo(S*0.42,S*0.22,S*0.38,S*0.20); g.stroke();
-    g.beginPath(); g.moveTo(S*0.50,S*0.34); g.quadraticCurveTo(S*0.58,S*0.22,S*0.62,S*0.20); g.stroke();
-  }},
+  {emoji:"🌋", name:"きょうりゅうのもり", src:"lines/dino.png"},
+  {emoji:"🐱", name:"ねこ", src:"lines/cat.png"},
+  {emoji:"🐶", name:"いぬ", src:"lines/dog.png"},
+  {emoji:"🐰", name:"うさぎ", src:"lines/rabbit.png"},
+  {emoji:"🐻", name:"くま", src:"lines/bear.png"},
+  {emoji:"🐼", name:"ぱんだ", src:"lines/panda.png"},
+  {emoji:"🦁", name:"らいおん", src:"lines/lion.png"},
+  {emoji:"🐘", name:"ぞう", src:"lines/elephant.png"},
+  {emoji:"🦒", name:"きりん", src:"lines/giraffe.png"},
+  {emoji:"🐵", name:"さる", src:"lines/monkey.png"},
+  {emoji:"🐧", name:"ぺんぎん", src:"lines/penguin.png"},
+  {emoji:"🦉", name:"ふくろう", src:"lines/owl.png"},
+  {emoji:"🦊", name:"きつね", src:"lines/fox.png"},
+  {emoji:"🐸", name:"かえる", src:"lines/frog.png"},
+  {emoji:"🐢", name:"かめ", src:"lines/turtle.png"},
+  {emoji:"🐟", name:"さかな", src:"lines/fish.png"},
+  {emoji:"🐳", name:"くじら", src:"lines/whale.png"},
+  {emoji:"🐬", name:"いるか", src:"lines/dolphin.png"},
+  {emoji:"🐙", name:"たこ", src:"lines/octopus.png"},
+  {emoji:"🦀", name:"かに", src:"lines/crab.png"},
+  {emoji:"🦋", name:"ちょうちょ", src:"lines/butterfly.png"},
+  {emoji:"🐝", name:"はち", src:"lines/bee.png"},
+  {emoji:"🐞", name:"てんとうむし", src:"lines/ladybug.png"},
+  {emoji:"🐌", name:"かたつむり", src:"lines/snail.png"},
+  {emoji:"🦔", name:"はりねずみ", src:"lines/hedgehog.png"},
+  {emoji:"🐑", name:"ひつじ", src:"lines/sheep.png"},
+  {emoji:"🦖", name:"ティラノ", src:"lines/trex.png"},
+  {emoji:"🦕", name:"くびながりゅう", src:"lines/longneck.png"},
+  {emoji:"🦄", name:"ゆにこーん", src:"lines/unicorn.png"},
+  {emoji:"🐲", name:"どらごん", src:"lines/dragon.png"},
+  {emoji:"🧜", name:"にんぎょ", src:"lines/mermaid.png"},
+  {emoji:"🚗", name:"くるま", src:"lines/car.png"},
+  {emoji:"🚌", name:"ばす", src:"lines/bus.png"},
+  {emoji:"🚂", name:"でんしゃ", src:"lines/train.png"},
+  {emoji:"✈️", name:"ひこうき", src:"lines/airplane.png"},
+  {emoji:"🚀", name:"ろけっと", src:"lines/rocket.png"},
+  {emoji:"⛵", name:"ふね", src:"lines/ship.png"},
+  {emoji:"🚒", name:"しょうぼうしゃ", src:"lines/firetruck.png"},
+  {emoji:"🚜", name:"しょべるかー", src:"lines/digger.png"},
+  {emoji:"🚲", name:"じてんしゃ", src:"lines/bicycle.png"},
+  {emoji:"🚁", name:"へりこぷたー", src:"lines/helicopter.png"},
+  {emoji:"🍎", name:"りんご", src:"lines/apple.png"},
+  {emoji:"🍓", name:"いちご", src:"lines/strawberry.png"},
+  {emoji:"🍦", name:"あいす", src:"lines/icecream.png"},
+  {emoji:"🎂", name:"けーき", src:"lines/cake.png"},
+  {emoji:"🍩", name:"どーなつ", src:"lines/donut.png"},
+  {emoji:"🌷", name:"ちゅーりっぷ", src:"lines/tulip.png"},
+  {emoji:"🌻", name:"ひまわり", src:"lines/sunflower.png"},
+  {emoji:"🌳", name:"き", src:"lines/tree.png"},
+  {emoji:"🤖", name:"ろぼっと", src:"lines/robot.png"},
+  {emoji:"🧸", name:"くまさん", src:"lines/teddybear.png"},
 ];
 
 const selectScreen=document.getElementById("select"), colorScreen=document.getElementById("color");
