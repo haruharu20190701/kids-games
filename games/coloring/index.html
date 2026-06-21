@@ -68,6 +68,10 @@
   .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
   .btn.on{color:#fff;background:linear-gradient(180deg,#ff8fab,#ff6b8a);box-shadow:0 3px 0 #e04e6e;}
   .btn.choose{color:#fff;background:linear-gradient(180deg,#ffc24d,#ff9f45);box-shadow:0 3px 0 #e07d1f;}
+  .szlab{font-size:13px;font-weight:800;color:#a98b5a;}
+  .szb{border:none;font-family:inherit;font-weight:800;font-size:13px;color:var(--ink);background:#fffdf5;border-radius:999px;padding:6px 14px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;}
+  .szb:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .szb.on{color:#fff;background:linear-gradient(180deg,#4cc9f0,#3aa0d6);box-shadow:0 3px 0 #2b7fae;}
   #stage{flex:1;width:100%;max-width:760px;display:flex;align-items:center;justify-content:center;padding:6px 10px 8px;min-height:0;}
   #view{background:#fff;border-radius:18px;box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);touch-action:none;}
   .hint{font-size:13px;color:#8a7a66;margin:2px 0 8px;text-align:center;padding:0 12px;}
@@ -90,12 +94,23 @@
     <div id="tools">
       <div class="row">
         <button class="btn choose" id="back">← えらぶ</button>
-        <button class="btn on" id="tBucket">🪣 バケツ</button>
-        <button class="btn" id="tBrush">🖌️ ふで</button>
-        <button class="btn" id="tEraser">🧽 けしごむ</button>
         <button class="btn" id="undo">↩️ もどす</button>
         <button class="btn" id="clear">🔄 やりなおし</button>
         <button class="btn" id="save">💾 ほぞん</button>
+      </div>
+      <div class="row">
+        <button class="btn tool on" data-tool="bucket">🪣 バケツ</button>
+        <button class="btn tool" data-tool="brush">🖌️ ふで</button>
+        <button class="btn tool" data-tool="spray">💨 スプレー</button>
+        <button class="btn tool" data-tool="crayon">🖍️ クレヨン</button>
+        <button class="btn tool" data-tool="rainbow">🌈 にじ</button>
+        <button class="btn tool" data-tool="eraser">🧽 けしごむ</button>
+      </div>
+      <div class="row" id="sizes">
+        <span class="szlab">ふとさ</span>
+        <button class="szb" data-mul="0.6">ほそ</button>
+        <button class="szb on" data-mul="1">ふつう</button>
+        <button class="szb" data-mul="1.9">ふと</button>
       </div>
       <div class="row" id="palette"></div>
     </div>
@@ -111,7 +126,15 @@
    - 線は「線レイヤー」、いろは「ぬりレイヤー」。画像線画は くらい ピクセルを かべに
    - すべて canvas。がいぶ素材 ふよう（画像は じぶんの オリジナル）
    ========================================================= */
-const COLORS=["#ff5a5f","#ff9f45","#ffd23f","#7bdc8a","#34c759","#4cc9f0","#3a86ff","#b388ff","#ff6fb5","#a0522d","#222222","#ffffff"];
+const COLORS=[
+  "#ffffff","#dddddd","#9e9e9e","#222222",
+  "#fff06a","#ffd23f","#ffb703","#ff9f45","#ff7043",
+  "#ff5a5f","#e63946","#ff6fb5","#d81b60",
+  "#caffbf","#7bdc8a","#34c759","#1b9e5a",
+  "#a7e8ff","#4cc9f0","#3a86ff","#2740b0",
+  "#d8b4ff","#b388ff","#7c4dff",
+  "#ffd9b3","#a0522d","#6b3f1d"
+];
 
 function circle(g,x,y,r){ g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); }
 function tri(g,ax,ay,bx,by,cx,cy){ g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by); g.lineTo(cx,cy); g.closePath(); g.stroke(); }
@@ -174,6 +197,7 @@ const thumbsEl=document.getElementById("thumbs");
 const view=document.getElementById("view"), vctx=view.getContext("2d");
 const stage=document.getElementById("stage");
 let paint,pctx, line,lctx, bw=600,bh=600, scale=1, cur=0, tool="bucket", color="#ff5a5f";
+let sizeMul=1, hue=0;
 const undoStack=[], MAX_UNDO=8;
 
 // ── 画像線画の よみこみ ──
@@ -304,15 +328,34 @@ function bucket(sx,sy){
   pctx.putImageData(pd,0,0); render();
 }
 
-// ── ふで／けしごむ ──
+// ── ふで／スプレー／クレヨン／にじ／けしごむ ──
 let drawing=false,lx=0,ly=0;
-function bsize(){ return Math.max(6, Math.min(bw,bh)*0.022); }
-function strokeTo(x,y){
-  pctx.strokeStyle = (tool==="eraser") ? "#ffffff" : color;
-  pctx.lineWidth = (tool==="eraser") ? bsize()*2 : bsize();
-  pctx.lineCap="round"; pctx.lineJoin="round";
-  pctx.beginPath(); pctx.moveTo(lx,ly); pctx.lineTo(x,y); pctx.stroke();
-  lx=x; ly=y; render();
+function bsize(){ return Math.max(5, Math.min(bw,bh)*0.022) * sizeMul; }
+function lineSeg(x0,y0,x1,y1,w,c){ pctx.strokeStyle=c; pctx.lineWidth=w; pctx.lineCap="round"; pctx.lineJoin="round"; pctx.beginPath(); pctx.moveTo(x0,y0); pctx.lineTo(x1,y1); pctx.stroke(); }
+function spray(cx,cy,r){
+  pctx.fillStyle=color;
+  const n=Math.floor(r*1.4);
+  for(let i=0;i<n;i++){ const a=Math.random()*6.283, rr=Math.random()*r; pctx.globalAlpha=0.4+Math.random()*0.5; pctx.beginPath(); pctx.arc(cx+Math.cos(a)*rr, cy+Math.sin(a)*rr, Math.random()*1.6+0.6,0,7); pctx.fill(); }
+  pctx.globalAlpha=1;
+}
+function crayonSeg(x0,y0,x1,y1,b){
+  pctx.globalAlpha=0.5; lineSeg(x0,y0,x1,y1,b,color);   // ほんたい（はんとうめい）
+  pctx.globalAlpha=0.45; pctx.fillStyle=color;          // ざらざら つぶ
+  const dist=Math.hypot(x1-x0,y1-y0), steps=Math.max(1,Math.floor(dist/2));
+  for(let s=0;s<=steps;s++){
+    const t=s/steps, cx=x0+(x1-x0)*t, cy=y0+(y1-y0)*t;
+    for(let k=0;k<3;k++){ const a=Math.random()*6.283, rr=Math.random()*b*0.5; pctx.beginPath(); pctx.arc(cx+Math.cos(a)*rr, cy+Math.sin(a)*rr, Math.random()*1.4+0.4,0,7); pctx.fill(); }
+  }
+  pctx.globalAlpha=1;
+}
+function paintSeg(x0,y0,x1,y1){
+  const b=bsize();
+  if(tool==="eraser")      lineSeg(x0,y0,x1,y1,b*2,"#ffffff");
+  else if(tool==="brush")  lineSeg(x0,y0,x1,y1,b,color);
+  else if(tool==="rainbow"){ lineSeg(x0,y0,x1,y1,b,"hsl("+(hue%360)+",85%,55%)"); hue+=14; }
+  else if(tool==="crayon") crayonSeg(x0,y0,x1,y1,b);
+  else if(tool==="spray")  spray(x1,y1,b*2.2);
+  render();
 }
 
 // ── にゅうりょく ──
@@ -321,9 +364,9 @@ view.addEventListener("pointerdown",(e)=>{
   e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume();
   const p=toBuf(e); pushUndo();
   if(tool==="bucket"){ bucket(p.x,p.y); beep(520,0.08,"sine",0.14); }
-  else { drawing=true; lx=p.x; ly=p.y; strokeTo(p.x,p.y); try{view.setPointerCapture(e.pointerId);}catch(_){} }
+  else { drawing=true; lx=p.x; ly=p.y; paintSeg(p.x,p.y,p.x,p.y); try{view.setPointerCapture(e.pointerId);}catch(_){} }
 });
-view.addEventListener("pointermove",(e)=>{ if(!drawing)return; e.preventDefault(); const p=toBuf(e); strokeTo(p.x,p.y); });
+view.addEventListener("pointermove",(e)=>{ if(!drawing)return; e.preventDefault(); const p=toBuf(e); paintSeg(lx,ly,p.x,p.y); lx=p.x; ly=p.y; });
 function endStroke(){ drawing=false; }
 view.addEventListener("pointerup",endStroke); view.addEventListener("pointercancel",endStroke); view.addEventListener("pointerleave",endStroke);
 
@@ -331,14 +374,12 @@ view.addEventListener("pointerup",endStroke); view.addEventListener("pointercanc
 const paletteEl=document.getElementById("palette");
 COLORS.forEach((c,i)=>{
   const s=document.createElement("div"); s.className="sw"+(i===0?" on":""); s.style.background=c; if(c==="#ffffff")s.style.borderColor="#ddd";
-  s.addEventListener("click",()=>{ color=c; document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s)); if(tool==="eraser")setTool("bucket"); beep(660,0.05,"sine",0.12); });
+  s.addEventListener("click",()=>{ color=c; document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s)); if(tool==="eraser"||tool==="bucket"){} else if(tool==="rainbow")setTool("brush"); beep(660,0.05,"sine",0.12); });
   paletteEl.appendChild(s);
 });
-const tB=document.getElementById("tBucket"),tBr=document.getElementById("tBrush"),tE=document.getElementById("tEraser");
-function setTool(t){ tool=t; tB.classList.toggle("on",t==="bucket"); tBr.classList.toggle("on",t==="brush"); tE.classList.toggle("on",t==="eraser"); }
-tB.addEventListener("click",()=>{setTool("bucket");beep(500,0.05);});
-tBr.addEventListener("click",()=>{setTool("brush");beep(500,0.05);});
-tE.addEventListener("click",()=>{setTool("eraser");beep(330,0.06);});
+function setTool(t){ tool=t; document.querySelectorAll(".tool").forEach(b=>b.classList.toggle("on",b.dataset.tool===t)); }
+document.querySelectorAll(".tool").forEach(b=>b.addEventListener("click",()=>{ setTool(b.dataset.tool); beep(b.dataset.tool==="eraser"?330:500,0.05); }));
+document.querySelectorAll(".szb").forEach(b=>b.addEventListener("click",()=>{ sizeMul=parseFloat(b.dataset.mul); document.querySelectorAll(".szb").forEach(x=>x.classList.toggle("on",x===b)); beep(550,0.05); }));
 document.getElementById("clear").addEventListener("click",()=>{ pushUndo(); pctx.fillStyle="#fff"; pctx.fillRect(0,0,bw,bh); render(); beep(300,0.12,"sawtooth",0.12); });
 document.getElementById("save").addEventListener("click",()=>{
   try{ const a=document.createElement("a"); a.download="nurie.png"; a.href=view.toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove(); [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*80)); }catch(e){}
