@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="エアホッケー" />
+<title>エアホッケー｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの エアホッケー。ひとり(CPU)でも ふたりでも あそべる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/airhockey/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="エアホッケー｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの エアホッケー。ひとり(CPU)でも ふたりでも あそべる。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/airhockey/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --accent:#ff8fab; --accent2:#ff6b8a; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  #top{width:100%;max-width:620px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 14px 2px;}
+  .title{font-size:20px;font-weight:900;letter-spacing:1px;}
+  .tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .tab{
+    border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:8px 16px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;
+  }
+  .tab:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tab.on{color:#fff;background:linear-gradient(180deg,var(--accent),var(--accent2));box-shadow:0 3px 0 #e04e6e;}
+  #stage{flex:1;width:100%;max-width:620px;display:flex;padding:6px 10px 10px;min-height:0;}
+  #rink{
+    flex:1;min-width:0;min-height:0;width:100%;height:100%;display:block;
+    border-radius:18px;background:#eaf6ff;touch-action:none;
+    box-shadow:0 8px 0 #b9d9ee, 0 14px 24px rgba(0,0,0,.12);
+  }
+  /* かちまけ */
+  #over{
+    position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:rgba(255,247,214,.92);z-index:80;text-align:center;
+  }
+  #over.show{display:flex;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  #over .big{font-size:30px;font-weight:900;}
+  .btn{
+    border:none;border-radius:999px;padding:16px 34px;font-size:22px;font-weight:900;font-family:inherit;color:#fff;
+    background:linear-gradient(180deg,#ff8fab,#ff6b8a);box-shadow:0 6px 0 #e04e6e;cursor:pointer;text-decoration:none;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #e04e6e;}
+  .btn.ghost{background:#fff;color:#ff6b8a;box-shadow:0 6px 0 #f0c0cb;font-size:18px;padding:12px 26px;}
+  .hint{font-size:13px;color:#8a7a66;margin:2px 0 8px;text-align:center;padding:0 12px;}
+  #fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60;}
+  .confetti{position:absolute;font-size:24px;animation:cf var(--dur,1s) ease-in forwards;}
+  @keyframes cf{0%{transform:translate(0,0) rotate(0);opacity:1;}100%{transform:translate(var(--dx,0),110vh) rotate(420deg);opacity:0;}}
+  @media (orientation:landscape) and (max-height:480px){ #top{padding:4px 14px 0;gap:5px;} .hint{display:none;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <div id="top">
+    <div class="title">🏒 エアホッケー</div>
+    <div class="tabs">
+      <button class="tab on" data-mode="cpu">ひとり（CPU）</button>
+      <button class="tab" data-mode="2p">ふたり</button>
+      <button class="tab" id="reset">さいしょから</button>
+    </div>
+  </div>
+
+  <div id="stage"><canvas id="rink"></canvas></div>
+  <div class="hint" id="hint">パドルを ゆびで うごかして、あいての ゴールに いれよう！（5てん さきどり）</div>
+
+  <div id="over">
+    <div class="big" id="overTitle">かち！</div>
+    <button class="btn" id="again">もういちど</button>
+    <a class="btn ghost" href="../../index.html">メニューへ</a>
+  </div>
+  <div id="fx"></div>
+
+<script>
+/* =========================================================
+   5さいむけ エアホッケー
+   - ひとり(CPU) / ふたり(おなじ画面・上下から)
+   - パックは かべで はねて、ゴールに はいると とくてん（5てん さきどり）
+   - canvas＋かんたん物理。おとは Web Audio（ファイルふよう）
+   ========================================================= */
+const canvas=document.getElementById("rink"), ctx=canvas.getContext("2d");
+const stage=document.getElementById("stage");
+const overEl=document.getElementById("over"), overTitle=document.getElementById("overTitle"), fxEl=document.getElementById("fx");
+const WIN=5;
+
+let W=300,H=400,dpr=1,R=16,PR=30,GOAL=140;
+let mode="cpu";
+let scoreTop=0, scoreBottom=0;
+let state="play";          // play | serve | over
+let serveTimer=0, serveDir=1;
+
+const puck={x:150,y:200,vx:0,vy:0};
+const padB={x:150,y:360,px:150,py:360,vx:0,vy:0,ctrl:null};  // した＝プレイヤー1
+const padT={x:150,y:40, px:150,py:40, vx:0,vy:0,ctrl:null};  // うえ＝CPU/プレイヤー2
+
+// ── おと ──
+let actx=null;
+function beep(freq,dur=0.08,type="sine",vol=0.16){
+  try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume();
+    const o=actx.createOscillator(),g=actx.createGain(); o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(actx.destination);o.start(); g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+const sHit=()=>beep(420,0.05,"square",0.12);
+const sWall=()=>beep(300,0.04,"sine",0.09);
+const sGoal=()=>[660,880,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*80));
+const fanfare=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.2,"triangle",0.22),i*110));
+
+// ── サイズあわせ ──
+function fit(){
+  const r=stage.getBoundingClientRect(); dpr=window.devicePixelRatio||1;
+  W=Math.max(160,r.width-20); H=Math.max(200,r.height-20);
+  // canvas は stage いっぱい
+  const cw=Math.max(160,r.width-20), ch=Math.max(200,r.height-20);
+  canvas.style.width=cw+"px"; canvas.style.height=ch+"px";
+  canvas.width=Math.round(cw*dpr); canvas.height=Math.round(ch*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  W=cw; H=ch;
+  R=Math.max(10,Math.min(W,H)*0.04);
+  PR=Math.max(20,W*0.085);
+  GOAL=Math.min(W*0.5, W-2*PR-10);
+  clampAll();
+}
+function clampAll(){
+  padB.x=Math.min(Math.max(padB.x,PR),W-PR); padB.y=Math.min(Math.max(padB.y,H/2+PR),H-PR);
+  padT.x=Math.min(Math.max(padT.x,PR),W-PR); padT.y=Math.min(Math.max(padT.y,PR),H/2-PR);
+  puck.x=Math.min(Math.max(puck.x,R),W-R);   puck.y=Math.min(Math.max(puck.y,R),H-R);
+}
+let rt=null;
+window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,150);});
+window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+
+// ── パック サーブ（ちゅうおうから）──
+function serve(dir){
+  puck.x=W/2; puck.y=H/2; puck.vx=0; puck.vy=0;
+  state="serve"; serveTimer=0.8; serveDir=dir;
+}
+function launch(){
+  const sp=H*0.55;
+  puck.vy=serveDir*sp; puck.vx=(Math.random()*2-1)*sp*0.4;
+  state="play";
+}
+
+// ── にゅうりょく（マルチタッチ）──
+function relPos(e){ const r=canvas.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+function assign(e){
+  const p=relPos(e);
+  let pad;
+  if(mode==="2p") pad=(p.y<H/2)?padT:padB;
+  else pad=padB;                       // CPUモードは した だけ そうさ
+  pad.ctrl=e.pointerId; movePad(pad,p);
+}
+function movePad(pad,p){
+  pad.x=Math.min(Math.max(p.x,PR),W-PR);
+  if(pad===padB) pad.y=Math.min(Math.max(p.y,H/2+PR),H-PR);
+  else           pad.y=Math.min(Math.max(p.y,PR),H/2-PR);
+}
+canvas.addEventListener("pointerdown",(e)=>{ e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume(); assign(e); try{canvas.setPointerCapture(e.pointerId);}catch(_){} });
+canvas.addEventListener("pointermove",(e)=>{
+  e.preventDefault(); const p=relPos(e);
+  if(e.pointerId===padB.ctrl) movePad(padB,p);
+  if(e.pointerId===padT.ctrl) movePad(padT,p);
+});
+function release(e){ if(e.pointerId===padB.ctrl)padB.ctrl=null; if(e.pointerId===padT.ctrl)padT.ctrl=null; }
+canvas.addEventListener("pointerup",release);
+canvas.addEventListener("pointercancel",release);
+
+// ── CPU ──
+function cpu(dt){
+  const home={x:W/2,y:PR*1.4};
+  let tx=home.x, ty=home.y;
+  if(puck.y < H*0.55){                 // パックが じぶんの はんぶんに きたら おいかける
+    tx=puck.x; ty=Math.min(puck.y-R, H/2-PR);
+  }
+  const speed=H*0.9;                   // やさしめ
+  const dx=tx-padT.x, dy=ty-padT.y, d=Math.hypot(dx,dy);
+  if(d>1){ const step=Math.min(d, speed*dt); padT.x+=dx/d*step; padT.y+=dy/d*step; }
+  padT.x=Math.min(Math.max(padT.x,PR),W-PR); padT.y=Math.min(Math.max(padT.y,PR),H/2-PR);
+}
+
+// ── パドルと パックの あたり ──
+function collide(pad){
+  const dx=puck.x-pad.x, dy=puck.y-pad.y; const d=Math.hypot(dx,dy), min=R+pad.r;
+  if(d<min && d>0){
+    const nx=dx/d, ny=dy/d;
+    puck.x=pad.x+nx*min; puck.y=pad.y+ny*min;
+    const rvx=puck.vx-pad.vx, rvy=puck.vy-pad.vy, dot=rvx*nx+rvy*ny;
+    if(dot<0){ puck.vx-=2*dot*nx; puck.vy-=2*dot*ny; }
+    puck.vx+=pad.vx*0.6; puck.vy+=pad.vy*0.6;
+    speedClamp(); sHit();
+  }
+}
+function speedClamp(){
+  const maxV=H*1.6, sp=Math.hypot(puck.vx,puck.vy);
+  if(sp>maxV){ puck.vx*=maxV/sp; puck.vy*=maxV/sp; }
+}
+const inGoalX=(x)=> x>(W-GOAL)/2 && x<(W+GOAL)/2;
+
+// ── とくてん ──
+function goal(who){            // who: 'top' = うえプレイヤーが いれた / 'bottom' = したプレイヤー
+  if(who==="bottom") scoreBottom++; else scoreTop++;
+  sGoal();
+  if(scoreBottom>=WIN || scoreTop>=WIN){ finish(); return; }
+  serve(who==="bottom" ? -1 : 1);    // とられた がわへ サーブ
+}
+function finish(){
+  state="over";
+  let msg;
+  if(mode==="cpu") msg = scoreBottom>scoreTop ? "かち！🎉" : "ざんねん…";
+  else msg = scoreBottom>scoreTop ? "した の かち！🎉" : "うえ の かち！🎉";
+  overTitle.textContent=msg;
+  overEl.classList.add("show");
+  fanfare(); confetti(46);
+}
+function confetti(n){
+  const emo=["🎉","🌈","⭐","💖","✨","🎊","🏒"];
+  for(let i=0;i<n;i++){ const sp=document.createElement("div"); sp.className="confetti"; sp.textContent=emo[Math.floor(Math.random()*emo.length)];
+    sp.style.left=(Math.random()*100)+"vw"; sp.style.top="-8vh";
+    sp.style.setProperty("--dx",(Math.random()*80-40)+"px"); sp.style.setProperty("--dur",(1+Math.random()*0.8)+"s");
+    fxEl.appendChild(sp); setTimeout(()=>sp.remove(),1900); }
+}
+
+// ── ループ ──
+let last=0;
+function loop(t){
+  const dt=Math.min(0.033,(t-last)/1000)||0; last=t;
+  padB.r=PR; padT.r=PR;
+  // パドルの そくど
+  if(dt>0){ padB.vx=(padB.x-padB.px)/dt; padB.vy=(padB.y-padB.py)/dt; padT.vx=(padT.x-padT.px)/dt; padT.vy=(padT.y-padT.py)/dt; }
+  if(mode==="cpu") cpu(dt);
+  padB.px=padB.x; padB.py=padB.y; padT.px=padT.x; padT.py=padT.y;
+
+  if(state==="serve"){ serveTimer-=dt; if(serveTimer<=0) launch(); }
+  if(state==="play"){
+    puck.x+=puck.vx*dt; puck.y+=puck.vy*dt;
+    puck.vx*=Math.pow(0.86,dt); puck.vy*=Math.pow(0.86,dt);   // すこし まさつ
+    // よこ かべ
+    if(puck.x-R<0){ puck.x=R; puck.vx=Math.abs(puck.vx)*0.92; sWall(); }
+    if(puck.x+R>W){ puck.x=W-R; puck.vx=-Math.abs(puck.vx)*0.92; sWall(); }
+    // うえ
+    if(puck.y-R<0){
+      if(inGoalX(puck.x)){ if(puck.y<-R) goal("bottom"); }     // うえゴールへ＝した のとくてん
+      else { puck.y=R; puck.vy=Math.abs(puck.vy)*0.92; sWall(); }
+    }
+    // した
+    if(puck.y+R>H){
+      if(inGoalX(puck.x)){ if(puck.y>H+R) goal("top"); }       // したゴールへ＝うえ のとくてん
+      else { puck.y=H-R; puck.vy=-Math.abs(puck.vy)*0.92; sWall(); }
+    }
+    collide(padB); collide(padT);
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // テーブル
+  ctx.fillStyle="#eaf6ff"; ctx.fillRect(0,0,W,H);
+  // とくてん（うすく おおきく）
+  ctx.save(); ctx.fillStyle="rgba(120,170,210,.28)"; ctx.font="900 "+Math.floor(H*0.18)+"px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.translate(W/2,H*0.27); ctx.rotate(Math.PI); ctx.fillText(scoreTop,0,0); ctx.restore();
+  ctx.save(); ctx.fillStyle="rgba(255,140,160,.28)"; ctx.font="900 "+Math.floor(H*0.18)+"px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(scoreBottom,W/2,H*0.73); ctx.restore();
+  // センターライン＋まる
+  ctx.strokeStyle="#9cc7e0"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2,H/2,Math.min(W,H)*0.13,0,7); ctx.stroke();
+  // ゴール
+  ctx.lineWidth=8; ctx.lineCap="round";
+  ctx.strokeStyle="#ff8fab"; ctx.beginPath(); ctx.moveTo((W-GOAL)/2,4); ctx.lineTo((W+GOAL)/2,4); ctx.stroke();
+  ctx.strokeStyle="#4cc9f0"; ctx.beginPath(); ctx.moveTo((W-GOAL)/2,H-4); ctx.lineTo((W+GOAL)/2,H-4); ctx.stroke();
+  ctx.lineCap="butt";
+  // パック
+  ctx.fillStyle="#5b4636"; ctx.beginPath(); ctx.arc(puck.x,puck.y,R,0,7); ctx.fill();
+  // パドル
+  drawPad(padT,"#4cc9f0","#2b7fae"); drawPad(padB,"#ff6b8a","#e04e6e");
+  // サーブ ちゅうの あいず
+  if(state==="serve"){ ctx.fillStyle="rgba(91,70,54,.5)"; ctx.font="900 "+Math.floor(H*0.05)+"px sans-serif"; ctx.textAlign="center"; ctx.fillText("よーい…",W/2,H/2-Math.min(W,H)*0.13-14); }
+}
+function drawPad(pad,c1,c2){
+  ctx.fillStyle=c2; ctx.beginPath(); ctx.arc(pad.x,pad.y+3,pad.r,0,7); ctx.fill();
+  ctx.fillStyle=c1; ctx.beginPath(); ctx.arc(pad.x,pad.y,pad.r,0,7); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.5)"; ctx.beginPath(); ctx.arc(pad.x,pad.y,pad.r*0.45,0,7); ctx.fill();
+}
+
+// ── モード／リセット ──
+function resetMatch(){ scoreTop=0; scoreBottom=0; overEl.classList.remove("show"); serve(Math.random()<0.5?1:-1); }
+document.querySelectorAll("[data-mode]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    mode=btn.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("on",b===btn));
+    document.getElementById("hint").textContent = mode==="2p"
+      ? "ふたりで！うえと したから パドルを うごかそう（5てん さきどり）"
+      : "パドルを ゆびで うごかして、あいての ゴールに いれよう！（5てん さきどり）";
+    beep(600,0.06,"sine",0.12); resetMatch();
+  });
+});
+document.getElementById("reset").addEventListener("click",()=>{ beep(500,0.06,"sine",0.12); resetMatch(); });
+document.getElementById("again").addEventListener("click",resetMatch);
+
+// ── スタート ──
+function init(){ fit(); padB.x=padB.px=W/2; padB.y=padB.py=H-PR*1.6; padT.x=padT.px=W/2; padT.y=padT.py=PR*1.6; serve(Math.random()<0.5?1:-1); requestAnimationFrame((t)=>{last=t;requestAnimationFrame(loop);}); }
+init();
+</script>
+</body>
+</html>
