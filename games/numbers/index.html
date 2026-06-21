@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="かずあそび" />
+<title>かずあそび｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの かずあそび。ものを かぞえて ただしい すうじを タッチ。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/numbers/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="かずあそび｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの かずあそび。ものを かぞえて ただしい すうじを タッチ。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/numbers/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ かずあそび ── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --card:#fffdf5; --accent:#ff8fab; --accent2:#ff6b8a; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  #top{width:100%;max-width:620px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 14px 2px;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  .tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;}
+  .tab{
+    border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:8px 16px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;
+  }
+  .tab:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tab.on{color:#fff;background:linear-gradient(180deg,var(--accent),var(--accent2));box-shadow:0 3px 0 #e04e6e;}
+  .score{font-weight:800;font-size:16px;}
+  .score .lab{color:#a98b5a;font-size:13px;}
+  /* ── もんだい ── */
+  #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%;max-width:620px;padding:6px 12px;min-height:0;}
+  .ask{font-size:20px;font-weight:900;}
+  #items{
+    background:var(--card);border-radius:20px;box-shadow:0 6px 0 #e8c98a, 0 12px 20px rgba(0,0,0,.08);
+    padding:14px 16px;display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;align-items:center;
+    width:100%;max-height:46vh;overflow:auto;
+  }
+  .item{line-height:1;animation:pip .3s ease backwards;}
+  @keyframes pip{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+  #choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .num{
+    border:none;font-family:inherit;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#4cc9f0,#3aa0d6);
+    width:84px;height:84px;border-radius:22px;font-size:44px;
+    box-shadow:0 6px 0 #2b7fae;cursor:pointer;transition:transform .08s;
+  }
+  .num:nth-child(2){background:linear-gradient(180deg,#7bdc8a,#52c46a);box-shadow:0 6px 0 #3a9152;}
+  .num:nth-child(3){background:linear-gradient(180deg,#ffb24d,#ff9f45);box-shadow:0 6px 0 #d9892f;}
+  .num:active{transform:translateY(3px);}
+  .num.bad{animation:shake .35s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .num.good{animation:pop .4s ease;}
+  @keyframes pop{0%{transform:scale(1);}45%{transform:scale(1.2);}100%{transform:scale(1);}}
+  /* ── ねこ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:40px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-20px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:56px;bottom:22px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  .hint{font-size:14px;color:#8a7a66;margin:4px 0 10px;text-align:center;padding:0 12px;}
+  /* ── えんしゅつ ── */
+  #fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:55;}
+  .confetti{position:absolute;font-size:24px;animation:confFall var(--dur,1s) ease-in forwards;}
+  @keyframes confFall{0%{transform:translate(0,0) rotate(0);opacity:1;}100%{transform:translate(var(--dx,0),110vh) rotate(420deg);opacity:0;}}
+  @media (orientation:landscape) and (max-height:480px){
+    #top{padding:4px 14px 0;gap:5px;}
+    #stage{gap:8px;}
+    #items{max-height:38vh;}
+    .num{width:64px;height:64px;font-size:34px;}
+    #cat{font-size:30px;}
+    .hint{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <div id="top">
+    <div class="title">🔢 かずあそび</div>
+    <div class="tabs">
+      <button class="tab on" data-max="5">1〜5</button>
+      <button class="tab" data-max="10">1〜10</button>
+      <button class="tab" data-max="15">1〜15</button>
+    </div>
+    <div class="score"><span class="lab">せいかい</span> <span id="score">0</span></div>
+  </div>
+
+  <div id="stage">
+    <div class="ask">いくつ あるかな？</div>
+    <div id="items"></div>
+    <div id="choices"></div>
+  </div>
+  <div class="hint" id="hint">ものを かぞえて、ただしい すうじを おしてね！</div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="fx"></div>
+
+<script>
+/* =========================================================
+   5さいむけ かずあそび
+   - ものを かぞえて ただしい すうじを タッチ
+   - レベル：1〜5 / 1〜10 / 1〜15
+   - せいかいすると、その かずだけ「ポン」と なって かぞえを みみでも
+   - おとは Web Audio で せいせい（ファイル ふよう）
+   ========================================================= */
+const EMOJIS = ["🍎","🍓","🍊","🍌","🐱","🐶","🐰","⭐","🌸","🚗","🎈","🐠","🦋","🍪","🐥"];
+
+const itemsEl=document.getElementById("items"), choicesEl=document.getElementById("choices");
+const scoreEl=document.getElementById("score");
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble"), fxEl=document.getElementById("fx");
+
+let maxN=5, answer=0, score=0, locked=false;
+
+// ── おと ──
+let actx=null;
+function beep(freq,dur=0.1,type="sine",vol=0.16){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(actx.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function sNo(){ beep(200,0.16,"sawtooth",0.12); }
+function fanfare(){ [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*90)); }
+// せいかいの かずだけ「ポン」（だんだん たかく）
+function countPops(n){
+  for(let i=0;i<n;i++) setTimeout(()=>beep(440+i*40,0.1,"triangle",0.18), i*200);
+}
+
+// ── ねこ ──
+let bubbleTimer=null;
+function catReact(face,word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){ bubbleEl.textContent=word; bubbleEl.classList.add("show"); clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1400); }
+  setTimeout(()=>{catEl.textContent="🐱";},900);
+}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const rand=(lo,hi)=>Math.floor(Math.random()*(hi-lo+1))+lo;
+
+// ── もんだいを つくる ──
+function newQuestion(){
+  locked=false;
+  answer=rand(1,maxN);
+  const emo=pick(EMOJIS);
+  // ものを ならべる（おおいほど ちょっと ちいさく）
+  const fs = answer<=6 ? 46 : answer<=10 ? 38 : 30;
+  itemsEl.innerHTML="";
+  for(let i=0;i<answer;i++){
+    const d=document.createElement("div");
+    d.className="item"; d.textContent=emo; d.style.fontSize=fs+"px"; d.style.animationDelay=(i*0.04)+"s";
+    itemsEl.appendChild(d);
+  }
+  // せんたくし（せいかい＋ちかい 2つ）
+  const opts=new Set([answer]);
+  let guard=0;
+  while(opts.size<3 && guard++<50){
+    let cand=answer+rand(-3,3);
+    if(cand<1) cand=answer+rand(1,3);
+    if(cand>maxN) cand=answer-rand(1,3);
+    if(cand>=1 && cand<=maxN) opts.add(cand);
+  }
+  // よびの ほきょう（はばが せまいレベル用）
+  let n=1; while(opts.size<3 && n<=maxN){ opts.add(n); n++; }
+  const arr=Array.from(opts).slice(0,3);
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  choicesEl.innerHTML="";
+  arr.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="num"; b.textContent=v; b.dataset.v=v;
+    b.addEventListener("pointerdown",(e)=>{ e.preventDefault(); choose(v,b); });
+    choicesEl.appendChild(b);
+  });
+}
+
+// ── こたえる ──
+function choose(v,btn){
+  if(actx&&actx.state==="suspended") actx.resume();
+  if(locked) return;
+  if(v===answer){
+    locked=true;
+    btn.classList.add("good");
+    score++; scoreEl.textContent=score;
+    countPops(answer);                 // その かずだけ ポン
+    setTimeout(fanfare, answer*200+120);
+    catReact("😻", pick(["せいかい！","やったね！","すごい！","ぴったり！"]));
+    confetti(28);
+    setTimeout(newQuestion, Math.max(1200, answer*200+700));
+  }else{
+    btn.classList.remove("bad"); void btn.offsetWidth; btn.classList.add("bad");
+    sNo(); catReact("😺","もういちど かぞえてみよう");
+  }
+}
+
+function confetti(n){
+  const emo=["🎉","🌈","⭐","💖","✨","🎊","🔢"];
+  for(let i=0;i<n;i++){
+    const sp=document.createElement("div"); sp.className="confetti"; sp.textContent=pick(emo);
+    sp.style.left=(Math.random()*100)+"vw"; sp.style.top="-8vh";
+    sp.style.setProperty("--dx",(Math.random()*80-40)+"px");
+    sp.style.setProperty("--dur",(1.0+Math.random()*0.8)+"s");
+    fxEl.appendChild(sp); setTimeout(()=>sp.remove(),1900);
+  }
+}
+
+// ── レベル ──
+document.querySelectorAll("[data-max]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    maxN=parseInt(btn.dataset.max,10);
+    document.querySelectorAll("[data-max]").forEach(b=>b.classList.toggle("on",b===btn));
+    beep(600,0.06,"sine",0.12); newQuestion();
+  });
+});
+
+// ── スタート ──
+function init(){ newQuestion(); setTimeout(()=>catReact("😺","いくつ あるかな？"),500); }
+init();
+</script>
+</body>
+</html>
