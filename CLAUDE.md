@@ -56,5 +56,17 @@ kids/
 - `.claude/`（ローカル設定・メモリ）は **.gitignore 済み。絶対に公開しない**。
 - 相対パス（`../../index.html` など）のみ使用しているので、`/kids-games/` のサブパス配信でもそのまま動く。
 
+### push が 403 になるとき（複数アカウント問題）
+このマシンには gh アカウントが2つある（`fcyyamaguchi` と `haruharu20190701`）。
+macOS のキーチェーンが旧アカウント `fcyyamaguchi` の資格情報を返し、
+`git push` が `Permission ... denied to fcyyamaguchi` (403) になることがある。
+その場合は、アクティブな haruharu のトークンで**資格情報ヘルパを介さず直接プッシュ**する:
+```bash
+gh auth switch --user haruharu20190701
+git push "https://x-access-token:$(gh auth token)@github.com/haruharu20190701/kids-games.git" main
+```
+（トークンは一回限りのURLで使うだけ。表示・保存しないこと。
+ この方法だと `origin/main` の追跡参照は更新されないので、必要なら後で `git fetch origin`。）
+
 ## コミットメッセージ
 末尾に `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>` を付ける（履歴参照）。
