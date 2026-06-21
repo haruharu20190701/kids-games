@@ -22,6 +22,14 @@
 <meta property="og:locale" content="ja_JP" />
 <meta name="twitter:card" content="summary" />
 <style>
+  /* ── どうほうの 教科書体フォント（Klee One を ひらがなだけに サブセット）──
+     Fontworks Klee One / SIL Open Font License 1.1（font/OFL.txt）。
+     ぜんたんまつで とめ・はね・はらいが でる。16KB ほどで オフライン可。 */
+  @font-face{
+    font-family:"KyokashoKids";
+    src:url("font/kyokasho.woff2") format("woff2");
+    font-weight:400;font-style:normal;font-display:swap;
+  }
   /* ── 5さいむけ ひらがな かきれんしゅう（おてほんを なぞる）── */
   :root{
     --bg1:#fff7d6; --bg2:#ffe1b8;
@@ -99,7 +107,7 @@
   .prow{display:flex;gap:5px;justify-content:center;}
   .pcell{width:40px;height:44px;display:flex;align-items:center;justify-content:center;
     /* おてほんと おなじ 教科書体／明朝（とめ・はね・はらい）*/
-    font-family:"UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R","YuKyokasho Yoko","YuKyokasho","Yu Kyokasho","Hiragino Mincho ProN","Yu Mincho",serif;
+    font-family:"KyokashoKids","UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R","YuKyokasho Yoko","YuKyokasho","Yu Kyokasho","Hiragino Mincho ProN","Yu Mincho",serif;
     font-size:25px;font-weight:600;color:var(--ink);background:#fff7e6;border-radius:12px;cursor:pointer;box-shadow:0 2px 0 #e8c98a;}
   .pcell.on{background:linear-gradient(180deg,#ffd23f,#ffb703);color:#5b4636;}
   .pcell.blank{background:transparent;box-shadow:none;pointer-events:none;}
@@ -195,7 +203,8 @@ const indexOfChar = (k)=>CHARS.findIndex(c=>c.k===k);
 // ── おてほんの フォント（教科書体ゆうせん → 明朝 → serif）──
 // とめ・はね・はらい が でる かきとり向きの フォントを OSから さがす。
 // Win:UDデジタル教科書体 / Mac:游教科書体 / iOS等:ヒラギノ明朝 に おちる。
-const KYOKASHO = '"UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R",'
+const KYOKASHO = '"KyokashoKids",'
+  + '"UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R",'
   + '"UD デジタル教科書体 N-R","UDDigiKyokashoN-R",'
   + '"YuKyokasho Yoko","YuKyokasho","Yu Kyokasho",'
   + '"Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho","YuMincho","MS PMincho",serif';
@@ -405,6 +414,14 @@ function init(){
   buildPicker();
   fitCanvas();
   setChar(0, true);
+  // 教科書体フォントは あとから よみこまれるので、よめたら かきなおす
+  // （canvasは フォントの よみこみを またないため）
+  try{
+    if(document.fonts && document.fonts.load){
+      document.fonts.load('500 100px "KyokashoKids"').then(render).catch(()=>{});
+      document.fonts.ready.then(render).catch(()=>{});
+    }
+  }catch(e){}
   setTimeout(()=>catReact("😺","おてほんを なぞってね！"),500);
 }
 init();
