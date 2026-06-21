@@ -98,7 +98,9 @@
   #pickgrid{display:flex;flex-direction:column;gap:5px;background:#fffdf5;border-radius:18px;padding:12px;max-height:74vh;overflow:auto;box-shadow:0 10px 28px rgba(0,0,0,.4);}
   .prow{display:flex;gap:5px;justify-content:center;}
   .pcell{width:40px;height:44px;display:flex;align-items:center;justify-content:center;
-    font-size:24px;font-weight:800;color:var(--ink);background:#fff7e6;border-radius:12px;cursor:pointer;box-shadow:0 2px 0 #e8c98a;}
+    /* おてほんと おなじ 教科書体／明朝（とめ・はね・はらい）*/
+    font-family:"UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R","YuKyokasho Yoko","YuKyokasho","Yu Kyokasho","Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:25px;font-weight:600;color:var(--ink);background:#fff7e6;border-radius:12px;cursor:pointer;box-shadow:0 2px 0 #e8c98a;}
   .pcell.on{background:linear-gradient(180deg,#ffd23f,#ffb703);color:#5b4636;}
   .pcell.blank{background:transparent;box-shadow:none;pointer-events:none;}
   /* ── おいわい かみふぶき ── */
@@ -189,6 +191,14 @@ const GRID = [
   ["わ","","を","","ん"],
 ];
 const indexOfChar = (k)=>CHARS.findIndex(c=>c.k===k);
+
+// ── おてほんの フォント（教科書体ゆうせん → 明朝 → serif）──
+// とめ・はね・はらい が でる かきとり向きの フォントを OSから さがす。
+// Win:UDデジタル教科書体 / Mac:游教科書体 / iOS等:ヒラギノ明朝 に おちる。
+const KYOKASHO = '"UD デジタル教科書体 NK-R","UD Digi Kyokasho NK-R","UDDigiKyokashoNK-R",'
+  + '"UD デジタル教科書体 N-R","UDDigiKyokashoN-R",'
+  + '"YuKyokasho Yoko","YuKyokasho","Yu Kyokasho",'
+  + '"Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho","YuMincho","MS PMincho",serif';
 
 let idx = 0;                 // いまの もじ
 let color = "#ff5a5f";
@@ -289,9 +299,11 @@ function render(){
   ctx.stroke();
   ctx.setLineDash([]);
   // おてほん もじ（うすい グレー）
+  // フォントは 教科書体 を ゆうせん（とめ・はね・はらい が でる）→ なければ 明朝 → serif。
+  // OSに ある フォントだけを つかう（CDN・がいぶファイル ふよう）。
   const fs=Math.min(CW,CH)*0.78;
   ctx.fillStyle="#e7ddcb";
-  ctx.font="900 "+fs+'px "Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif';
+  ctx.font="500 "+fs+'px '+KYOKASHO;
   ctx.textAlign="center"; ctx.textBaseline="middle";
   ctx.fillText(CHARS[idx].k, CW/2, CH/2+fs*0.02);
   // なぞった せん
