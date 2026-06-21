@@ -14,8 +14,14 @@
 kids/
 ├── index.html              ゲーム選択メニュー（ランチャー・データ駆動）
 ├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結
-│   ├── puzzle-block/        ぱずるぶろっく
-│   └── piano/              ぴあの
+│   ├── puzzle-block/        ぱずるぶろっく（ステージ制パズル）
+│   ├── piano/              ぴあの（自由演奏＋おてほん曲）
+│   ├── draw/               おえかき（自由描画・スタンプ）
+│   ├── memory/             しんけいすいじゃく（神経衰弱）
+│   ├── numbers/            かずあそび（数を数える）
+│   ├── airhockey/          エアホッケー（CPU/2人・物理）
+│   └── coloring/           ぬりえ（バケツ塗り・選択→ぬる画面）
+│       └── lines/          ぬりえの線画（画像）。例 dino.png
 ├── shared/                 （将来）共通CSS/JS
 ├── robots.txt              全クロール許可＋sitemap の場所を明示
 ├── sitemap.xml             公開ページ一覧（ゲーム追加時に1 URL追記）
@@ -55,6 +61,32 @@ kids/
 - `resize`/`orientationchange` で**ゲーム状態を壊さず**再レイアウト（150msデバウンス）。セルサイズと手持ちコマ要素をその場で作り直す。
 - 横向き省スペース用の `@media` は**スタイルシートの末尾**に置く。
   CSSの落とし穴: 同詳細度ルールはソース順で決まるため、上書きしたい基本ルールより**後ろ**に置かないと、後で定義されたセレクタには効かず黙って失敗する。
+
+## canvas の おとしあな（学習済み）
+- **flex の中の canvas は `min-width:0; min-height:0;` を必ず付ける**。付けないと canvas の内在サイズ（`width/height` 属性＝バックバッファ）が `min-width:auto` として効き、要素が巨大化して画面外へはみ出す（描いた線が見えない／座標がズレる）。`draw`・`coloring` で発生して修正済み。
+- バックバッファは `CSSサイズ × min(devicePixelRatio,2)` にして、座標は `(clientX-rect.left)/rect.width*バッファ幅` で写す（くっきり＆ズレなし）。
+- 入力は **Pointer Events（`pointerdown/move/up` ＋ `setPointerCapture`）** が単純で確実（タッチ＆マウス兼用、マルチタッチもID別に追える）。
+
+## 画像の保存（iPhone/iPad 対応）⚠️必須パターン
+**iOS Safari は `<a download>` を無視する**（写真に保存されず画像が開くだけ）。保存機能は次の3段で実装する（`draw`・`coloring` 実装済み）:
+1. **Web Share**: `navigator.canShare({files:[file]})` が真なら `navigator.share({files})` → iOSの共有シートから「写真に保存」。
+2. **PC**: それ以外で `download` 対応かつ非iOSなら `<a download>` でダウンロード。
+3. **フォールバック**: 上記不可（古いiOS等）は、画像を全面オーバーレイで表示し「ながおしで しゃしんに ほぞん」を案内。
+- 元データは `canvas.toBlob(...)`（無ければ `toDataURL`→`fetch`→`blob`）。iOS判定は `/(iPhone|iPad|iPod)/` ＋ `navigator.platform==="MacIntel"&&maxTouchPoints>1`（iPadOS）。
+
+## ぬりえ（線画ぬり）エンジン（coloring）
+- レイヤー分離：**線レイヤー**（黒・透明線）＋**ぬりレイヤー**（白背景）。表示は `ぬり→線` の順で重ね、線は常にくっきり。
+- **バケツ＝フラッドフィル**（スキャンライン）。`線レイヤーの不透明ピクセルを“壁”`にして領域内だけ塗る。色一致は許容差つき。
+- 線画は2種類対応：ベクター（`draw(g,S)` で閉じた領域を stroke）／**画像**（PNGの暗いピクセルだけを線として取り込み＝白背景は塗れる）。縦横比は線画に合わせる。
+- 線画を増やすには `PICS` に1行：ベクターは `{emoji,name,ratio:1,draw}`、画像は `{emoji,name,src:"lines/xxx.png"}`（`sips -Z 900` 程度に縮小）。サムネイル一覧に自動で並ぶ。
+
+## そざい（線画・画像）の著作権ポリシー ⚠️
+- 公開サイトに載せる素材は **自作 / 生成AIのオリジナル / CC0・パブリックドメイン** のみ。
+- **第三者IPは不可**（例：ポケモン等の公式ぬりえ。「家庭で印刷OK」でも別サイトへの転載・ホスティングは許可されていない）。見た目が無料でも転載しない。
+- 生成AIの線画は、特定キャラを模さない汎用モチーフにする。元の大きい画像は `.gitignore` に入れ、Web用縮小版だけ公開（例 `coloring/lines/dino.png`）。
+
+## リアルタイム物理（airhockey の学習）
+- パドル等で動く物体が**壁とパドルの間に挟まって停止**しやすい。対策：①衝突時に必ず外向きの最低速度を与える ②**位置ベースの“はまり検知”**（速度ではなく、同じ場所に一定時間留まったら中央へ逃がす）③AIが角に張り付かないよう追従範囲を内側に制限。
 
 ## 最小SEO（ゲーム追加時に必ず付ける）
 方針は「**title / description / canonical / OGP だけ**の軽量SEO」。

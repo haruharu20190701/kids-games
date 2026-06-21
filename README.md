@@ -8,11 +8,14 @@
 ```
 kids/
 ├── index.html              ゲーム選択メニュー（ランチャー）
-├── games/                  ゲーム本体。1ゲーム＝1フォルダ
-│   ├── puzzle-block/        ぱずるぶろっく（8×8の落ちものパズル）
-│   │   └── index.html
-│   └── piano/              ぴあの（自由演奏＋おてほん曲モード）
-│       └── index.html
+├── games/                  ゲーム本体。1ゲーム＝1フォルダ＝index.html
+│   ├── puzzle-block/        🧩 ぱずるぶろっく（ステージ制パズル）
+│   ├── piano/              🎹 ぴあの（自由演奏＋おてほん曲）
+│   ├── draw/               🎨 おえかき（自由描画・スタンプ）
+│   ├── memory/             🃏 しんけいすいじゃく（神経衰弱）
+│   ├── numbers/            🔢 かずあそび（数を数える）
+│   ├── airhockey/          🏒 エアホッケー（CPU/2人）
+│   └── coloring/           🖍️ ぬりえ（バケツ塗り・lines/ に線画）
 ├── shared/                 複数ゲームで共通利用するCSS/JS（任意）
 ├── robots.txt / sitemap.xml  検索エンジン向け（ゲーム追加時に sitemap を更新）
 └── README.md
