@@ -79,20 +79,22 @@
 
 <script>
 /* =========================================================
-   5さいむけ ぬりえ（オリジナル線画）
+   5さいむけ ぬりえ（オリジナル線画 / 画像線画 両対応）
    - バケツ＝フラッドフィルで いっきに ぬる／ふで／けしごむ
-   - 線画は「線レイヤー」、いろは「ぬりレイヤー」に わけて、線は つねに くっきり
-   - すべて canvas。がいぶ素材 ふよう
+   - 線は「線レイヤー」（くろ・とうめいせん）、いろは「ぬりレイヤー」（はくはいけい）
+   - 画像線画は くらい ピクセルを「線＝かべ」として とりこむ
+   - すべて canvas。がいぶ素材 ふよう（画像は じぶんの オリジナル）
    ========================================================= */
 const COLORS=["#ff5a5f","#ff9f45","#ffd23f","#7bdc8a","#34c759","#4cc9f0","#3a86ff","#b388ff","#ff6fb5","#a0522d","#222222","#ffffff"];
 
-// ── オリジナル線画（0..S の ざひょうで えがく。とじた りょういきに しておく）──
+// ── 線画 ──（draw=ベクター線画 / src=画像線画）
 function circle(g,x,y,r){ g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); }
 function tri(g,ax,ay,bx,by,cx,cy){ g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by); g.lineTo(cx,cy); g.closePath(); g.stroke(); }
 function rrect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); g.stroke(); }
 
 const PICS=[
-  {emoji:"🐱", draw:(g,S)=>{
+  {emoji:"🦖", src:"lines/dino.png", ratio:1},
+  {emoji:"🐱", ratio:1, draw:(g,S)=>{
     tri(g,S*0.33,S*0.30,S*0.28,S*0.08,S*0.46,S*0.22);
     tri(g,S*0.67,S*0.30,S*0.72,S*0.08,S*0.54,S*0.22);
     circle(g,S*0.5,S*0.40,S*0.20);
@@ -101,20 +103,20 @@ const PICS=[
     g.beginPath(); g.moveTo(S*0.33,S*0.57); g.quadraticCurveTo(S*0.5,S*0.51,S*0.67,S*0.57); g.lineTo(S*0.72,S*0.86); g.lineTo(S*0.28,S*0.86); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.71,S*0.80); g.quadraticCurveTo(S*0.93,S*0.74,S*0.85,S*0.56); g.stroke();
   }},
-  {emoji:"🚗", draw:(g,S)=>{
+  {emoji:"🚗", ratio:1, draw:(g,S)=>{
     rrect(g,S*0.12,S*0.45,S*0.76,S*0.22,S*0.06);
     g.beginPath(); g.moveTo(S*0.28,S*0.45); g.lineTo(S*0.38,S*0.28); g.lineTo(S*0.66,S*0.28); g.lineTo(S*0.74,S*0.45); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.52,S*0.28); g.lineTo(S*0.52,S*0.45); g.stroke();
     circle(g,S*0.30,S*0.69,S*0.09); circle(g,S*0.70,S*0.69,S*0.09);
   }},
-  {emoji:"🐟", draw:(g,S)=>{
+  {emoji:"🐟", ratio:1, draw:(g,S)=>{
     g.beginPath(); g.ellipse(S*0.46,S*0.5,S*0.28,S*0.18,0,0,7); g.stroke();
     g.beginPath(); g.moveTo(S*0.74,S*0.5); g.lineTo(S*0.90,S*0.36); g.lineTo(S*0.90,S*0.64); g.closePath(); g.stroke();
     circle(g,S*0.34,S*0.46,S*0.03);
     g.beginPath(); g.moveTo(S*0.50,S*0.34); g.quadraticCurveTo(S*0.58,S*0.24,S*0.66,S*0.36); g.stroke();
     g.beginPath(); g.arc(S*0.46,S*0.5,S*0.28,-0.5,0.5); g.stroke();
   }},
-  {emoji:"🌷", draw:(g,S)=>{
+  {emoji:"🌷", ratio:1, draw:(g,S)=>{
     circle(g,S*0.5,S*0.30,S*0.10);
     circle(g,S*0.34,S*0.34,S*0.10); circle(g,S*0.66,S*0.34,S*0.10);
     circle(g,S*0.40,S*0.48,S*0.10); circle(g,S*0.60,S*0.48,S*0.10);
@@ -123,7 +125,7 @@ const PICS=[
     g.beginPath(); g.moveTo(S*0.5,S*0.66); g.quadraticCurveTo(S*0.30,S*0.62,S*0.26,S*0.74); g.quadraticCurveTo(S*0.42,S*0.78,S*0.5,S*0.70); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.5,S*0.72); g.quadraticCurveTo(S*0.70,S*0.70,S*0.74,S*0.82); g.quadraticCurveTo(S*0.58,S*0.84,S*0.5,S*0.76); g.closePath(); g.stroke();
   }},
-  {emoji:"🏠", draw:(g,S)=>{
+  {emoji:"🏠", ratio:1, draw:(g,S)=>{
     rrect(g,S*0.22,S*0.46,S*0.56,S*0.40,S*0.02);
     g.beginPath(); g.moveTo(S*0.16,S*0.46); g.lineTo(S*0.5,S*0.18); g.lineTo(S*0.84,S*0.46); g.closePath(); g.stroke();
     rrect(g,S*0.42,S*0.62,S*0.16,S*0.24,S*0.02);
@@ -131,7 +133,7 @@ const PICS=[
     rrect(g,S*0.61,S*0.54,S*0.12,S*0.12,S*0.02);
     circle(g,S*0.78,S*0.22,S*0.07);
   }},
-  {emoji:"🦋", draw:(g,S)=>{
+  {emoji:"🦋", ratio:1, draw:(g,S)=>{
     g.beginPath(); g.ellipse(S*0.49,S*0.5,S*0.025,S*0.16,0,0,7); g.stroke();
     g.beginPath(); g.ellipse(S*0.33,S*0.38,S*0.15,S*0.12,-0.5,0,7); g.stroke();
     g.beginPath(); g.ellipse(S*0.67,S*0.38,S*0.15,S*0.12,0.5,0,7); g.stroke();
@@ -144,8 +146,16 @@ const PICS=[
 
 const view=document.getElementById("view"), vctx=view.getContext("2d");
 const stage=document.getElementById("stage");
-let paint,pctx, line,lctx, side=600, scale=1, cur=0, tool="bucket", color="#ff5a5f";
+let paint,pctx, line,lctx, bw=600,bh=600, scale=1, cur=0, tool="bucket", color="#ff5a5f";
 const undoStack=[], MAX_UNDO=8;
+
+// ── 画像線画の よみこみ ──
+PICS.forEach((p,i)=>{
+  if(!p.src) return;
+  const img=new Image(); p.img=img; p.ready=false;
+  img.onload=()=>{ p.ready=true; p.ratio=img.naturalHeight/img.naturalWidth; if(cur===i) fit(); };
+  img.src=p.src;
+});
 
 // ── おと ──
 let actx=null;
@@ -155,34 +165,51 @@ function beep(freq,dur=0.08,type="sine",vol=0.14){
     o.connect(g);g.connect(actx.destination);o.start(); g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
   }catch(e){}
 }
-
 const hex2rgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 
-// ── バッファを つくる（リサイズじは ぬりを いかす）──
+// ── バッファ ──
 function buildBuffers(preserve){
   let old=null;
   if(preserve && paint){ old=document.createElement("canvas"); old.width=paint.width; old.height=paint.height; old.getContext("2d").drawImage(paint,0,0); }
-  paint=document.createElement("canvas"); paint.width=side; paint.height=side; pctx=paint.getContext("2d",{willReadFrequently:true});
-  line=document.createElement("canvas"); line.width=side; line.height=side; lctx=line.getContext("2d",{willReadFrequently:true});
-  pctx.fillStyle="#fff"; pctx.fillRect(0,0,side,side);
-  if(old) pctx.drawImage(old,0,0,old.width,old.height,0,0,side,side);
+  paint=document.createElement("canvas"); paint.width=bw; paint.height=bh; pctx=paint.getContext("2d",{willReadFrequently:true});
+  line=document.createElement("canvas"); line.width=bw; line.height=bh; lctx=line.getContext("2d",{willReadFrequently:true});
+  pctx.fillStyle="#fff"; pctx.fillRect(0,0,bw,bh);
+  if(old) pctx.drawImage(old,0,0,old.width,old.height,0,0,bw,bh);
   drawLine(); render();
 }
 function drawLine(){
-  lctx.clearRect(0,0,side,side);
-  lctx.strokeStyle="#3a2e22"; lctx.lineWidth=Math.max(3,side*0.011); lctx.lineJoin="round"; lctx.lineCap="round";
-  PICS[cur].draw(lctx, side);
+  lctx.clearRect(0,0,bw,bh);
+  const p=PICS[cur];
+  if(p.src){                               // 画像：くらい ピクセルだけ 線として とりこむ
+    if(!p.ready) return;
+    const t=document.createElement("canvas"); t.width=bw; t.height=bh; const tx=t.getContext("2d",{willReadFrequently:true});
+    tx.drawImage(p.img,0,0,bw,bh);
+    const d=tx.getImageData(0,0,bw,bh), D=d.data;
+    for(let i=0;i<D.length;i+=4){
+      const lum=D[i]*0.299+D[i+1]*0.587+D[i+2]*0.114;
+      if(D[i+3]>30 && lum<120){ D[i]=58;D[i+1]=46;D[i+2]=34;D[i+3]=255; }
+      else { D[i+3]=0; }
+    }
+    lctx.putImageData(d,0,0);
+  }else{                                   // ベクター
+    lctx.strokeStyle="#3a2e22"; lctx.lineWidth=Math.max(3,bw*0.011); lctx.lineJoin="round"; lctx.lineCap="round";
+    p.draw(lctx, bw);
+  }
 }
-function render(){ vctx.clearRect(0,0,side,side); vctx.drawImage(paint,0,0); vctx.drawImage(line,0,0); }
+function render(){ vctx.clearRect(0,0,bw,bh); vctx.drawImage(paint,0,0); vctx.drawImage(line,0,0); }
 
-// ── サイズあわせ ──
+// ── サイズあわせ（線画の たてよこ比に あわせる）──
 function fit(){
   const r=stage.getBoundingClientRect();
-  const cssSide=Math.max(160, Math.floor(Math.min(r.width-20, r.height-16)));
-  scale=Math.min(window.devicePixelRatio||1, 2);
-  side=Math.round(cssSide*scale);
-  view.style.width=cssSide+"px"; view.style.height=cssSide+"px";
-  view.width=side; view.height=side;
+  const availW=Math.max(140,r.width-20), availH=Math.max(140,r.height-16);
+  const ratio=PICS[cur].ratio||1;            // たて/よこ
+  let cssW=availW, cssH=cssW*ratio;
+  if(cssH>availH){ cssH=availH; cssW=cssH/ratio; }
+  cssW=Math.floor(cssW); cssH=Math.floor(cssH);
+  scale=Math.min(window.devicePixelRatio||1,2);
+  bw=Math.round(cssW*scale); bh=Math.round(cssH*scale);
+  view.style.width=cssW+"px"; view.style.height=cssH+"px";
+  view.width=bw; view.height=bh;
   buildBuffers(true);
 }
 let rt=null;
@@ -190,15 +217,15 @@ window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,160);})
 window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
 
 // ── もどす ──
-function pushUndo(){ try{ undoStack.push(pctx.getImageData(0,0,side,side)); }catch(e){} if(undoStack.length>MAX_UNDO) undoStack.shift(); }
+function pushUndo(){ try{ undoStack.push(pctx.getImageData(0,0,bw,bh)); }catch(e){} if(undoStack.length>MAX_UNDO) undoStack.shift(); }
 document.getElementById("undo").addEventListener("click",()=>{ if(!undoStack.length){beep(300,0.08);return;} pctx.putImageData(undoStack.pop(),0,0); render(); beep(440,0.07); });
 
 // ── バケツ（フラッドフィル）。線レイヤーを かべに する ──
 function bucket(sx,sy){
-  if(sx<0||sy<0||sx>=side||sy>=side) return;
-  const pd=pctx.getImageData(0,0,side,side), ld=lctx.getImageData(0,0,side,side);
-  const P=pd.data, L=ld.data, W=side;
-  const idx=(x,y)=>(y*W+x)*4;
+  if(sx<0||sy<0||sx>=bw||sy>=bh) return;
+  const pd=pctx.getImageData(0,0,bw,bh), ld=lctx.getImageData(0,0,bw,bh);
+  const P=pd.data, L=ld.data;
+  const idx=(x,y)=>(y*bw+x)*4;
   const si=idx(sx,sy);
   if(L[si+3]>90) return;                       // 線の うえは ぬらない
   const sr=P[si],sg=P[si+1],sb=P[si+2];
@@ -210,11 +237,11 @@ function bucket(sx,sy){
   while(st.length){
     const [x,y]=st.pop();
     let xl=x; while(xl>=0 && ok(idx(xl,y))) xl--; xl++;
-    let xr=x; while(xr<W && ok(idx(xr,y))) xr++; xr--;
+    let xr=x; while(xr<bw && ok(idx(xr,y))) xr++; xr--;
     for(let xx=xl;xx<=xr;xx++){
       const i=idx(xx,y); P[i]=nr;P[i+1]=ng;P[i+2]=nb;P[i+3]=255;
       if(y>0 && ok(idx(xx,y-1))) st.push([xx,y-1]);
-      if(y<side-1 && ok(idx(xx,y+1))) st.push([xx,y+1]);
+      if(y<bh-1 && ok(idx(xx,y+1))) st.push([xx,y+1]);
     }
   }
   pctx.putImageData(pd,0,0); render();
@@ -222,7 +249,7 @@ function bucket(sx,sy){
 
 // ── ふで／けしごむ ──
 let drawing=false,lx=0,ly=0;
-function bsize(){ return Math.max(6, side*0.022); }
+function bsize(){ return Math.max(6, Math.min(bw,bh)*0.022); }
 function strokeTo(x,y){
   pctx.strokeStyle = (tool==="eraser") ? "#ffffff" : color;
   pctx.lineWidth = (tool==="eraser") ? bsize()*2 : bsize();
@@ -232,7 +259,7 @@ function strokeTo(x,y){
 }
 
 // ── にゅうりょく ──
-function toBuf(e){ const r=view.getBoundingClientRect(); return { x:Math.round((e.clientX-r.left)/r.width*side), y:Math.round((e.clientY-r.top)/r.height*side) }; }
+function toBuf(e){ const r=view.getBoundingClientRect(); return { x:Math.round((e.clientX-r.left)/r.width*bw), y:Math.round((e.clientY-r.top)/r.height*bh) }; }
 view.addEventListener("pointerdown",(e)=>{
   e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume();
   const p=toBuf(e); pushUndo();
@@ -240,8 +267,8 @@ view.addEventListener("pointerdown",(e)=>{
   else { drawing=true; lx=p.x; ly=p.y; strokeTo(p.x,p.y); try{view.setPointerCapture(e.pointerId);}catch(_){} }
 });
 view.addEventListener("pointermove",(e)=>{ if(!drawing)return; e.preventDefault(); const p=toBuf(e); strokeTo(p.x,p.y); });
-function end(){ drawing=false; }
-view.addEventListener("pointerup",end); view.addEventListener("pointercancel",end); view.addEventListener("pointerleave",end);
+function endStroke(){ drawing=false; }
+view.addEventListener("pointerup",endStroke); view.addEventListener("pointercancel",endStroke); view.addEventListener("pointerleave",endStroke);
 
 // ── パレット／どうぐ／え ──
 const paletteEl=document.getElementById("palette"), picsEl=document.getElementById("pics");
@@ -252,7 +279,7 @@ COLORS.forEach((c,i)=>{
 });
 PICS.forEach((p,i)=>{
   const b=document.createElement("div"); b.className="pic"+(i===0?" on":""); b.textContent=p.emoji;
-  b.addEventListener("click",()=>{ cur=i; document.querySelectorAll(".pic").forEach(x=>x.classList.toggle("on",x===b)); undoStack.length=0; buildBuffers(false); beep(600,0.06,"sine",0.12); });
+  b.addEventListener("click",()=>{ cur=i; document.querySelectorAll(".pic").forEach(x=>x.classList.toggle("on",x===b)); undoStack.length=0; fit(); beep(600,0.06,"sine",0.12); });
   picsEl.appendChild(b);
 });
 const tB=document.getElementById("tBucket"),tBr=document.getElementById("tBrush"),tE=document.getElementById("tEraser");
@@ -260,7 +287,7 @@ function setTool(t){ tool=t; tB.classList.toggle("on",t==="bucket"); tBr.classLi
 tB.addEventListener("click",()=>{setTool("bucket");beep(500,0.05);});
 tBr.addEventListener("click",()=>{setTool("brush");beep(500,0.05);});
 tE.addEventListener("click",()=>{setTool("eraser");beep(330,0.06);});
-document.getElementById("clear").addEventListener("click",()=>{ pushUndo(); pctx.fillStyle="#fff"; pctx.fillRect(0,0,side,side); render(); beep(300,0.12,"sawtooth",0.12); });
+document.getElementById("clear").addEventListener("click",()=>{ pushUndo(); pctx.fillStyle="#fff"; pctx.fillRect(0,0,bw,bh); render(); beep(300,0.12,"sawtooth",0.12); });
 document.getElementById("save").addEventListener("click",()=>{
   try{ const a=document.createElement("a"); a.download="nurie.png"; a.href=view.toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove(); [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*80)); }catch(e){}
 });

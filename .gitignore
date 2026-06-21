@@ -11,3 +11,6 @@ Thumbs.db
 
 # アイコンのソース（1024px）。公開は縮小版 icon-180.png のみ
 icon-1024.png
+
+# ぬりえ線画の元画像（公開は games/coloring/lines/ の縮小版のみ）
+A_fun_coloring_page_*.png
