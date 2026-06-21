@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ぴあの" />
+<title>ぴあの｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ぴあのアプリ。じゆうに弾いたり、おてほん曲で あそべます。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/piano/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ぴあの｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの ぴあのアプリ。じゆうに弾いたり、おてほん曲で あそべます。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/piano/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ ぴあの。じゆうに弾く／おてほん曲モード ── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+    --accent:#ff8fab; --accent2:#ff6b8a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  /* ── ホームボタン ── */
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:780px;text-align:center;padding:10px 14px 2px;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;}
+  /* ── きりかえタブ（モード・おといろ）── */
+  .tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px;width:100%;max-width:780px;padding:0 12px;}
+  .tab{
+    border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:8px 16px;
+    box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;
+  }
+  .tab:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tab.on{color:#fff;background:linear-gradient(180deg,var(--accent),var(--accent2));box-shadow:0 3px 0 #e04e6e;}
+  .sep{width:1px;align-self:stretch;background:#e8c98a;margin:0 2px;}
+  /* ── ねこ ── */
+  #buddy{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;min-height:60px;margin-top:6px;}
+  #cat{font-size:46px;line-height:1;flex:none;animation:bob 2.2s ease-in-out infinite;transform-origin:bottom center;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-22px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08) rotate(6deg);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:relative;display:flex;align-items:center;
+    background:#fff;border:3px solid #ffd23f;border-radius:16px;
+    font-size:16px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:8px 16px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:left center;
+    transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);animation:pin .45s ease;}
+  #bubble::before{content:"";position:absolute;left:-13px;top:50%;transform:translateY(-50%);border:8px solid transparent;border-right-color:#ffd23f;}
+  #bubble::after{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:#fff;}
+  @keyframes pin{0%{transform:scale(.4)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  /* ── おてほん：つぎのおと・しんちょく ── */
+  #song{display:none;flex-direction:column;align-items:center;gap:6px;margin-top:4px;width:100%;max-width:780px;padding:0 12px;}
+  #song.show{display:flex;}
+  .songpick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .nextnote{font-size:18px;font-weight:900;}
+  .nextnote b{font-size:26px;color:var(--accent2);}
+  .progress{font-size:14px;color:#8a7a66;font-weight:800;}
+  /* ── けんばん ── */
+  #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;}
+  #piano{
+    position:relative;width:min(96vw,760px);height:clamp(150px,40vh,280px);
+    display:flex;border-radius:0 0 14px 14px;
+    box-shadow:0 8px 0 #b07a2f, 0 14px 24px rgba(0,0,0,.16);
+    border-top:6px solid #c98a3a;background:#c98a3a;overflow:hidden;
+  }
+  .wkey{
+    flex:1;position:relative;background:linear-gradient(180deg,#ffffff,#f4eee0);
+    border-right:1px solid #d8cba8;display:flex;align-items:flex-end;justify-content:center;
+    padding-bottom:10px;cursor:pointer;
+  }
+  .wkey:last-child{border-right:none;}
+  .wkey .lab{font-size:15px;font-weight:900;color:#b9a06f;}
+  .wkey.down{background:linear-gradient(180deg,#ffe9a8,#ffd23f);}
+  .wkey.lit{background:linear-gradient(180deg,#bff0c4,#7bdc8a);}
+  .wkey.lit .lab{color:#2e8b57;}
+  .wkey.lit::after{content:"👇";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:20px;animation:point .7s ease-in-out infinite;}
+  @keyframes point{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(5px);}}
+  .wkey.bad{animation:shakeKey .3s ease;}
+  @keyframes shakeKey{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  .bkey{
+    position:absolute;top:0;height:60%;width:8.5%;z-index:2;
+    background:linear-gradient(180deg,#4a4036,#2b241d);border-radius:0 0 6px 6px;
+    box-shadow:0 4px 0 rgba(0,0,0,.4);cursor:pointer;
+  }
+  .bkey.down{background:linear-gradient(180deg,#ffd23f,#ffae00);box-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .hint{font-size:14px;color:#8a7a66;margin:6px 0 10px;text-align:center;padding:0 12px;}
+  /* ── かみふぶき（クリアえんしゅつ）── */
+  #fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:55;}
+  .confetti{position:absolute;font-size:24px;animation:confFall var(--dur,1s) ease-in forwards;}
+  @keyframes confFall{0%{transform:translate(0,0) rotate(0);opacity:1;}100%{transform:translate(var(--dx,0),110vh) rotate(420deg);opacity:0;}}
+  #praise{
+    position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(0);
+    font-size:42px;font-weight:900;color:#fff;text-shadow:0 4px 0 #ff8fab,0 0 18px #ffd23f;
+    pointer-events:none;z-index:60;white-space:nowrap;
+  }
+  #praise.show{animation:praise 1.2s ease forwards;}
+  @keyframes praise{0%{transform:translate(-50%,-50%) scale(0) rotate(-12deg);opacity:0;}25%{transform:translate(-50%,-50%) scale(1.25) rotate(6deg);opacity:1;}70%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(-50%,-65%) scale(1);opacity:0;}}
+  /* よこむきで せがひくいとき */
+  @media (orientation:landscape) and (max-height:480px){
+    #buddy{min-height:42px;margin-top:2px;}
+    #cat{font-size:34px;}
+    .hint{display:none;}
+    #piano{height:46vh;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🎹 ぴあの</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" id="mFree">じゆうに ひく</button>
+    <button class="tab" id="mSong">おてほん きょく</button>
+    <div class="sep"></div>
+    <button class="tab on" data-timbre="piano">🎹 ピアノ</button>
+    <button class="tab" data-timbre="bell">🔔 ベル</button>
+    <button class="tab" data-timbre="flute">🎵 ふえ</button>
+  </div>
+
+  <div id="buddy">
+    <div id="cat">🐱</div>
+    <div id="bubble"></div>
+  </div>
+
+  <div id="song">
+    <div class="songpick" id="songPick"></div>
+    <div class="nextnote">つぎは… <b id="nextNote">―</b></div>
+    <div class="progress" id="prog"></div>
+  </div>
+
+  <div id="stage">
+    <div id="piano"></div>
+  </div>
+  <div class="hint" id="hint">けんばんを さわって おとを ならそう！</div>
+
+  <div id="fx"></div>
+  <div id="praise"></div>
+
+<script>
+/* =========================================================
+   5さいむけ ぴあの
+   - 白黒の けんばん（1オクターブ＋ど）
+   - じゆうモード：さわると おとが なる
+   - おてほんモード：ひかる けんばんを じゅんに おして きょくを ひく
+   - おとは Web Audio で せいせい（ファイル ふよう）
+   - おといろ：ピアノ／ベル／ふえ
+   ========================================================= */
+
+// ── けんばんの データ ──（ど=C4 〜 ど=C5）
+const WHITES = [
+  {id:"C4", lab:"ど",  f:261.63},
+  {id:"D4", lab:"れ",  f:293.66},
+  {id:"E4", lab:"み",  f:329.63},
+  {id:"F4", lab:"ふぁ", f:349.23},
+  {id:"G4", lab:"そ",  f:392.00},
+  {id:"A4", lab:"ら",  f:440.00},
+  {id:"B4", lab:"し",  f:493.88},
+  {id:"C5", lab:"ど",  f:523.25},
+];
+// くろ鍵：白鍵の さかいめに のせる（left は ぜんたいはばに たいする %）
+const BLACKS = [
+  {id:"C#4", f:277.18, left:8.25},
+  {id:"D#4", f:311.13, left:20.75},
+  {id:"F#4", f:369.99, left:45.75},
+  {id:"G#4", f:415.30, left:58.25},
+  {id:"A#4", f:466.16, left:70.75},
+];
+
+// ── きょく（ぜんぶ 白鍵で ひける）──
+const NAME = {C4:"ど",D4:"れ",E4:"み",F4:"ふぁ",G4:"そ",A4:"ら",B4:"し",C5:"ど"};
+const SONGS = {
+  "きらきらぼし": ["C4","C4","G4","G4","A4","A4","G4","F4","F4","E4","E4","D4","D4","C4"],
+  "ちょうちょ":   ["G4","E4","E4","F4","D4","D4","C4","D4","E4","F4","G4","G4","G4"],
+  "かえるのうた": ["C4","D4","E4","F4","E4","D4","C4","E4","F4","G4","A4","G4","F4","E4"],
+};
+
+// ── おと（Web Audio）──
+let actx=null;
+function ac(){
+  if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended") actx.resume();
+  return actx;
+}
+let timbre = "piano";
+function playNote(freq){
+  const ctx=ac(), t=ctx.currentTime;
+  const master=ctx.createGain(); master.gain.value=0.9; master.connect(ctx.destination);
+  const add=(f,amp,type,dur,attack,sustain)=>{
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(amp,t+attack);
+    if(sustain) g.gain.setValueAtTime(amp,t+dur-0.12);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+dur);
+  };
+  if(timbre==="piano"){
+    add(freq,    0.28, "triangle", 1.2, 0.005, false);
+    add(freq*2,  0.08, "sine",     1.0, 0.005, false);
+  }else if(timbre==="bell"){
+    add(freq,    0.26, "sine", 1.7, 0.003, false);
+    add(freq*2.76,0.12,"sine", 1.4, 0.003, false);
+    add(freq*5.4, 0.05,"sine", 0.9, 0.003, false);
+  }else{ // flute / organ
+    add(freq,    0.18, "sine", 0.9, 0.05, true);
+    add(freq*2,  0.07, "sine", 0.9, 0.05, true);
+    add(freq*3,  0.04, "sine", 0.9, 0.05, true);
+  }
+}
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1300);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},900);
+}
+
+// ── けんばんを つくる ──
+const pianoEl=document.getElementById("piano");
+const keyEls={};   // id -> element
+function buildKeyboard(){
+  pianoEl.innerHTML="";
+  WHITES.forEach(w=>{
+    const k=document.createElement("div");
+    k.className="wkey"; k.dataset.note=w.id; k.dataset.freq=w.f;
+    k.innerHTML=`<span class="lab">${w.lab}</span>`;
+    pianoEl.appendChild(k); keyEls[w.id]=k;
+    attachKey(k);
+  });
+  BLACKS.forEach(b=>{
+    const k=document.createElement("div");
+    k.className="bkey"; k.dataset.note=b.id; k.dataset.freq=b.f;
+    k.style.left=b.left+"%";
+    pianoEl.appendChild(k); keyEls[b.id]=k;
+    attachKey(k);
+  });
+}
+function attachKey(k){
+  k.addEventListener("pointerdown",(e)=>{ e.preventDefault(); pressKey(k); });
+}
+
+// ── けんばんを おした ──
+const freePraise=["いいおと！","じょうず！","すてき♪","にゃー♪","たのしい！","いいね！","きれい〜","ナイス！"];
+function pressKey(k){
+  const id=k.dataset.note, freq=parseFloat(k.dataset.freq);
+  playNote(freq);
+  // みため
+  k.classList.add("down");
+  setTimeout(()=>k.classList.remove("down"),140);
+
+  if(mode==="song"){ checkSong(id, k); }
+  else if(NAME[id] && Math.random()<0.22){ catReact("😺", freePraise[Math.floor(Math.random()*freePraise.length)]); }
+}
+
+// ── モード きりかえ ──
+let mode="free";
+const songBox=document.getElementById("song"), hintEl=document.getElementById("hint");
+const mFree=document.getElementById("mFree"), mSong=document.getElementById("mSong");
+function setMode(m){
+  mode=m;
+  mFree.classList.toggle("on", m==="free");
+  mSong.classList.toggle("on", m==="song");
+  songBox.classList.toggle("show", m==="song");
+  clearLit();
+  if(m==="song"){ hintEl.textContent="ひかる けんばんを じゅんに おしてね"; if(!curSong) selectSong(Object.keys(SONGS)[0]); else restartSong(); }
+  else{ hintEl.textContent="けんばんを さわって おとを ならそう！"; catReact("😺","じゆうに どうぞ♪"); }
+}
+mFree.addEventListener("click",()=>setMode("free"));
+mSong.addEventListener("click",()=>setMode("song"));
+
+// ── おといろ きりかえ ──
+document.querySelectorAll("[data-timbre]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    timbre=btn.dataset.timbre;
+    document.querySelectorAll("[data-timbre]").forEach(b=>b.classList.toggle("on",b===btn));
+    ac(); playNote(392.00);   // サンプルおと
+  });
+});
+
+// ── おてほん きょく ──
+let curSong=null, seq=[], step=0;
+const songPick=document.getElementById("songPick");
+const nextNoteEl=document.getElementById("nextNote"), progEl=document.getElementById("prog");
+function buildSongPicker(){
+  Object.keys(SONGS).forEach(name=>{
+    const b=document.createElement("button");
+    b.className="tab"; b.textContent=name; b.dataset.song=name;
+    b.addEventListener("click",()=>selectSong(name));
+    songPick.appendChild(b);
+  });
+}
+function selectSong(name){
+  curSong=name; seq=SONGS[name]; step=0;
+  document.querySelectorAll("#songPick .tab").forEach(b=>b.classList.toggle("on",b.dataset.song===name));
+  catReact("😺", name+"！");
+  showStep();
+}
+function restartSong(){ step=0; showStep(); }
+function showStep(){
+  clearLit();
+  if(step>=seq.length){ nextNoteEl.textContent="🎉"; progEl.textContent="ぜんぶ ひけたね！"; return; }
+  const id=seq[step];
+  keyEls[id].classList.add("lit");
+  nextNoteEl.textContent=NAME[id]||id;
+  progEl.textContent="♪ "+(step+1)+" / "+seq.length;
+}
+function clearLit(){ Object.values(keyEls).forEach(k=>k.classList.remove("lit")); }
+function checkSong(id, k){
+  if(step>=seq.length) return;
+  if(id===seq[step]){
+    step++;
+    if(step>=seq.length){ showStep(); celebrate(); }
+    else showStep();
+  }else{
+    // ちがう鍵：おとは ならして、やさしく ヒント
+    k.classList.remove("bad"); void k.offsetWidth; k.classList.add("bad");
+    catReact("😼","ひかってる ところだよ");
+  }
+}
+
+// ── クリアえんしゅつ ──
+const praiseEl=document.getElementById("praise"), fxEl=document.getElementById("fx");
+function celebrate(){
+  const w=["できたね！","すごーい！","てんさい！","やったね！！"][Math.floor(Math.random()*4)];
+  praiseEl.textContent=w;
+  praiseEl.classList.remove("show"); void praiseEl.offsetWidth; praiseEl.classList.add("show");
+  catReact("😻", w);
+  fanfare(); confetti(40);
+  progEl.textContent="もういちど おしてね or べつの きょくを えらんでね";
+  setTimeout(()=>{ if(mode==="song") restartSong(); }, 2600);
+}
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>{ const old=timbre; playNote(f); },i*120)); }
+function confetti(n){
+  const emo=["🎉","🌈","⭐","💖","✨","🎊","🎵"];
+  for(let i=0;i<n;i++){
+    const sp=document.createElement("div");
+    sp.className="confetti"; sp.textContent=emo[Math.floor(Math.random()*emo.length)];
+    sp.style.left=(Math.random()*100)+"vw"; sp.style.top="-8vh";
+    sp.style.setProperty("--dx",(Math.random()*80-40)+"px");
+    sp.style.setProperty("--dur",(1.0+Math.random()*0.8)+"s");
+    fxEl.appendChild(sp);
+    setTimeout(()=>sp.remove(),1900);
+  }
+}
+
+// ── スタート ──
+function init(){
+  buildKeyboard();
+  buildSongPicker();
+  setTimeout(()=>catReact("😺","ピアノで あそぼう！"),500);
+}
+init();
+</script>
+</body>
+</html>
