@@ -9,9 +9,12 @@
 kids/
 ├── index.html              ゲーム選択メニュー（ランチャー）
 ├── games/                  ゲーム本体。1ゲーム＝1フォルダ
-│   └── puzzle-block/        ぱずるぶろっく（8×8の落ちものパズル）
+│   ├── puzzle-block/        ぱずるぶろっく（8×8の落ちものパズル）
+│   │   └── index.html
+│   └── piano/              ぴあの（自由演奏＋おてほん曲モード）
 │       └── index.html
 ├── shared/                 複数ゲームで共通利用するCSS/JS（任意）
+├── robots.txt / sitemap.xml  検索エンジン向け（ゲーム追加時に sitemap を更新）
 └── README.md
 ```
 
@@ -36,6 +39,8 @@ python3 -m http.server 8000
    ```
 
    - `soon:true` を付けると「じゅんびちゅう」表示（クリック不可）になります。
+3. **最小SEOを付ける**：新ページの `<head>` に `title` / `description` / `canonical` / OGP を入れ、`sitemap.xml` に新URLを1ブロック追記する（メニュー登録と sitemap は必ず一致させる）。テンプレと詳細は `CLAUDE.md`「最小SEO」を参照。
+   - トラッキング・広告・外部スクリプトは入れない方針（軽量・プライバシー優先）。
 
 ## 制作の方針（5歳前後むけ）
 

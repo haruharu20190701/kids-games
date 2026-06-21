@@ -14,8 +14,12 @@
 kids/
 ├── index.html              ゲーム選択メニュー（ランチャー・データ駆動）
 ├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結
-│   └── puzzle-block/        ぱずるぶろっく
+│   ├── puzzle-block/        ぱずるぶろっく
+│   └── piano/              ぴあの
 ├── shared/                 （将来）共通CSS/JS
+├── robots.txt              全クロール許可＋sitemap の場所を明示
+├── sitemap.xml             公開ページ一覧（ゲーム追加時に1 URL追記）
+├── icon-1024.png / icon-180.png  ホーム画面・OGP用アイコン
 ├── README.md               利用者向けの概要・追加手順
 ├── PROJECT.md              プロジェクトの目的・学び・ロードマップ
 └── .gitignore              .claude/ など非公開物を除外
@@ -32,9 +36,12 @@ kids/
 ## 新しいゲームの追加
 1. `games/<slug>/index.html` を作る（slug = 半角小文字。例 `numbers`, `memory-card`）。
 2. 🏠ホームボタン（`../../index.html`）と、結果画面に「メニューへ」リンクを置く。
-3. ルート `index.html` の `GAMES` 配列に登録: `{ name, emoji, path }`。
-4. テスト → コミット → プッシュ。
+3. **`<head>` に最小SEOタグを入れる**（下の「最小SEO」テンプレ参照。`<title>` / `description` / `canonical` / OGP）。
+4. ルート `index.html` の `GAMES` 配列に登録: `{ name, emoji, path }`。
+5. **`sitemap.xml` に新ページの `<url>` を1ブロック追記**（メニュー登録と sitemap は必ず一致させる）。
+6. テスト → コミット → プッシュ。
 - スキル `/new-kids-game` で手順を呼び出せる。
+- ⚠️ メニュー登録・sitemap・head の SEO は3点セット。どれか1つだけ漏れがちなので追加時に必ず揃える。
 
 ## ローカル開発・テスト
 - **`file://` はテスト用ブラウザでブロックされる**。必ずHTTPで配信:
@@ -48,6 +55,39 @@ kids/
 - `resize`/`orientationchange` で**ゲーム状態を壊さず**再レイアウト（150msデバウンス）。セルサイズと手持ちコマ要素をその場で作り直す。
 - 横向き省スペース用の `@media` は**スタイルシートの末尾**に置く。
   CSSの落とし穴: 同詳細度ルールはソース順で決まるため、上書きしたい基本ルールより**後ろ**に置かないと、後で定義されたセレクタには効かず黙って失敗する。
+
+## 最小SEO（ゲーム追加時に必ず付ける）
+方針は「**title / description / canonical / OGP だけ**の軽量SEO」。
+**トラッキング・広告・GA・外部スクリプトは入れない**（子供向け規制 COPPA/GDPR-K の回避＋静的・プライバシー優位の維持）。
+- **公開URLの基点**: `https://haruharu20190701.github.io/kids-games/`
+  （`<slug>` ゲームは `…/kids-games/games/<slug>/`。末尾スラッシュ付きの正規URLを使う）
+- **OG画像**は全ページ共通で `…/kids-games/icon-1024.png`（絶対URL）。OGP は絶対URL必須。
+- 各ゲームの `<head>`（`<title>` のところ）に貼るテンプレ（`<slug>`・なまえ・説明を置き換え）:
+  ```html
+  <title>＜なまえ＞｜こどもあそびば</title>
+  <meta name="description" content="5さいくらいの こども向けの ＜どんなあそびか＞。むりょう・とうろくふよう・スマホ対応。" />
+  <link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/<slug>/" />
+  <!-- OGP（SNSシェアじの みため用）-->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="こどもあそびば" />
+  <meta property="og:title" content="＜なまえ＞｜こどもあそびば" />
+  <meta property="og:description" content="5さいくらいの こども向けの ＜どんなあそびか＞。" />
+  <meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/<slug>/" />
+  <meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+  <meta property="og:locale" content="ja_JP" />
+  <meta name="twitter:card" content="summary" />
+  ```
+- `sitemap.xml` に足すブロック:
+  ```xml
+  <url>
+    <loc>https://haruharu20190701.github.io/kids-games/games/<slug>/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  ```
+- 確認（HTTP配信で）: `curl -s http://localhost:8000/games/<slug>/ | grep -iE '<title>|description|canonical|og:url'`。
+  全URLが `200`、メニュー登録と sitemap の URL数が一致すること。
+- OG画像は現状 正方形（1024px）を流用。将来 横長1200×630 に差し替えるとSNSカードがより映える（任意）。
 
 ## 公開フロー（GitHub Pages）
 - main ブランチのルートで設定済み。デプロイは:
