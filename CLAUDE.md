@@ -80,6 +80,11 @@ kids/
 - 線画は2種類対応：ベクター（`draw(g,S)` で閉じた領域を stroke）／**画像**（PNGの暗いピクセルだけを線として取り込み＝白背景は塗れる）。縦横比は線画に合わせる。
 - 線画を増やすには `PICS` に1行：ベクターは `{emoji,name,ratio:1,draw}`、画像は `{emoji,name,src:"lines/xxx.png"}`（`sips -Z 900` 程度に縮小）。サムネイル一覧に自動で並ぶ。
 
+## ぬりえ線画の作りかた（imagegen/ ・要対話ログイン）
+- ローカルの `imagegen/`（gitignore）に AI画像生成ツールキットがある（genspark.ai をブラウザ自動操作、モデル「GPT Image 2」）。`prompts.txt`（塗り絵50枚・線画指定済み）→ `images/` に保存。
+- **Claude は自走で生成できない**：`node save-session.js` が実Chromeでの**手動ログイン**必須のため。ユーザーが `save-session.js`→`generate.js` を実行する。手順は `imagegen/README.md`。
+- 生成後の取り込みは Claude がやる：`sips -Z 900 imagegen/images/NNN_slug.png --out games/coloring/lines/slug.png` → `coloring` の `PICS` に `{emoji,name,src}` を追加。画像が十分そろったらベクター線画は削除可。
+
 ## そざい（線画・画像）の著作権ポリシー ⚠️
 - 公開サイトに載せる素材は **自作 / 生成AIのオリジナル / CC0・パブリックドメイン** のみ。
 - **第三者IPは不可**（例：ポケモン等の公式ぬりえ。「家庭で印刷OK」でも別サイトへの転載・ホスティングは許可されていない）。見た目が無料でも転載しない。

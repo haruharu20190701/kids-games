@@ -15,5 +15,5 @@ icon-1024.png
 # ぬりえ線画の元画像（公開は games/coloring/lines/ の縮小版のみ）
 A_fun_coloring_page_*.png
 
-# 別プロジェクトの作業物（このリポジトリには含めない）
-genspark/
+# 画像生成ツールキット（ローカル専用。node_modules等が重い）
+imagegen/
