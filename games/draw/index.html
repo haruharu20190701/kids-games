@@ -97,6 +97,11 @@
     header{padding:4px 14px 0;}
     #cat{font-size:30px;}
   }
+  /* ── ほぞん オーバーレイ（iOS ながおし用）── */
+  #saveov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(91,70,54,.72);z-index:90;padding:20px;}
+  #saveov.show{display:flex;}
+  #saveov .savemsg{color:#fff;font-weight:800;font-size:16px;text-align:center;line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+  #saveov img{max-width:84vw;max-height:60vh;border-radius:12px;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.45);}
 </style>
 </head>
 <body>
@@ -122,6 +127,13 @@
 
   <div id="cat">🐱</div>
   <div id="bubble"></div>
+
+  <!-- ほぞん（iOS用：ながおしで しゃしんに ほぞん）-->
+  <div id="saveov">
+    <div class="savemsg">えを ながおしして<br>「しゃしんに ほぞん」を おしてね</div>
+    <img id="saveimg" alt="おえかき" />
+    <button class="btn" id="saveclose">とじる</button>
+  </div>
 
 <script>
 /* =========================================================
@@ -238,15 +250,29 @@ document.getElementById("clear").addEventListener("click",()=>{
   pushUndo(); clearCanvas(); sweepDown(); catReact("😺","まっさら！");
 });
 
-// ── ほぞん（PNG ダウンロード）──
-document.getElementById("save").addEventListener("click",()=>{
-  try{
+// ── ほぞん（iPhone/iPad・PC りょうたいおう）──
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+function saveImage(){
+  const done=(blob)=>{
+    if(!blob){ catReact("😿","ほぞん できなかった"); return; }
+    chime();
+    // ① 共有シート（iOS Safari など）→「しゃしんに ほぞん」
+    try{
+      const file=new File([blob],"oekaki.png",{type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(()=>{}); catReact("😻","ほぞん／シェア！"); return; }
+    }catch(e){}
+    const url=URL.createObjectURL(blob);
+    // ② PC：ダウンロード
     const a=document.createElement("a");
-    a.download="oekaki.png"; a.href=canvas.toDataURL("image/png");
-    document.body.appendChild(a); a.click(); a.remove();
-    chime(); catReact("😻","ほぞん したよ！");
-  }catch(e){ catReact("😿","ほぞん できなかった"); }
-});
+    if(("download" in a) && !isIOS){ a.href=url; a.download="oekaki.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),3000); catReact("😻","ほぞん したよ！"); return; }
+    // ③ それいがい（ふるい iOS など）：ながおしで ほぞん
+    document.getElementById("saveimg").src=url; document.getElementById("saveov").classList.add("show");
+  };
+  if(canvas.toBlob) canvas.toBlob(done,"image/png");
+  else fetch(canvas.toDataURL("image/png")).then(r=>r.blob()).then(done);
+}
+document.getElementById("save").addEventListener("click",saveImage);
+document.getElementById("saveclose").addEventListener("click",()=>document.getElementById("saveov").classList.remove("show"));
 
 // ── キャンバスの サイズあわせ（くっきり・リサイズで内容ほじ）──
 function fitCanvas(){
