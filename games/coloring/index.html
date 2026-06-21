@@ -10,13 +10,13 @@
 <link rel="icon" type="image/png" href="../../icon-180.png" />
 <meta name="apple-mobile-web-app-title" content="ぬりえ" />
 <title>ぬりえ｜こどもあそびば</title>
-<meta name="description" content="5さいくらいの こども向けの ぬりえ。バケツで いっきに ぬったり、ふでで ぬったり。むりょう・とうろくふよう・スマホ対応。" />
+<meta name="description" content="5さいくらいの こども向けの ぬりえ。すきな えを えらんで、バケツや ふでで ぬろう。むりょう・とうろくふよう・スマホ対応。" />
 <link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/coloring/" />
 <!-- OGP（SNSシェアじの みため用）-->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="こどもあそびば" />
 <meta property="og:title" content="ぬりえ｜こどもあそびば" />
-<meta property="og:description" content="5さいくらいの こども向けの ぬりえ。バケツで いっきに ぬったり、ふでで ぬったり。" />
+<meta property="og:description" content="5さいくらいの こども向けの ぬりえ。すきな えを えらんで、バケツや ふでで ぬろう。" />
 <meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/coloring/" />
 <meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
 <meta property="og:locale" content="ja_JP" />
@@ -38,8 +38,25 @@
     font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
   }
   #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
-  header{width:100%;max-width:760px;text-align:center;padding:8px 14px 0;}
+  .screen{width:100%;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;}
+  header{width:100%;max-width:820px;text-align:center;padding:10px 56px 2px;}
   .title{font-size:20px;font-weight:900;letter-spacing:1px;}
+  .sub{font-size:13px;color:#8a7a66;margin-top:2px;}
+  /* ── えらぶ画面：サムネイル ── */
+  #thumbs{
+    width:100%;max-width:820px;flex:1;min-height:0;overflow-y:auto;touch-action:pan-y;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:14px;padding:12px 16px 24px;align-content:start;
+  }
+  .thumb{
+    border:none;font-family:inherit;background:var(--card);border-radius:18px;
+    box-shadow:0 5px 0 #e8c98a, 0 10px 18px rgba(0,0,0,.08);
+    padding:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .08s;
+  }
+  .thumb:active{transform:translateY(3px);box-shadow:0 2px 0 #e8c98a;}
+  .thumb canvas{width:100%;height:auto;border-radius:12px;background:#fff;display:block;box-shadow:inset 0 0 0 2px #f0e6cc;}
+  .thumb .nm{font-size:15px;font-weight:800;}
+  /* ── ぬる画面：どうぐ ── */
   #tools{width:100%;max-width:760px;display:flex;flex-direction:column;gap:6px;padding:4px 10px;}
   .row{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;}
   .sw{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.18);cursor:pointer;transition:transform .08s;}
@@ -50,8 +67,7 @@
   }
   .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
   .btn.on{color:#fff;background:linear-gradient(180deg,#ff8fab,#ff6b8a);box-shadow:0 3px 0 #e04e6e;}
-  .pic{font-size:22px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#fffdf5;border-radius:12px;box-shadow:0 2px 0 #e8c98a;cursor:pointer;}
-  .pic.on{background:#ffe9a8;transform:scale(1.08);}
+  .btn.choose{color:#fff;background:linear-gradient(180deg,#ffc24d,#ff9f45);box-shadow:0 3px 0 #e07d1f;}
   #stage{flex:1;width:100%;max-width:760px;display:flex;align-items:center;justify-content:center;padding:6px 10px 8px;min-height:0;}
   #view{background:#fff;border-radius:18px;box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);touch-action:none;}
   .hint{font-size:13px;color:#8a7a66;margin:2px 0 8px;text-align:center;padding:0 12px;}
@@ -59,42 +75,51 @@
 </head>
 <body>
   <a id="home" href="../../index.html" title="メニューへ">🏠</a>
-  <header><div class="title">🖍️ ぬりえ</div></header>
 
-  <div id="tools">
-    <div class="row" id="pics"></div>
-    <div class="row" id="palette"></div>
-    <div class="row">
-      <button class="btn on" id="tBucket">🪣 バケツ</button>
-      <button class="btn" id="tBrush">🖌️ ふで</button>
-      <button class="btn" id="tEraser">🧽 けしごむ</button>
-      <button class="btn" id="undo">↩️ もどす</button>
-      <button class="btn" id="clear">🔄 やりなおし</button>
-      <button class="btn" id="save">💾 ほぞん</button>
-    </div>
+  <!-- ① えらぶ画面 -->
+  <div id="select" class="screen">
+    <header>
+      <div class="title">🖍️ ぬりえ</div>
+      <div class="sub">どの えに ぬる？ えらんでね</div>
+    </header>
+    <div id="thumbs"></div>
   </div>
 
-  <div id="stage"><canvas id="view"></canvas></div>
-  <div class="hint" id="hint">バケツで いっきに ぬろう！ふでで こまかく ぬれるよ。</div>
+  <!-- ② ぬる画面 -->
+  <div id="color" class="screen" style="display:none">
+    <div id="tools">
+      <div class="row">
+        <button class="btn choose" id="back">← えらぶ</button>
+        <button class="btn on" id="tBucket">🪣 バケツ</button>
+        <button class="btn" id="tBrush">🖌️ ふで</button>
+        <button class="btn" id="tEraser">🧽 けしごむ</button>
+        <button class="btn" id="undo">↩️ もどす</button>
+        <button class="btn" id="clear">🔄 やりなおし</button>
+        <button class="btn" id="save">💾 ほぞん</button>
+      </div>
+      <div class="row" id="palette"></div>
+    </div>
+    <div id="stage"><canvas id="view"></canvas></div>
+    <div class="hint">バケツで いっきに ぬろう！ふでで こまかく ぬれるよ。</div>
+  </div>
 
 <script>
 /* =========================================================
-   5さいむけ ぬりえ（オリジナル線画 / 画像線画 両対応）
-   - バケツ＝フラッドフィルで いっきに ぬる／ふで／けしごむ
-   - 線は「線レイヤー」（くろ・とうめいせん）、いろは「ぬりレイヤー」（はくはいけい）
-   - 画像線画は くらい ピクセルを「線＝かべ」として とりこむ
+   5さいむけ ぬりえ
+   - がめん：① えらぶ（サムネイル）→ ② ぬる
+   - バケツ＝フラッドフィル／ふで／けしごむ
+   - 線は「線レイヤー」、いろは「ぬりレイヤー」。画像線画は くらい ピクセルを かべに
    - すべて canvas。がいぶ素材 ふよう（画像は じぶんの オリジナル）
    ========================================================= */
 const COLORS=["#ff5a5f","#ff9f45","#ffd23f","#7bdc8a","#34c759","#4cc9f0","#3a86ff","#b388ff","#ff6fb5","#a0522d","#222222","#ffffff"];
 
-// ── 線画 ──（draw=ベクター線画 / src=画像線画）
 function circle(g,x,y,r){ g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); }
 function tri(g,ax,ay,bx,by,cx,cy){ g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by); g.lineTo(cx,cy); g.closePath(); g.stroke(); }
 function rrect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); g.stroke(); }
 
 const PICS=[
-  {emoji:"🦖", src:"lines/dino.png", ratio:1},
-  {emoji:"🐱", ratio:1, draw:(g,S)=>{
+  {emoji:"🦖", name:"きょうりゅう", src:"lines/dino.png", ratio:1.189},
+  {emoji:"🐱", name:"ねこ", ratio:1, draw:(g,S)=>{
     tri(g,S*0.33,S*0.30,S*0.28,S*0.08,S*0.46,S*0.22);
     tri(g,S*0.67,S*0.30,S*0.72,S*0.08,S*0.54,S*0.22);
     circle(g,S*0.5,S*0.40,S*0.20);
@@ -103,20 +128,20 @@ const PICS=[
     g.beginPath(); g.moveTo(S*0.33,S*0.57); g.quadraticCurveTo(S*0.5,S*0.51,S*0.67,S*0.57); g.lineTo(S*0.72,S*0.86); g.lineTo(S*0.28,S*0.86); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.71,S*0.80); g.quadraticCurveTo(S*0.93,S*0.74,S*0.85,S*0.56); g.stroke();
   }},
-  {emoji:"🚗", ratio:1, draw:(g,S)=>{
+  {emoji:"🚗", name:"くるま", ratio:1, draw:(g,S)=>{
     rrect(g,S*0.12,S*0.45,S*0.76,S*0.22,S*0.06);
     g.beginPath(); g.moveTo(S*0.28,S*0.45); g.lineTo(S*0.38,S*0.28); g.lineTo(S*0.66,S*0.28); g.lineTo(S*0.74,S*0.45); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.52,S*0.28); g.lineTo(S*0.52,S*0.45); g.stroke();
     circle(g,S*0.30,S*0.69,S*0.09); circle(g,S*0.70,S*0.69,S*0.09);
   }},
-  {emoji:"🐟", ratio:1, draw:(g,S)=>{
+  {emoji:"🐟", name:"さかな", ratio:1, draw:(g,S)=>{
     g.beginPath(); g.ellipse(S*0.46,S*0.5,S*0.28,S*0.18,0,0,7); g.stroke();
     g.beginPath(); g.moveTo(S*0.74,S*0.5); g.lineTo(S*0.90,S*0.36); g.lineTo(S*0.90,S*0.64); g.closePath(); g.stroke();
     circle(g,S*0.34,S*0.46,S*0.03);
     g.beginPath(); g.moveTo(S*0.50,S*0.34); g.quadraticCurveTo(S*0.58,S*0.24,S*0.66,S*0.36); g.stroke();
     g.beginPath(); g.arc(S*0.46,S*0.5,S*0.28,-0.5,0.5); g.stroke();
   }},
-  {emoji:"🌷", ratio:1, draw:(g,S)=>{
+  {emoji:"🌷", name:"はな", ratio:1, draw:(g,S)=>{
     circle(g,S*0.5,S*0.30,S*0.10);
     circle(g,S*0.34,S*0.34,S*0.10); circle(g,S*0.66,S*0.34,S*0.10);
     circle(g,S*0.40,S*0.48,S*0.10); circle(g,S*0.60,S*0.48,S*0.10);
@@ -125,7 +150,7 @@ const PICS=[
     g.beginPath(); g.moveTo(S*0.5,S*0.66); g.quadraticCurveTo(S*0.30,S*0.62,S*0.26,S*0.74); g.quadraticCurveTo(S*0.42,S*0.78,S*0.5,S*0.70); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(S*0.5,S*0.72); g.quadraticCurveTo(S*0.70,S*0.70,S*0.74,S*0.82); g.quadraticCurveTo(S*0.58,S*0.84,S*0.5,S*0.76); g.closePath(); g.stroke();
   }},
-  {emoji:"🏠", ratio:1, draw:(g,S)=>{
+  {emoji:"🏠", name:"おうち", ratio:1, draw:(g,S)=>{
     rrect(g,S*0.22,S*0.46,S*0.56,S*0.40,S*0.02);
     g.beginPath(); g.moveTo(S*0.16,S*0.46); g.lineTo(S*0.5,S*0.18); g.lineTo(S*0.84,S*0.46); g.closePath(); g.stroke();
     rrect(g,S*0.42,S*0.62,S*0.16,S*0.24,S*0.02);
@@ -133,7 +158,7 @@ const PICS=[
     rrect(g,S*0.61,S*0.54,S*0.12,S*0.12,S*0.02);
     circle(g,S*0.78,S*0.22,S*0.07);
   }},
-  {emoji:"🦋", ratio:1, draw:(g,S)=>{
+  {emoji:"🦋", name:"ちょうちょ", ratio:1, draw:(g,S)=>{
     g.beginPath(); g.ellipse(S*0.49,S*0.5,S*0.025,S*0.16,0,0,7); g.stroke();
     g.beginPath(); g.ellipse(S*0.33,S*0.38,S*0.15,S*0.12,-0.5,0,7); g.stroke();
     g.beginPath(); g.ellipse(S*0.67,S*0.38,S*0.15,S*0.12,0.5,0,7); g.stroke();
@@ -144,6 +169,8 @@ const PICS=[
   }},
 ];
 
+const selectScreen=document.getElementById("select"), colorScreen=document.getElementById("color");
+const thumbsEl=document.getElementById("thumbs");
 const view=document.getElementById("view"), vctx=view.getContext("2d");
 const stage=document.getElementById("stage");
 let paint,pctx, line,lctx, bw=600,bh=600, scale=1, cur=0, tool="bucket", color="#ff5a5f";
@@ -153,9 +180,56 @@ const undoStack=[], MAX_UNDO=8;
 PICS.forEach((p,i)=>{
   if(!p.src) return;
   const img=new Image(); p.img=img; p.ready=false;
-  img.onload=()=>{ p.ready=true; p.ratio=img.naturalHeight/img.naturalWidth; if(cur===i) fit(); };
+  img.onload=()=>{ p.ready=true; p.ratio=img.naturalHeight/img.naturalWidth; buildThumbs(); if(visible()==="color" && cur===i) fit(true); };
   img.src=p.src;
 });
+
+// ── 線画を かく（ctxに、はば W たかさ Hで）──
+function paintLines(g, p, W, H){
+  if(p.src){
+    if(!p.ready) return false;
+    g.drawImage(p.img,0,0,W,H);
+    const d=g.getImageData(0,0,W,H), D=d.data;
+    for(let i=0;i<D.length;i+=4){
+      const lum=D[i]*0.299+D[i+1]*0.587+D[i+2]*0.114;
+      if(D[i+3]>30 && lum<120){ D[i]=58;D[i+1]=46;D[i+2]=34;D[i+3]=255; } else { D[i+3]=0; }
+    }
+    g.putImageData(d,0,0);
+    return true;
+  }else{
+    g.strokeStyle="#3a2e22"; g.lineWidth=Math.max(2,W*0.011); g.lineJoin="round"; g.lineCap="round";
+    p.draw(g, W); return true;
+  }
+}
+
+// ── ① サムネイル ──
+function buildThumbs(){
+  thumbsEl.innerHTML="";
+  PICS.forEach((p,i)=>{
+    const card=document.createElement("button"); card.className="thumb";
+    const TW=300, TH=Math.round(TW*(p.ratio||1));
+    const c=document.createElement("canvas"); c.width=TW; c.height=TH;
+    const g=c.getContext("2d",{willReadFrequently:true});
+    g.fillStyle="#fff"; g.fillRect(0,0,TW,TH);
+    if(p.src && !p.ready){ g.fillStyle="#bbb"; g.font="900 90px sans-serif"; g.textAlign="center"; g.textBaseline="middle"; g.fillText(p.emoji,TW/2,TH/2); }
+    else { paintLines(g,p,TW,TH); }
+    const nm=document.createElement("div"); nm.className="nm"; nm.textContent=p.emoji+" "+p.name;
+    card.append(c,nm);
+    card.addEventListener("click",()=>openPic(i));
+    thumbsEl.appendChild(card);
+  });
+}
+
+// ── がめん きりかえ ──
+function visible(){ return colorScreen.style.display==="none" ? "select" : "color"; }
+function showSelect(){ colorScreen.style.display="none"; selectScreen.style.display="flex"; }
+function openPic(i){
+  cur=i; undoStack.length=0;
+  selectScreen.style.display="none"; colorScreen.style.display="flex";
+  fit(false);
+  beep(600,0.06,"sine",0.12);
+}
+document.getElementById("back").addEventListener("click",()=>{ showSelect(); beep(500,0.06,"sine",0.12); });
 
 // ── おと ──
 let actx=null;
@@ -175,34 +249,17 @@ function buildBuffers(preserve){
   line=document.createElement("canvas"); line.width=bw; line.height=bh; lctx=line.getContext("2d",{willReadFrequently:true});
   pctx.fillStyle="#fff"; pctx.fillRect(0,0,bw,bh);
   if(old) pctx.drawImage(old,0,0,old.width,old.height,0,0,bw,bh);
-  drawLine(); render();
-}
-function drawLine(){
-  lctx.clearRect(0,0,bw,bh);
-  const p=PICS[cur];
-  if(p.src){                               // 画像：くらい ピクセルだけ 線として とりこむ
-    if(!p.ready) return;
-    const t=document.createElement("canvas"); t.width=bw; t.height=bh; const tx=t.getContext("2d",{willReadFrequently:true});
-    tx.drawImage(p.img,0,0,bw,bh);
-    const d=tx.getImageData(0,0,bw,bh), D=d.data;
-    for(let i=0;i<D.length;i+=4){
-      const lum=D[i]*0.299+D[i+1]*0.587+D[i+2]*0.114;
-      if(D[i+3]>30 && lum<120){ D[i]=58;D[i+1]=46;D[i+2]=34;D[i+3]=255; }
-      else { D[i+3]=0; }
-    }
-    lctx.putImageData(d,0,0);
-  }else{                                   // ベクター
-    lctx.strokeStyle="#3a2e22"; lctx.lineWidth=Math.max(3,bw*0.011); lctx.lineJoin="round"; lctx.lineCap="round";
-    p.draw(lctx, bw);
-  }
+  lctx.clearRect(0,0,bw,bh); paintLines(lctx, PICS[cur], bw, bh);
+  render();
 }
 function render(){ vctx.clearRect(0,0,bw,bh); vctx.drawImage(paint,0,0); vctx.drawImage(line,0,0); }
 
 // ── サイズあわせ（線画の たてよこ比に あわせる）──
-function fit(){
+function fit(preserve){
+  if(colorScreen.style.display==="none") return;
   const r=stage.getBoundingClientRect();
   const availW=Math.max(140,r.width-20), availH=Math.max(140,r.height-16);
-  const ratio=PICS[cur].ratio||1;            // たて/よこ
+  const ratio=PICS[cur].ratio||1;
   let cssW=availW, cssH=cssW*ratio;
   if(cssH>availH){ cssH=availH; cssW=cssH/ratio; }
   cssW=Math.floor(cssW); cssH=Math.floor(cssH);
@@ -210,24 +267,24 @@ function fit(){
   bw=Math.round(cssW*scale); bh=Math.round(cssH*scale);
   view.style.width=cssW+"px"; view.style.height=cssH+"px";
   view.width=bw; view.height=bh;
-  buildBuffers(true);
+  buildBuffers(preserve);
 }
 let rt=null;
-window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,160);});
-window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>fit(true),160);});
+window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(()=>fit(true),200);});
 
 // ── もどす ──
 function pushUndo(){ try{ undoStack.push(pctx.getImageData(0,0,bw,bh)); }catch(e){} if(undoStack.length>MAX_UNDO) undoStack.shift(); }
 document.getElementById("undo").addEventListener("click",()=>{ if(!undoStack.length){beep(300,0.08);return;} pctx.putImageData(undoStack.pop(),0,0); render(); beep(440,0.07); });
 
-// ── バケツ（フラッドフィル）。線レイヤーを かべに する ──
+// ── バケツ（フラッドフィル）──
 function bucket(sx,sy){
   if(sx<0||sy<0||sx>=bw||sy>=bh) return;
   const pd=pctx.getImageData(0,0,bw,bh), ld=lctx.getImageData(0,0,bw,bh);
   const P=pd.data, L=ld.data;
   const idx=(x,y)=>(y*bw+x)*4;
   const si=idx(sx,sy);
-  if(L[si+3]>90) return;                       // 線の うえは ぬらない
+  if(L[si+3]>90) return;
   const sr=P[si],sg=P[si+1],sb=P[si+2];
   const [nr,ng,nb]=hex2rgb(color);
   if(sr===nr&&sg===ng&&sb===nb) return;
@@ -270,17 +327,12 @@ view.addEventListener("pointermove",(e)=>{ if(!drawing)return; e.preventDefault(
 function endStroke(){ drawing=false; }
 view.addEventListener("pointerup",endStroke); view.addEventListener("pointercancel",endStroke); view.addEventListener("pointerleave",endStroke);
 
-// ── パレット／どうぐ／え ──
-const paletteEl=document.getElementById("palette"), picsEl=document.getElementById("pics");
+// ── パレット／どうぐ ──
+const paletteEl=document.getElementById("palette");
 COLORS.forEach((c,i)=>{
   const s=document.createElement("div"); s.className="sw"+(i===0?" on":""); s.style.background=c; if(c==="#ffffff")s.style.borderColor="#ddd";
   s.addEventListener("click",()=>{ color=c; document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s)); if(tool==="eraser")setTool("bucket"); beep(660,0.05,"sine",0.12); });
   paletteEl.appendChild(s);
-});
-PICS.forEach((p,i)=>{
-  const b=document.createElement("div"); b.className="pic"+(i===0?" on":""); b.textContent=p.emoji;
-  b.addEventListener("click",()=>{ cur=i; document.querySelectorAll(".pic").forEach(x=>x.classList.toggle("on",x===b)); undoStack.length=0; fit(); beep(600,0.06,"sine",0.12); });
-  picsEl.appendChild(b);
 });
 const tB=document.getElementById("tBucket"),tBr=document.getElementById("tBrush"),tE=document.getElementById("tEraser");
 function setTool(t){ tool=t; tB.classList.toggle("on",t==="bucket"); tBr.classList.toggle("on",t==="brush"); tE.classList.toggle("on",t==="eraser"); }
@@ -293,7 +345,7 @@ document.getElementById("save").addEventListener("click",()=>{
 });
 
 // ── スタート ──
-fit();
+buildThumbs();
 </script>
 </body>
 </html>
