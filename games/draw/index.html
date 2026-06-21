@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="おえかき" />
+<title>おえかき｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの おえかきアプリ。ゆびで じゆうに かいて、スタンプや ほぞんも。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/draw/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="おえかき｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの おえかきアプリ。ゆびで じゆうに かいて、スタンプや ほぞんも。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/draw/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ おえかき。ゆびで じゆうに かく ── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:860px;text-align:center;padding:8px 14px 2px;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  /* ── どうぐばこ ── */
+  #tools{width:100%;max-width:860px;display:flex;flex-direction:column;gap:6px;padding:4px 10px;}
+  .row{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;}
+  .sw{
+    width:34px;height:34px;border-radius:50%;border:3px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.18);cursor:pointer;transition:transform .08s;
+  }
+  .sw.on{transform:scale(1.22);border-color:#5b4636;}
+  .btn{
+    border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:7px 13px;
+    box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;display:flex;align-items:center;gap:4px;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .btn.on{color:#fff;background:linear-gradient(180deg,#ff8fab,#ff6b8a);box-shadow:0 3px 0 #e04e6e;}
+  /* ふでの おおきさ プレビュー */
+  .size{width:40px;height:34px;display:flex;align-items:center;justify-content:center;
+    background:#fffdf5;border-radius:12px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;}
+  .size:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .size.on{background:#ffe9a8;box-shadow:0 3px 0 #e0b84e;}
+  .size i{display:block;border-radius:50%;background:#5b4636;}
+  /* スタンプ えらび */
+  #stamps{display:none;}
+  #stamps.show{display:flex;}
+  .stamp{font-size:24px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+    background:#fffdf5;border-radius:12px;box-shadow:0 2px 0 #e8c98a;cursor:pointer;}
+  .stamp.on{background:#ffe9a8;transform:scale(1.1);}
+  /* ── キャンバス ── */
+  #stage{flex:1;width:100%;max-width:860px;display:flex;padding:6px 10px 10px;min-height:0;}
+  #pad{
+    flex:1;min-width:0;min-height:0;width:100%;height:100%;
+    background:#fff;border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;
+  }
+  /* ── ねこ（みぎした すみ）── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-18px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:54px;bottom:20px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;}
+    #cat{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🎨 おえかき</div></header>
+
+  <div id="tools">
+    <div class="row" id="palette"></div>
+    <div class="row">
+      <div class="size" data-size="6"  title="ほそい"><i style="width:8px;height:8px"></i></div>
+      <div class="size on" data-size="16" title="ふつう"><i style="width:16px;height:16px"></i></div>
+      <div class="size" data-size="30" title="ふとい"><i style="width:26px;height:26px"></i></div>
+      <button class="btn" id="eraser">🧽 けしごむ</button>
+      <button class="btn" id="stampBtn">⭐ スタンプ</button>
+      <button class="btn" id="undo">↩️ もどす</button>
+      <button class="btn" id="clear">🗑️ ぜんぶけす</button>
+      <button class="btn" id="save">💾 ほぞん</button>
+    </div>
+    <div class="row" id="stamps"></div>
+  </div>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+
+<script>
+/* =========================================================
+   5さいむけ おえかき
+   - ゆび／マウスで じゆうに かく（canvas）
+   - いろ・ふでのおおきさ・けしごむ・スタンプ・もどす・ぜんぶけす・ほぞん(PNG)
+   - おとは Web Audio で せいせい（ファイル ふよう）
+   ========================================================= */
+
+// ── いろ（5さいが すきな はっきりした 色）──
+const COLORS = ["#222222","#ff5a5f","#ff9f45","#ffd23f","#7bdc8a","#34c759",
+                "#4cc9f0","#3a86ff","#b388ff","#ff6fb5","#a0522d","#ffffff"];
+const STAMPS = ["⭐","🌸","❤️","🐱","🦋","🌈","🚗","🍎","😊","🌟","🐶","🌼","🍓","🐟","🌙","🎈"];
+
+const canvas = document.getElementById("pad");
+const ctx = canvas.getContext("2d", {willReadFrequently:true});
+let color = "#222222";
+let size = 16;
+let tool = "pen";        // pen | eraser | stamp
+let stamp = "⭐";
+
+// ── おと ──
+let actx=null;
+function beep(freq, dur=0.08, type="sine", vol=0.15){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function pop(){ beep(880,0.1,"triangle",0.18); }
+function sweepDown(){ [600,500,400,300].forEach((f,i)=>setTimeout(()=>beep(f,0.09,"sawtooth",0.12),i*45)); }
+function chime(){ [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*80)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1300);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},900);
+}
+
+// ── パレット／スタンプを つくる ──
+const paletteEl=document.getElementById("palette"), stampsEl=document.getElementById("stamps");
+function buildPalette(){
+  COLORS.forEach((c,i)=>{
+    const s=document.createElement("div");
+    s.className="sw"+(i===0?" on":""); s.style.background=c; s.dataset.color=c;
+    if(c==="#ffffff") s.style.borderColor="#ddd";
+    s.addEventListener("click",()=>{
+      color=c; tool="pen";
+      document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s));
+      setToolBtns(); beep(660,0.05,"sine",0.12);
+    });
+    paletteEl.appendChild(s);
+  });
+  STAMPS.forEach((e,i)=>{
+    const s=document.createElement("div");
+    s.className="stamp"+(i===0?" on":""); s.textContent=e; s.dataset.stamp=e;
+    s.addEventListener("click",()=>{
+      stamp=e; tool="stamp";
+      document.querySelectorAll(".stamp").forEach(x=>x.classList.toggle("on",x===s));
+      setToolBtns(); pop();
+    });
+    stampsEl.appendChild(s);
+  });
+}
+
+// ── どうぐボタン ──
+const eraserBtn=document.getElementById("eraser"), stampBtn=document.getElementById("stampBtn");
+function setToolBtns(){
+  eraserBtn.classList.toggle("on", tool==="eraser");
+  stampBtn.classList.toggle("on", tool==="stamp");
+  stampsEl.classList.toggle("show", tool==="stamp");
+}
+eraserBtn.addEventListener("click",()=>{ tool="eraser"; setToolBtns(); beep(330,0.06,"sine",0.12); });
+stampBtn.addEventListener("click",()=>{ tool="stamp"; setToolBtns(); pop(); });
+document.querySelectorAll(".size").forEach(b=>{
+  b.addEventListener("click",()=>{
+    size=parseInt(b.dataset.size,10);
+    document.querySelectorAll(".size").forEach(x=>x.classList.toggle("on",x===b));
+    if(tool==="eraser"||tool==="stamp"){ tool="pen"; setToolBtns(); }
+    beep(550,0.05,"sine",0.1);
+  });
+});
+
+// ── もどす（アンドゥ）──
+const undoStack=[]; const MAX_UNDO=12;
+function pushUndo(){
+  try{ undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height)); }catch(e){}
+  if(undoStack.length>MAX_UNDO) undoStack.shift();
+}
+document.getElementById("undo").addEventListener("click",()=>{
+  if(!undoStack.length){ catReact("😺","まっさらだよ"); return; }
+  const img=undoStack.pop(); ctx.putImageData(img,0,0); beep(440,0.07,"sine",0.12);
+});
+
+// ── ぜんぶけす ──
+function clearCanvas(silent){
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.restore();
+}
+document.getElementById("clear").addEventListener("click",()=>{
+  pushUndo(); clearCanvas(); sweepDown(); catReact("😺","まっさら！");
+});
+
+// ── ほぞん（PNG ダウンロード）──
+document.getElementById("save").addEventListener("click",()=>{
+  try{
+    const a=document.createElement("a");
+    a.download="oekaki.png"; a.href=canvas.toDataURL("image/png");
+    document.body.appendChild(a); a.click(); a.remove();
+    chime(); catReact("😻","ほぞん したよ！");
+  }catch(e){ catReact("😿","ほぞん できなかった"); }
+});
+
+// ── キャンバスの サイズあわせ（くっきり・リサイズで内容ほじ）──
+function fitCanvas(){
+  const rect=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  const w=Math.max(1,Math.round(rect.width*dpr)), h=Math.max(1,Math.round(rect.height*dpr));
+  if(w===canvas.width && h===canvas.height) return;
+  // いまの えを たいひ
+  let tmp=null;
+  if(canvas.width){ tmp=document.createElement("canvas"); tmp.width=canvas.width; tmp.height=canvas.height; tmp.getContext("2d").drawImage(canvas,0,0); }
+  canvas.width=w; canvas.height=h;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,rect.width,rect.height);
+  if(tmp) ctx.drawImage(tmp,0,0,tmp.width,tmp.height,0,0,rect.width,rect.height);
+}
+let resizeT=null;
+window.addEventListener("resize",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,150); });
+window.addEventListener("orientationchange",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,200); });
+
+// ── かく（ポインタ：タッチ＆マウス りょうたいおう）──
+let drawing=false, lastX=0, lastY=0;
+function pos(e){ const r=canvas.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+function drawDot(x,y){ ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,size/2,0,Math.PI*2); ctx.fill(); }
+
+canvas.addEventListener("pointerdown",(e)=>{
+  e.preventDefault();
+  if(actx&&actx.state==="suspended") actx.resume();
+  pushUndo();                       // この そうさを もどせるように
+  const p=pos(e);
+  if(tool==="stamp"){
+    ctx.font=(size*2.2)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(stamp,p.x,p.y); pop(); return;
+  }
+  drawing=true; lastX=p.x; lastY=p.y;
+  ctx.strokeStyle = (tool==="eraser") ? "#ffffff" : color;
+  ctx.lineWidth = (tool==="eraser") ? size*1.8 : size;
+  drawDot(lastX,lastY);             // 1てんでも まるく つく
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+});
+canvas.addEventListener("pointermove",(e)=>{
+  if(!drawing) return;
+  e.preventDefault();
+  const p=pos(e);
+  ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+  lastX=p.x; lastY=p.y;
+});
+function endStroke(){ drawing=false; }
+canvas.addEventListener("pointerup",endStroke);
+canvas.addEventListener("pointercancel",endStroke);
+canvas.addEventListener("pointerleave",endStroke);
+
+// ── スタート ──
+function init(){
+  buildPalette();
+  fitCanvas();
+  setTimeout(()=>catReact("😺","じゆうに かいてね！"),500);
+}
+init();
+</script>
+</body>
+</html>
