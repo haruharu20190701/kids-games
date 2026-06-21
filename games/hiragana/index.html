@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ひらがな" />
+<title>ひらがな｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ひらがな かきれんしゅう。おてほんを ゆびで なぞって おぼえよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/hiragana/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ひらがな｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの ひらがな かきれんしゅう。おてほんを ゆびで なぞって おぼえよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/hiragana/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ ひらがな かきれんしゅう（おてほんを なぞる）── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:760px;text-align:center;padding:8px 14px 2px;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  /* ── れい（あ→🐜あり）の ヒント ── */
+  #hint{font-size:17px;font-weight:800;color:#8a7a66;min-height:24px;margin-top:2px;}
+  #hint .emoji{font-size:22px;vertical-align:-3px;}
+  /* ── うえの どうぐ（まえ・つぎ・もじいちらん）── */
+  #nav{display:flex;gap:8px;justify-content:center;align-items:center;padding:4px 10px;flex-wrap:wrap;}
+  .btn{
+    border:none;font-family:inherit;font-weight:800;font-size:16px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:8px 15px;
+    box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;display:flex;align-items:center;gap:4px;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .btn.big{font-size:18px;padding:10px 20px;}
+  .btn.done{color:#fff;background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  /* ── どうぐ（いろ・ふとさ・やりなおし）── */
+  #tools{width:100%;max-width:760px;display:flex;gap:6px;justify-content:center;align-items:center;padding:2px 10px 4px;flex-wrap:wrap;}
+  .sw{
+    width:32px;height:32px;border-radius:50%;border:3px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.18);cursor:pointer;transition:transform .08s;
+  }
+  .sw.on{transform:scale(1.22);border-color:#5b4636;}
+  .size{width:40px;height:32px;display:flex;align-items:center;justify-content:center;
+    background:#fffdf5;border-radius:12px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;}
+  .size:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .size.on{background:#ffe9a8;box-shadow:0 3px 0 #e0b84e;}
+  .size i{display:block;border-radius:50%;background:#5b4636;}
+  /* ── キャンバス ── */
+  #stage{flex:1;width:100%;max-width:760px;display:flex;padding:4px 10px 10px;min-height:0;}
+  #pad{
+    flex:1;min-width:0;min-height:0;width:100%;height:100%;
+    background:#fff;border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;
+  }
+  /* ── ねこ（みぎした すみ）── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-18px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:54px;bottom:20px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  /* ── もじ いちらん（えらぶ）── */
+  #pickov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(91,70,54,.72);z-index:90;padding:18px;}
+  #pickov.show{display:flex;}
+  #pickov .ptitle{color:#fff;font-weight:900;font-size:18px;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+  #pickgrid{display:flex;flex-direction:column;gap:5px;background:#fffdf5;border-radius:18px;padding:12px;max-height:74vh;overflow:auto;box-shadow:0 10px 28px rgba(0,0,0,.4);}
+  .prow{display:flex;gap:5px;justify-content:center;}
+  .pcell{width:40px;height:44px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:800;color:var(--ink);background:#fff7e6;border-radius:12px;cursor:pointer;box-shadow:0 2px 0 #e8c98a;}
+  .pcell.on{background:linear-gradient(180deg,#ffd23f,#ffb703);color:#5b4636;}
+  .pcell.blank{background:transparent;box-shadow:none;pointer-events:none;}
+  /* ── おいわい かみふぶき ── */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;}
+    .title{font-size:18px;}
+    #hint{font-size:14px;min-height:18px;}
+    #cat{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">✏️ ひらがな</div>
+    <div id="hint"></div>
+  </header>
+
+  <div id="nav">
+    <button class="btn big" id="prev">◀ まえ</button>
+    <button class="btn" id="pick">あ いちらん</button>
+    <button class="btn big" id="next">つぎ ▶</button>
+  </div>
+
+  <div id="tools">
+    <div class="sw on" data-color="#ff5a5f" style="background:#ff5a5f"></div>
+    <div class="sw" data-color="#3a86ff" style="background:#3a86ff"></div>
+    <div class="sw" data-color="#34c759" style="background:#34c759"></div>
+    <div class="sw" data-color="#ff9f45" style="background:#ff9f45"></div>
+    <div class="sw" data-color="#b388ff" style="background:#b388ff"></div>
+    <div class="sw" data-color="#5b4636" style="background:#5b4636"></div>
+    <div class="size" data-size="14" title="ほそい"><i style="width:9px;height:9px"></i></div>
+    <div class="size on" data-size="22" title="ふつう"><i style="width:15px;height:15px"></i></div>
+    <div class="size" data-size="32" title="ふとい"><i style="width:23px;height:23px"></i></div>
+    <button class="btn" id="redo">↩️ やりなおし</button>
+    <button class="btn done" id="done">できた！</button>
+  </div>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+  <!-- もじを えらぶ いちらん -->
+  <div id="pickov">
+    <div class="ptitle">かきたい もじを えらんでね</div>
+    <div id="pickgrid"></div>
+    <button class="btn" id="pickclose">とじる</button>
+  </div>
+
+<script>
+/* =========================================================
+   5さいむけ ひらがな かきれんしゅう
+   - うすい おてほん もじを ゆびで なぞる（canvas）
+   - まえ／つぎ／いちらん で 五十音を いどう
+   - やりなおし は なぞりだけ けす（おてほんは のこる）
+   - 「できた！」で おいわい えんしゅつ → つぎの もじへ
+   - おとは Web Audio で せいせい（ファイル ふよう）
+   ========================================================= */
+
+// ── 五十音（れいの ことば つき。ことばは あれば ヒントに）──
+const CHARS = [
+  {k:"あ",w:"あり",e:"🐜"}, {k:"い",w:"いぬ",e:"🐶"}, {k:"う",w:"うま",e:"🐴"}, {k:"え",w:"えび",e:"🦐"}, {k:"お",w:"おに",e:"👹"},
+  {k:"か",w:"かに",e:"🦀"}, {k:"き",w:"きのこ",e:"🍄"}, {k:"く",w:"くるま",e:"🚗"}, {k:"け",w:"けーき",e:"🍰"}, {k:"こ",w:"こあら",e:"🐨"},
+  {k:"さ",w:"さかな",e:"🐟"}, {k:"し",w:"しか",e:"🦌"}, {k:"す",w:"すいか",e:"🍉"}, {k:"せ",w:"せみ",e:"🦗"}, {k:"そ",w:"そら",e:"☁️"},
+  {k:"た",w:"たこ",e:"🐙"}, {k:"ち",w:"ちょう",e:"🦋"}, {k:"つ",w:"つき",e:"🌙"}, {k:"て",w:"て",e:"✋"}, {k:"と",w:"とり",e:"🐦"},
+  {k:"な",w:"なす",e:"🍆"}, {k:"に",w:"にじ",e:"🌈"}, {k:"ぬ",w:"ぬいぐるみ",e:"🧸"}, {k:"ね",w:"ねこ",e:"🐱"}, {k:"の",w:"のり",e:"🍙"},
+  {k:"は",w:"はな",e:"🌸"}, {k:"ひ",w:"ひこうき",e:"✈️"}, {k:"ふ",w:"ふね",e:"⛵"}, {k:"へ",w:"へび",e:"🐍"}, {k:"ほ",w:"ほし",e:"⭐"},
+  {k:"ま",w:"まめ",e:"🫛"}, {k:"み",w:"みかん",e:"🍊"}, {k:"む",w:"むし",e:"🐛"}, {k:"め",w:"め",e:"👁️"}, {k:"も",w:"もも",e:"🍑"},
+  {k:"や",w:"やま",e:"⛰️"}, {k:"ゆ",w:"ゆき",e:"⛄"}, {k:"よ",w:"よる",e:"🌃"},
+  {k:"ら",w:"らいおん",e:"🦁"}, {k:"り",w:"りんご",e:"🍎"}, {k:"る",w:"",e:""}, {k:"れ",w:"れもん",e:"🍋"}, {k:"ろ",w:"ろうそく",e:"🕯️"},
+  {k:"わ",w:"わに",e:"🐊"}, {k:"を",w:"",e:""}, {k:"ん",w:"",e:""},
+];
+// いちらん（五十音ひょう。すきまは blank）
+const GRID = [
+  ["あ","い","う","え","お"],
+  ["か","き","く","け","こ"],
+  ["さ","し","す","せ","そ"],
+  ["た","ち","つ","て","と"],
+  ["な","に","ぬ","ね","の"],
+  ["は","ひ","ふ","へ","ほ"],
+  ["ま","み","む","め","も"],
+  ["や","","ゆ","","よ"],
+  ["ら","り","る","れ","ろ"],
+  ["わ","","を","","ん"],
+];
+const indexOfChar = (k)=>CHARS.findIndex(c=>c.k===k);
+
+let idx = 0;                 // いまの もじ
+let color = "#ff5a5f";
+let baseSize = 22;           // ふとさ（min(W,H)=400 きじゅん）
+let strokes = [];            // なぞった せん（せいきか ざひょう 0..1）
+let cur = null;              // かいてる さいちゅうの せん
+
+const canvas = document.getElementById("pad");
+const ctx = canvas.getContext("2d");
+let CW=300, CH=300;          // CSSピクセルの おおきさ
+
+// ── おと ──
+let actx=null;
+function beep(freq, dur=0.08, type="sine", vol=0.15){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function pop(){ beep(880,0.1,"triangle",0.18); }
+function tick(){ beep(620,0.05,"sine",0.12); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.18,"triangle",0.22),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1400);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},1000);
+}
+
+// ── かみふぶき ──
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","💮","🌸"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div");
+    s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100, dur=1100+Math.random()*900, delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;
+      s.style.opacity="0.2";
+    });
+    setTimeout(()=>s.remove(), dur+delay+100);
+  }
+}
+
+// ── キャンバスの サイズあわせ（くっきり）──
+function fitCanvas(){
+  const rect=canvas.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1, 2);
+  CW=Math.max(1,Math.round(rect.width)); CH=Math.max(1,Math.round(rect.height));
+  canvas.width=Math.round(CW*dpr); canvas.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  render();
+}
+let resizeT=null;
+window.addEventListener("resize",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,150); });
+window.addEventListener("orientationchange",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,200); });
+
+// ── えがく（おてほん → なぞり）──
+function strokeW(){ return baseSize * (Math.min(CW,CH)/400); }
+function drawStroke(pts, col, w){
+  if(!pts.length) return;
+  ctx.strokeStyle=col; ctx.lineWidth=w;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x*CW, pts[0].y*CH);
+  if(pts.length===1){ // 1てんでも まるく
+    ctx.lineTo(pts[0].x*CW+0.01, pts[0].y*CH+0.01);
+  } else {
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x*CW, pts[i].y*CH);
+  }
+  ctx.stroke();
+}
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,CW,CH);
+  // ます目（よんぶんわり の めやす）
+  ctx.strokeStyle="#f0e6d2"; ctx.lineWidth=2;
+  ctx.setLineDash([6,8]);
+  ctx.beginPath();
+  ctx.moveTo(CW/2,8); ctx.lineTo(CW/2,CH-8);
+  ctx.moveTo(8,CH/2); ctx.lineTo(CW-8,CH/2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // おてほん もじ（うすい グレー）
+  const fs=Math.min(CW,CH)*0.78;
+  ctx.fillStyle="#e7ddcb";
+  ctx.font="900 "+fs+'px "Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif';
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(CHARS[idx].k, CW/2, CH/2+fs*0.02);
+  // なぞった せん
+  const w=strokeW();
+  for(const s of strokes) drawStroke(s.pts, s.col, s.w*(Math.min(CW,CH)/400));
+  if(cur) drawStroke(cur.pts, cur.col, cur.w*(Math.min(CW,CH)/400));
+}
+
+// ── ポインタ（タッチ＆マウス りょうたいおう）──
+function norm(e){ const r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height}; }
+canvas.addEventListener("pointerdown",(e)=>{
+  e.preventDefault();
+  if(actx&&actx.state==="suspended") actx.resume();
+  cur={col:color, w:baseSize, pts:[norm(e)]};
+  render(); tick();
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+});
+canvas.addEventListener("pointermove",(e)=>{
+  if(!cur) return;
+  e.preventDefault();
+  cur.pts.push(norm(e)); render();
+});
+function endStroke(){ if(cur){ strokes.push(cur); cur=null; } }
+canvas.addEventListener("pointerup",endStroke);
+canvas.addEventListener("pointercancel",endStroke);
+canvas.addEventListener("pointerleave",endStroke);
+
+// ── もじを かえる ──
+function setChar(i, silent){
+  idx=(i+CHARS.length)%CHARS.length;
+  strokes=[]; cur=null;
+  const c=CHARS[idx];
+  const hint=document.getElementById("hint");
+  hint.innerHTML = c.w ? `「${c.k}」… <span class="emoji">${c.e}</span> ${c.w} の「${c.k}」` : `「${c.k}」を なぞってね`;
+  render();
+  if(!silent){ tick(); }
+}
+document.getElementById("prev").addEventListener("click",()=>{ setChar(idx-1); });
+document.getElementById("next").addEventListener("click",()=>{ setChar(idx+1); });
+document.getElementById("redo").addEventListener("click",()=>{
+  if(!strokes.length){ catReact("😺","まだ まっさらだよ"); return; }
+  strokes=[]; cur=null; render(); beep(330,0.08,"sine",0.12);
+});
+document.getElementById("done").addEventListener("click",()=>{
+  if(!strokes.length){ catReact("😸","ゆびで なぞってみてね"); return; }
+  fanfare(); confetti();
+  const praise=["すごい！","じょうずだね！","できたね！","かんぺき！","はなまる！"];
+  catReact("😻", praise[(Math.random()*praise.length)|0]);
+  // つぎの もじへ
+  setTimeout(()=>{ setChar(idx+1, true); }, 1300);
+});
+
+// ── どうぐ（いろ・ふとさ）──
+document.querySelectorAll(".sw").forEach(s=>{
+  s.addEventListener("click",()=>{
+    color=s.dataset.color;
+    document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s));
+    beep(660,0.05,"sine",0.12);
+  });
+});
+document.querySelectorAll(".size").forEach(b=>{
+  b.addEventListener("click",()=>{
+    baseSize=parseInt(b.dataset.size,10);
+    document.querySelectorAll(".size").forEach(x=>x.classList.toggle("on",x===b));
+    beep(550,0.05,"sine",0.1);
+  });
+});
+
+// ── もじ いちらん（えらぶ）──
+const pickov=document.getElementById("pickov"), pickgrid=document.getElementById("pickgrid");
+function buildPicker(){
+  GRID.forEach(row=>{
+    const r=document.createElement("div"); r.className="prow";
+    row.forEach(k=>{
+      const c=document.createElement("div");
+      if(!k){ c.className="pcell blank"; }
+      else{
+        c.className="pcell"; c.textContent=k; c.dataset.k=k;
+        c.addEventListener("click",()=>{
+          setChar(indexOfChar(k)); pop();
+          pickov.classList.remove("show");
+        });
+      }
+      r.appendChild(c);
+    });
+    pickgrid.appendChild(r);
+  });
+}
+function openPicker(){
+  document.querySelectorAll(".pcell").forEach(c=>c.classList.toggle("on", c.dataset.k===CHARS[idx].k));
+  pickov.classList.add("show"); pop();
+}
+document.getElementById("pick").addEventListener("click",openPicker);
+document.getElementById("pickclose").addEventListener("click",()=>pickov.classList.remove("show"));
+pickov.addEventListener("click",(e)=>{ if(e.target===pickov) pickov.classList.remove("show"); });
+
+// ── スタート ──
+function init(){
+  buildPicker();
+  fitCanvas();
+  setChar(0, true);
+  setTimeout(()=>catReact("😺","おてほんを なぞってね！"),500);
+}
+init();
+</script>
+</body>
+</html>
