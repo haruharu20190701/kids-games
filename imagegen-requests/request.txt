@@ -1,3 +1,15 @@
-kind: coloring
+kind: custom
+dest: games/memory/assets
+size: 512
+transparent: false
 ---
-shark | simple cute coloring book line art of a friendly smiling shark, bold clean BLACK OUTLINES ONLY, no color, no shading, pure white background, big simple fully-closed shapes, thick smooth lines, low detail, centered, line drawing for kids, no text, no watermark
+cat | cute kawaii flat vector illustration of a happy cat, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+dog | cute kawaii flat vector illustration of a happy puppy dog, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+rabbit | cute kawaii flat vector illustration of a happy white rabbit, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+bear | cute kawaii flat vector illustration of a happy brown bear, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+panda | cute kawaii flat vector illustration of a happy panda, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+lion | cute kawaii flat vector illustration of a happy lion, big round head with mane, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+frog | cute kawaii flat vector illustration of a happy green frog, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+pig | cute kawaii flat vector illustration of a happy pink pig, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+elephant | cute kawaii flat vector illustration of a happy elephant, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
+monkey | cute kawaii flat vector illustration of a happy monkey, big round head, facing forward, big sparkly eyes, rosy cheeks, thick clean black outlines, bright cheerful colors, plain pure white background, centered single subject, simple, no text, no watermark, kids memory card art
