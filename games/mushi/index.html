@@ -51,7 +51,9 @@
   .screen.show{display:flex;}
   /* ── ホーム ── */
   #home-s{align-items:center;justify-content:center;gap:18px;}
-  #home-s .hero{font-size:74px;}
+  #home-s .hero{display:flex;align-items:center;justify-content:center;}
+  #home-s .hero-img{width:min(82%,320px);height:auto;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.18));}
+  #home-s .hero-emo{font-size:74px;}
   #home-s .big{font-size:24px;padding:16px 34px;}
   #home-s .prog{font-size:15px;color:#6b7a52;font-weight:800;}
   /* ── むしカード（共通）── */
@@ -132,7 +134,7 @@
   <div id="app">
     <!-- ホーム -->
     <section id="home-s" class="screen show">
-      <div class="hero">🪲⚔️🪲</div>
+      <div class="hero"><img class="hero-img" src="assets/battle.png" alt="むしバトル" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'hero-emo',textContent:'🪲⚔️🪲'}))"></div>
       <button class="btn green big" id="toSelect">⚔️ バトル</button>
       <button class="btn brown big" id="toZukan">📖 ずかん</button>
       <div class="prog">つかまえた むし：<span id="homeCount">0</span> / <span id="homeTotal">0</span></div>
