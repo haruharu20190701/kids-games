@@ -1,0 +1,105 @@
+# ============================================================
+#  リモートのClaude（や手元のgh）から画像生成をトリガーするワークフロー。
+#  生成本体は「PC上のセルフホストランナー」で動く（実Chrome＋genspark
+#  ログイン済みセッションが PC にしか無いため）。
+#
+#  ★安全策: トリガーは workflow_dispatch（手動起動）のみ。
+#    公開リポでも、書き込み権限のある人しか起動できない。
+#    pull_request トリガーは無いので fork PR からは実行されない。
+#
+#  使い方（リモート/手元の gh）:
+#    gh workflow run generate-images.yml \
+#      -f kind=icon \
+#      -f prompts=$'newgame | cute kawaii flat vector app icon of ..., plain white background, no text'
+#    進捗: gh run watch
+# ============================================================
+name: 画像生成（PCのセルフホストランナー）
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "種類（icon=メニューアイコン256px / coloring=ぬりえ線画900px）"
+        type: choice
+        options:
+          - icon
+          - coloring
+        default: icon
+      prompts:
+        description: "1行=「slug | プロンプト」。複数行OK。slugがファイル名になる（icons/<slug>.png 等）"
+        type: string
+        required: true
+
+permissions:
+  contents: write   # 生成画像を main にコミット＆プッシュするため
+
+jobs:
+  generate:
+    # PC を登録したセルフホストランナー。ラベルは環境に合わせて調整可。
+    runs-on: [self-hosted, macOS]
+    env:
+      # PC 上の imagegen 実体（Chromeのログインセッション user-data/ と node_modules がある場所）。
+      # 別の場所に置いている場合はここを直す。
+      IMAGEGEN_DIR: /Users/fc-yamaguchi/Desktop/kids/imagegen
+    steps:
+      # コミット用のクリーンなチェックアウト（_work 配下）。ユーザーの作業ツリーには触らない。
+      - name: チェックアウト
+        uses: actions/checkout@v4
+
+      - name: プロンプトを追記して生成（PCの実Chromeで）
+        env:
+          PROMPTS: ${{ inputs.prompts }}
+        run: |
+          set -euo pipefail
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"   # node/playwright を確実に拾う
+          cd "$IMAGEGEN_DIR"
+          # 入力の各行を prompts.txt に追記（同一行は重複追記しない＝再生成したい時はプロンプトを少し変える）。
+          # progress.json で生成済みはスキップされるので、新規ぶんだけ生成される。
+          printf '%s\n' "$PROMPTS" | while IFS= read -r line; do
+            case "$line" in ''|\#*) continue;; esac
+            if ! grep -qxF "$line" prompts.txt; then
+              printf '%s\n' "$line" >> prompts.txt
+              echo "＋追記: $line"
+            fi
+          done
+          node generate.js
+
+      - name: 生成画像を縮小して配置
+        env:
+          PROMPTS: ${{ inputs.prompts }}
+          KIND: ${{ inputs.kind }}
+        run: |
+          set -euo pipefail
+          if [ "$KIND" = "coloring" ]; then DEST="games/coloring/lines"; SZ=900; else DEST="icons"; SZ=256; fi
+          mkdir -p "$DEST"
+          printf '%s\n' "$PROMPTS" | while IFS= read -r line; do
+            case "$line" in ''|\#*) continue;; esac
+            slug=$(printf '%s' "$line" | sed -E 's/ *\|.*//' | tr -d '[:space:]')
+            [ -z "$slug" ] && continue
+            # その slug の最新の生成物（NNN_slug.png）を選ぶ
+            src=$(ls -1 "$IMAGEGEN_DIR"/images/*_"$slug".png 2>/dev/null | sort | tail -1 || true)
+            if [ -n "${src:-}" ]; then
+              sips -Z "$SZ" "$src" --out "$DEST/$slug.png" >/dev/null
+              echo "✓ $DEST/$slug.png ← $(basename "$src")"
+            else
+              echo "⚠ 生成物が見つからない: $slug（生成に失敗した可能性）"
+            fi
+          done
+
+      - name: コミット＆プッシュ
+        env:
+          KIND: ${{ inputs.kind }}
+        run: |
+          set -euo pipefail
+          if [ "$KIND" = "coloring" ]; then ADD="games/coloring/lines"; else ADD="icons"; fi
+          git add "$ADD"
+          if git diff --cached --quiet; then
+            echo "コミットする変更なし（生成に失敗 or 既存と同一）"; exit 0
+          fi
+          git -c user.name="haruharu20190701" \
+              -c user.email="y_peace24@icloud.com" \
+              commit -m "画像生成($KIND): セルフホストランナーで生成 [run #${{ github.run_number }}]
+
+          Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+          # actions/checkout が設定した認証情報（GITHUB_TOKEN）でそのまま push できる。
+          git push origin HEAD:main

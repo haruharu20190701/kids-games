@@ -84,6 +84,13 @@ kids/
 - ローカルの `imagegen/`（gitignore）に AI画像生成ツールキットがある（genspark.ai をブラウザ自動操作、モデル「GPT Image 2」）。`prompts.txt`（塗り絵50枚・線画指定済み）→ `images/` に保存。
 - **Claude は自走で生成できない**：`node save-session.js` が実Chromeでの**手動ログイン**必須のため。ユーザーが `save-session.js`→`generate.js` を実行する。手順は `imagegen/README.md`。
 - 生成後の取り込みは Claude がやる：`sips -Z 900 imagegen/images/NNN_slug.png --out games/coloring/lines/slug.png` → `coloring` の `PICS` に `{emoji,name,src}` を追加。画像が十分そろったらベクター線画は削除可。
+- メニューのゲームアイコンも同じ仕組みで生成（色つき・白背景・正方形）→ `sips -Z 256 … --out icons/<slug>.png` → `index.html` の `GAMES` に `img:"icons/<slug>.png"` を追加（読み込み失敗時は emoji にフォールバック）。
+
+## リモートから画像生成（GitHub Actions セルフホストランナー）
+- リモートのClaude（クラウド実行）には PC の Chrome もログインセッションも無いので生成できない。そこで **PC をこのリポの self-hosted runner に登録**し、`.github/workflows/generate-images.yml` を **`gh workflow run` で起動**して、生成本体は PC の実Chromeで動かす。
+- 起動例（kindは icon / coloring）: `gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | プロンプト'` → 生成→縮小→`icons/`（or `games/coloring/lines/`）へコミット＆プッシュ。`gh run watch` で進捗。
+- **追加課金はほぼ無し**：ワークフローはただの node スクリプト実行で **Claude API/Agent SDK は不使用**。self-hosted runner は GitHub Actions 分をほぼ消費しない（生成枠は genspark 側のみ）。
+- ⚠ **トリガーは `workflow_dispatch` のみ**にすること（公開リポなので、pull_request トリガーを置くと fork から実行され得る）。ランナーは **GUIセッションで起動**（headless:false のため画面が必要）。セッション失効時のみ手動 `save-session.js`。詳細は `imagegen/README.md`。
 
 ## そざい（線画・画像）の著作権ポリシー ⚠️
 - 公開サイトに載せる素材は **自作 / 生成AIのオリジナル / CC0・パブリックドメイン** のみ。
