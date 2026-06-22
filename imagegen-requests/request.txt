@@ -1,4 +1,5 @@
 # breakout: ボール＋こわすフルーツ6種（色つき透明）
+# retry: run#10 は push競合で main に乗らなかったため再配置（生成はスキップされる）
 kind: custom
 dest: games/breakout/assets
 size: 512
