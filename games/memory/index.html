@@ -71,6 +71,7 @@
     background:#fffdf5;transform:rotateY(180deg);
     box-shadow:0 5px 0 #e8c98a, inset 0 0 0 3px #ffe9a8;
   }
+  .front img{width:86%;height:86%;object-fit:contain;pointer-events:none;}
   .card.matched .front{box-shadow:0 0 0 3px #7bdc8a, 0 0 16px #7bdc8a;animation:matchpop .5s ease;}
   @keyframes matchpop{0%{transform:rotateY(180deg) scale(1);}40%{transform:rotateY(180deg) scale(1.18);}100%{transform:rotateY(180deg) scale(1);}}
   .card.matched{animation:wob .4s ease;}
@@ -137,7 +138,8 @@
    - レベル：かんたん(3×2) / ふつう(4×3) / たくさん(4×4)
    - おとは Web Audio で せいせい（ファイル ふよう）
    ========================================================= */
-const FACES = ["🐱","🐶","🐰","🐸","🐼","🦁","🐯","🐵","🐷","🐮","🐔","🐧","🦋","🐢","🐙","🦄","🍎","🍓","🍇","🍊"];
+// カードの絵（assets/<slug>.png・自前生成の色つきイラスト10種）
+const FACES = ["cat","rabbit","bear","frog","penguin","owl","koala","tiger","hippo","turtle"];
 const LEVELS = {
   easy:{cols:3, rows:2},   // 6まい・3ペア
   mid: {cols:4, rows:3},   // 12まい・6ペア
@@ -218,7 +220,7 @@ function deal(){
   cardsFaces.forEach((face)=>{
     const el=document.createElement("div");
     el.className="card";
-    el.innerHTML=`<div class="inner"><div class="face back">❓</div><div class="face front">${face}</div></div>`;
+    el.innerHTML=`<div class="inner"><div class="face back">❓</div><div class="face front"><img src="assets/${face}.png" alt="" draggable="false"></div></div>`;
     boardEl.appendChild(el);
     const card={face, el, matched:false};
     el.addEventListener("pointerdown",(e)=>{ e.preventDefault(); flip(card); });
