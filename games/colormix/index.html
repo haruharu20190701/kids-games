@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="いろまぜ" />
+<title>いろまぜ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの いろまぜ あそび。2いろ えらんで ぐるぐる まぜると あたらしい いろが できる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/colormix/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="いろまぜ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの いろまぜ あそび。2いろ えらんで ぐるぐる まぜよう！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/colormix/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ いろまぜ（2いろ えらんで ぐるぐる まぜる）── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #sub{font-size:15px;color:#8a7a66;margin-top:2px;}
+  /* ── がめん きりかえ ── */
+  .screen{display:none;flex:1;width:100%;max-width:560px;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:10px 14px;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── えらんだ 2いろ ── */
+  #slots{display:flex;align-items:center;justify-content:center;gap:14px;}
+  .slot{width:78px;height:78px;border-radius:20px;border:4px dashed #d8c6a0;background:#fffdf5;
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#cdbb95;overflow:hidden;}
+  .slot.filled{border-style:solid;border-color:#fff;box-shadow:0 4px 0 #e8c98a;}
+  .slot .nm{font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);}
+  .plus{font-size:30px;font-weight:900;color:#8a7a66;}
+  /* ── いろ パレット ── */
+  #palette{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+  .sw{width:60px;height:60px;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 6px rgba(0,0,0,.18);
+    cursor:pointer;transition:transform .08s;position:relative;}
+  .sw:active{transform:translateY(2px);}
+  .sw .lab{position:absolute;left:0;right:0;bottom:-18px;font-size:12px;font-weight:800;color:#5b4636;text-align:center;}
+  /* ── ボタン ── */
+  .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;}
+  .btn{
+    border:none;font-family:inherit;font-weight:800;font-size:17px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:11px 20px;
+    box-shadow:0 4px 0 #e8c98a;cursor:pointer;transition:transform .08s;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .btn.go{color:#fff;background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;font-size:20px;padding:13px 26px;}
+  .btn.go.off{opacity:.45;}
+  /* ── まぜる ボウル ── */
+  #bowl{position:relative;width:min(74vw,300px);height:min(74vw,300px);border-radius:50%;overflow:hidden;
+    border:9px solid #fffdf5;box-shadow:0 10px 0 #e8c98a, 0 16px 26px rgba(0,0,0,.18);touch-action:none;}
+  #bowlBase{position:absolute;inset:-10%;}
+  #bowlResult{position:absolute;inset:0;opacity:0;}
+  #spoon{position:absolute;left:50%;top:50%;font-size:46px;pointer-events:none;
+    transform:translate(-50%,-50%) rotate(0deg) translateY(-30%);}
+  #mixMsg{font-size:20px;font-weight:900;color:#e07b00;text-align:center;line-height:1.5;min-height:30px;}
+  #mixMsg .big{font-size:26px;}
+  /* ── ねこ ── */
+  #cat{position:fixed;right:10px;top:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-18px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:52px;top:14px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right top;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🎨 いろまぜ</div>
+    <div id="sub">2いろ えらんで まぜてみよう！</div>
+  </header>
+
+  <!-- えらぶ がめん -->
+  <div id="pickScreen" class="screen show">
+    <div id="slots">
+      <div class="slot" id="slot0"><span>?</span></div>
+      <div class="plus">＋</div>
+      <div class="slot" id="slot1"><span>?</span></div>
+    </div>
+    <div id="palette"></div>
+    <div class="row">
+      <button class="btn" id="clearBtn">やりなおし</button>
+      <button class="btn go off" id="mixBtn">まぜてみよう！</button>
+    </div>
+  </div>
+
+  <!-- まぜる がめん -->
+  <div id="mixScreen" class="screen">
+    <div id="bowl">
+      <div id="bowlBase"></div>
+      <div id="bowlResult"></div>
+      <div id="spoon">🥄</div>
+    </div>
+    <div id="mixMsg">ぐるぐる まわしてね！</div>
+    <div class="row">
+      <button class="btn go" id="againBtn">もういちど</button>
+    </div>
+  </div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   5さいむけ いろまぜ
+   - パレットから 2いろ えらぶ → 「まぜてみよう！」
+   - ボウルで ゆびで ぐるぐる まぜる → あたらしい いろが できた！
+   - えのぐの こんしょく（あか＋きいろ＝オレンジ など）
+   - おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+
+// ── えらべる いろ ──
+const COLORS = [
+  {id:"red",   name:"あか",   hex:"#e63946"},
+  {id:"blue",  name:"あお",   hex:"#1d6fe0"},
+  {id:"yellow",name:"きいろ", hex:"#ffd23f"},
+  {id:"green", name:"みどり", hex:"#36b24a"},
+  {id:"white", name:"しろ",   hex:"#ffffff"},
+  {id:"black", name:"くろ",   hex:"#444444"},
+];
+// ── まぜた けっか（id 2つを アルファベットじゅんに ＋ でつなぐ）──
+const MIX = {
+  "blue+red":     {name:"むらさき",   hex:"#8e44ad"},
+  "red+yellow":   {name:"オレンジ",   hex:"#ff8c1a"},
+  "blue+yellow":  {name:"みどり",     hex:"#36b24a"},
+  "red+white":    {name:"ピンク",     hex:"#ff9ec4"},
+  "blue+white":   {name:"みずいろ",   hex:"#7ec8ff"},
+  "white+yellow": {name:"クリームいろ",hex:"#fff3c0"},
+  "green+white":  {name:"きみどり",   hex:"#a5d84a"},
+  "black+white":  {name:"はいいろ",   hex:"#9aa0a6"},
+  "black+red":    {name:"えんじ",     hex:"#9b2d3a"},
+  "black+blue":   {name:"こんいろ",   hex:"#1b365d"},
+  "black+yellow": {name:"オリーブ",   hex:"#8a7d2a"},
+  "black+green":  {name:"ふかみどり", hex:"#245c39"},
+  "green+red":    {name:"ちゃいろ",   hex:"#8a5a2b"},
+  "blue+green":   {name:"あおみどり", hex:"#1f9e9e"},
+  "green+yellow": {name:"きみどり",   hex:"#9bd13f"},
+};
+function hexToRgb(h){ h=h.replace("#",""); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
+function rgbToHex(r){ return "#"+r.map(v=>Math.max(0,Math.min(255,v|0)).toString(16).padStart(2,"0")).join(""); }
+function avgHex(a,b){ const x=hexToRgb(a),y=hexToRgb(b); return rgbToHex([0,1,2].map(i=>(x[i]+y[i])/2)); }
+function mixResult(a,b){
+  if(a.id===b.id) return {name:a.name, hex:a.hex};
+  const key=[a.id,b.id].sort().join("+");
+  return MIX[key] || {name:"あたらしい いろ", hex:avgHex(a.hex,b.hex)};
+}
+
+let chosen=[];           // えらんだ いろ（さいだい2）
+let result=null;
+
+// ── おと ──
+let actx=null;
+function beep(freq, dur=0.08, type="sine", vol=0.15){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function plip(){ beep(660,0.05,"sine",0.12); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.18,"triangle",0.22),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1600);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},1000);
+}
+
+// ── かみふぶき ──
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","🎨","🌈"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div");
+    s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100, dur=1100+Math.random()*900, delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;
+      s.style.opacity="0.2";
+    });
+    setTimeout(()=>s.remove(), dur+delay+100);
+  }
+}
+
+// ── パレット／スロット ──
+const paletteEl=document.getElementById("palette");
+const slotEls=[document.getElementById("slot0"), document.getElementById("slot1")];
+const mixBtn=document.getElementById("mixBtn");
+function buildPalette(){
+  COLORS.forEach(c=>{
+    const s=document.createElement("div");
+    s.className="sw"; s.style.background=c.hex;
+    if(c.id==="white") s.style.borderColor="#eee";
+    s.innerHTML=`<span class="lab">${c.name}</span>`;
+    s.addEventListener("click",()=>{
+      if(chosen.length>=2){ catReact("😺","やりなおしてね"); return; }
+      chosen.push(c); plip(); updateSlots();
+    });
+    paletteEl.appendChild(s);
+  });
+}
+function updateSlots(){
+  slotEls.forEach((el,i)=>{
+    const c=chosen[i];
+    if(c){ el.classList.add("filled"); el.style.background=c.hex; el.style.borderColor=(c.id==="white"?"#eee":"#fff"); el.innerHTML=`<span class="nm">${c.name}</span>`; }
+    else { el.classList.remove("filled"); el.style.background="#fffdf5"; el.style.borderColor="#d8c6a0"; el.innerHTML="<span>?</span>"; }
+  });
+  mixBtn.classList.toggle("off", chosen.length<2);
+}
+// スロットを タップで けす
+slotEls.forEach((el,i)=>el.addEventListener("click",()=>{
+  if(chosen[i]){ chosen.splice(i,1); plip(); updateSlots(); }
+}));
+document.getElementById("clearBtn").addEventListener("click",()=>{ chosen=[]; updateSlots(); beep(330,0.07,"sine",0.12); });
+
+// ── がめん きりかえ ──
+const pickScreen=document.getElementById("pickScreen"), mixScreen=document.getElementById("mixScreen");
+const bowl=document.getElementById("bowl"), bowlBase=document.getElementById("bowlBase"),
+      bowlResult=document.getElementById("bowlResult"), spoon=document.getElementById("spoon"),
+      mixMsg=document.getElementById("mixMsg");
+
+mixBtn.addEventListener("click",()=>{
+  if(chosen.length<2){ catReact("😺","いろを 2つ えらんでね"); return; }
+  if(actx&&actx.state==="suspended") actx.resume();
+  result=mixResult(chosen[0], chosen[1]);
+  // ボウルを じゅんび（2いろを はんぶんずつ）
+  bowlBase.style.background=`conic-gradient(${chosen[0].hex} 0 50%, ${chosen[1].hex} 50% 100%)`;
+  bowlBase.style.transform="rotate(0deg)";
+  bowlResult.style.background=result.hex;
+  bowlResult.style.opacity="0";
+  spoon.textContent="🥄"; spoon.style.transform="translate(-50%,-50%) rotate(0deg) translateY(-30%)";
+  mixMsg.innerHTML="ぐるぐる まわしてね！";
+  total=0; done=false;
+  pickScreen.classList.remove("show"); mixScreen.classList.add("show");
+  catReact("😺","ゆびで ぐるぐる！");
+});
+document.getElementById("againBtn").addEventListener("click",()=>{
+  chosen=[]; updateSlots();
+  mixScreen.classList.remove("show"); pickScreen.classList.add("show");
+  beep(550,0.06,"sine",0.12);
+});
+
+// ── ぐるぐる まぜる ──
+const TURNS=2.4;                 // これだけ まわすと できあがり
+let stirring=false, lastAng=0, total=0, done=false, soundAcc=0;
+function angOf(e){
+  const r=bowl.getBoundingClientRect();
+  return Math.atan2((e.clientY-r.top)-r.height/2, (e.clientX-r.left)-r.width/2);
+}
+bowl.addEventListener("pointerdown",(e)=>{
+  if(done) return;
+  e.preventDefault();
+  if(actx&&actx.state==="suspended") actx.resume();
+  stirring=true; lastAng=angOf(e);
+  try{ bowl.setPointerCapture(e.pointerId); }catch(_){}
+});
+bowl.addEventListener("pointermove",(e)=>{
+  if(!stirring||done) return;
+  e.preventDefault();
+  const a=angOf(e);
+  let d=a-lastAng;
+  while(d> Math.PI) d-=2*Math.PI;
+  while(d<-Math.PI) d+=2*Math.PI;
+  lastAng=a;
+  total+=Math.abs(d);
+  // みため：スプーンと いろを まわす、すこしずつ まざる
+  const deg=a*180/Math.PI;
+  spoon.style.transform=`translate(-50%,-50%) rotate(${deg}deg) translateY(-30%)`;
+  bowlBase.style.transform=`rotate(${deg}deg)`;
+  const prog=Math.min(1, total/(TURNS*2*Math.PI));
+  bowlResult.style.opacity=prog.toFixed(3);
+  // まぜる おと（ときどき）
+  soundAcc+=Math.abs(d);
+  if(soundAcc>0.9){ soundAcc=0; beep(300+Math.random()*120,0.04,"sine",0.06); }
+  if(prog>=1) finishMix();
+});
+function endStir(){ stirring=false; }
+bowl.addEventListener("pointerup",endStir);
+bowl.addEventListener("pointercancel",endStir);
+
+function finishMix(){
+  if(done) return;
+  done=true; stirring=false;
+  bowlResult.style.opacity="1";
+  spoon.textContent="✨";
+  fanfare(); confetti();
+  mixMsg.innerHTML=`${chosen[0].name} と ${chosen[1].name} で<br><span class="big">${result.name} できた！</span>`;
+  catReact("😻", result.name+"！");
+}
+
+// ── スタート ──
+buildPalette(); updateSlots();
+setTimeout(()=>catReact("😺","2いろ えらんでね！"),500);
+</script>
+</body>
+</html>
