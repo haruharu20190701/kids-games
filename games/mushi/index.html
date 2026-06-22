@@ -67,6 +67,7 @@
   .cell .stars{font-size:11px;color:#f0a500;}
   .cell.locked{opacity:.85;cursor:default;}
   .cell.locked .pic{filter:grayscale(1) brightness(.5) contrast(.4);}
+  .btn.back{align-self:center;font-size:16px;padding:10px 22px;margin-top:10px;flex:0 0 auto;}
   .scrtitle{font-weight:900;font-size:18px;text-align:center;margin:2px 0 6px;}
   .scrtitle small{font-weight:800;color:#6b7a52;font-size:13px;}
   /* ── バトル ── */
@@ -135,6 +136,7 @@
     <section id="select-s" class="screen">
       <div class="scrtitle">たたかう むしを えらんでね</div>
       <div class="grid" id="selectGrid"></div>
+      <button class="btn brown back" id="selHome">◀ ホームへ</button>
     </section>
 
     <!-- バトル -->
@@ -166,6 +168,7 @@
     <section id="zukan-s" class="screen">
       <div class="scrtitle">むしずかん <small>(<span id="zCount">0</span>/<span id="zTotal">0</span>)</small></div>
       <div class="grid" id="zukanGrid"></div>
+      <button class="btn brown back" id="zukanHome">◀ ホームへ</button>
     </section>
   </div>
 
@@ -234,7 +237,10 @@ function refreshHome(){ document.getElementById("homeCount").textContent=caught.
 
 document.getElementById("toSelect").addEventListener("click",()=>{ if(actx&&actx.state==="suspended")actx.resume(); tick(); buildSelect(); show("select-s"); });
 document.getElementById("toZukan").addEventListener("click",()=>{ tick(); buildZukan(); show("zukan-s"); });
-document.getElementById("backHome").addEventListener("click",()=>{ tick(); refreshHome(); show("home-s"); });
+function goHome(){ tick(); refreshHome(); show("home-s"); }
+document.getElementById("backHome").addEventListener("click",goHome);
+document.getElementById("selHome").addEventListener("click",goHome);
+document.getElementById("zukanHome").addEventListener("click",goHome);
 
 // ── あいぼうえらび ──
 function buildSelect(){
