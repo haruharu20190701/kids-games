@@ -51,29 +51,29 @@
   /* ── もぐらの ばん ── */
   #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 12px 12px;min-height:0;}
   #board{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
     width:100%;max-width:520px;
+    background:linear-gradient(#a8e063,#7ec850);
+    border-radius:26px;padding:16px;
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.35), 0 8px 0 #5fa83e, 0 16px 24px rgba(0,0,0,.12);
   }
   .hole{position:relative;aspect-ratio:1/1;}
   /* あなの なかみ（どうぶつ）。ちめんで クリップして「でてくる」かんじ */
-  .pit{position:absolute;left:0;right:0;top:0;bottom:16%;overflow:hidden;}
+  .pit{position:absolute;left:0;right:0;top:0;bottom:28%;overflow:hidden;z-index:1;}
   .animal{
-    position:absolute;left:50%;bottom:0;
-    transform:translate(-50%,118%);
-    font-size:clamp(34px,13vw,64px);line-height:1;cursor:pointer;
+    position:absolute;left:50%;bottom:0;width:88%;
+    transform:translate(-50%,120%);cursor:pointer;
     transition:transform .2s cubic-bezier(.34,1.56,.6,1);
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));
   }
-  .hole.up .animal{transform:translate(-50%,-4%);}
+  .hole.up .animal{transform:translate(-50%,2%);}
   .hole.up .animal.caught{
-    transform:translate(-50%,-34%) scale(1.6) rotate(18deg);opacity:0;
+    transform:translate(-50%,-26%) scale(1.4) rotate(14deg);opacity:0;
     transition:transform .26s ease, opacity .26s ease;
   }
-  /* あな（つちの もりあがり）*/
-  .mound{
-    position:absolute;left:5%;right:5%;bottom:4%;height:30%;border-radius:50%;
-    background:radial-gradient(ellipse at 50% 32%, #4a2f17 0 34%, #6e4a28 35% 56%, #98774d 57% 100%);
-    box-shadow:0 5px 0 rgba(0,0,0,.10);
-  }
+  /* あな（つちの もりあがり＝生成画像 mound.png。どうぶつの まえに かさねる）*/
+  .mound{position:absolute;left:0;right:0;bottom:0;width:100%;z-index:2;pointer-events:none;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.15));}
   .star{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-size:30px;pointer-events:none;
     animation:starUp .6s ease forwards;z-index:5;}
   @keyframes starUp{0%{opacity:1;transform:translate(-50%,0) scale(.5);}100%{opacity:0;transform:translate(-50%,-58px) scale(1.3);}}
@@ -139,7 +139,8 @@
    - 10ひきごとに おいわい。おとは Web Audio（ファイル ふよう）
    ========================================================= */
 
-const ANIMALS = ["🐹","🐰","🐱","🐶","🐸","🐭","🦔","🐻","🐨","🦊","🐯","🐷","🐰","🐹"];
+// せいせいした どうぶつ画像（assets/<slug>.png・透明PNG）
+const ANIMALS = ["mole","rabbit","frog","cat","bear","fox"];
 const HOLES = 9;          // 3×3
 const MAXUP = 2;          // どうじに でる さいだいすう
 const UP_MS = 1200;       // でている じかん
@@ -203,8 +204,8 @@ function buildBoard(){
   for(let i=0;i<HOLES;i++){
     const el=document.createElement("div"); el.className="hole";
     const pit=document.createElement("div"); pit.className="pit";
-    const an=document.createElement("div"); an.className="animal"; an.textContent="🐹";
-    const mo=document.createElement("div"); mo.className="mound";
+    const an=document.createElement("img"); an.className="animal"; an.alt=""; an.draggable=false; an.src="assets/mole.png";
+    const mo=document.createElement("img"); mo.className="mound"; mo.alt=""; mo.draggable=false; mo.src="assets/mound.png";
     pit.appendChild(an); el.appendChild(pit); el.appendChild(mo);
     const h={el, an, up:false, caught:false, retract:null};
     el.addEventListener("pointerdown",(e)=>{ e.preventDefault(); onHit(h); });
@@ -215,7 +216,7 @@ function buildBoard(){
 // ── でる／ひっこむ ──
 function popUp(h){
   h.up=true; h.caught=false; upCount++;
-  h.an.textContent = ANIMALS[(Math.random()*ANIMALS.length)|0];
+  h.an.src = "assets/" + ANIMALS[(Math.random()*ANIMALS.length)|0] + ".png";
   h.el.classList.add("up");
   beep(520,0.05,"sine",0.08);
   h.retract=setTimeout(()=>retract(h), UP_MS + Math.random()*500);
