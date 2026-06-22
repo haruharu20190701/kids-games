@@ -1,17 +1,15 @@
 # ============================================================
-#  リモートのClaude（や手元のgh）から画像生成をトリガーするワークフロー。
-#  生成本体は「PC上のセルフホストランナー」で動く（実Chrome＋genspark
-#  ログイン済みセッションが PC にしか無いため）。
+#  画像生成ワークフロー（生成本体は PC のセルフホストランナーで動く）。
 #
-#  ★安全策: トリガーは workflow_dispatch（手動起動）のみ。
-#    公開リポでも、書き込み権限のある人しか起動できない。
-#    pull_request トリガーは無いので fork PR からは実行されない。
+#  起動方法は2つ:
+#   ① ハンズフリー（リモートのClaude推奨）: `imagegen-requests/request.txt` を
+#      書いて push すると自動起動。Claudeはコミット権限だけで起動できる。
+#   ② 手動: Actions画面の Run workflow / `gh workflow run`（workflow_dispatch）。
 #
-#  使い方（リモート/手元の gh）:
-#    gh workflow run generate-images.yml \
-#      -f kind=icon \
-#      -f prompts=$'newgame | cute kawaii flat vector app icon of ..., plain white background, no text'
-#    進捗: gh run watch
+#  ★安全策: push トリガーは main の `imagegen-requests/request.txt` だけ。
+#    fork からは main に push できないので、外部から実行されない
+#    （pull_request トリガーは絶対に置かないこと）。
+#  生成→縮小→（任意で透明化）→ icons/ や指定フォルダへ自動コミット＆プッシュ。
 # ============================================================
 name: 画像生成（PCのセルフホストランナー）
 
@@ -45,13 +43,21 @@ on:
         type: boolean
         required: false
         default: false
+  push:
+    branches: [main]
+    paths:
+      - "imagegen-requests/request.txt"   # ← この依頼ファイルを push したら自動起動
 
 permissions:
   contents: write   # 生成画像を main にコミット＆プッシュするため
 
+# 同時実行を1つに制限（genspark セッション＝単一の Chrome プロファイルのため）。
+concurrency:
+  group: image-generation
+  cancel-in-progress: false
+
 jobs:
   generate:
-    # PC を登録したセルフホストランナー。ラベルは環境に合わせて調整可。
     runs-on: [self-hosted, macOS]
     env:
       # PC 上の imagegen 実体（Chromeのログインセッション user-data/ と node_modules がある場所）。
@@ -62,31 +68,50 @@ jobs:
       - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: プロンプトを追記して生成（PCの実Chromeで）
+      - name: パラメータ決定（push依頼ファイル or 手動入力）
         env:
-          PROMPTS: ${{ inputs.prompts }}
+          EVENT: ${{ github.event_name }}
+          IN_KIND: ${{ inputs.kind }}
+          IN_DEST: ${{ inputs.dest }}
+          IN_SIZE: ${{ inputs.size }}
+          IN_TRANS: ${{ inputs.transparent }}
+          IN_PROMPTS: ${{ inputs.prompts }}
+        run: |
+          set -euo pipefail
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+          PF="$RUNNER_TEMP/prompts.txt"
+          if [ "$EVENT" = "push" ]; then
+            python3 "$GITHUB_WORKSPACE/.github/scripts/parse_request.py" \
+              "$GITHUB_WORKSPACE/imagegen-requests/request.txt" "$PF" >> "$GITHUB_ENV"
+          else
+            printf '%s\n' "$IN_PROMPTS" > "$PF"
+            {
+              echo "KIND=${IN_KIND:-icon}"
+              echo "DEST_IN=${IN_DEST:-}"
+              echo "SIZE_IN=${IN_SIZE:-512}"
+              echo "TRANSPARENT=${IN_TRANS:-false}"
+            } >> "$GITHUB_ENV"
+          fi
+          echo "PROMPTS_FILE=$PF" >> "$GITHUB_ENV"
+          echo "--- 受け取ったプロンプト ---"; cat "$PF"
+
+      - name: プロンプトを追記して生成（PCの実Chromeで）
         run: |
           set -euo pipefail
           export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"   # node/playwright を確実に拾う
           cd "$IMAGEGEN_DIR"
-          # 入力の各行を prompts.txt に追記（同一行は重複追記しない＝再生成したい時はプロンプトを少し変える）。
+          # 受け取った各行を prompts.txt に追記（同一行は重複追記しない＝再生成したい時はプロンプトを少し変える）。
           # progress.json で生成済みはスキップされるので、新規ぶんだけ生成される。
-          printf '%s\n' "$PROMPTS" | while IFS= read -r line; do
+          while IFS= read -r line; do
             case "$line" in ''|\#*) continue;; esac
             if ! grep -qxF "$line" prompts.txt; then
               printf '%s\n' "$line" >> prompts.txt
               echo "＋追記: $line"
             fi
-          done
+          done < "$PROMPTS_FILE"
           node generate.js
 
       - name: 生成画像を縮小して配置
-        env:
-          PROMPTS: ${{ inputs.prompts }}
-          KIND: ${{ inputs.kind }}
-          DEST_IN: ${{ inputs.dest }}
-          SIZE_IN: ${{ inputs.size }}
-          TRANSPARENT: ${{ inputs.transparent }}
         run: |
           set -euo pipefail
           export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"   # python3(Pillow) を拾う
@@ -95,7 +120,6 @@ jobs:
             DEST="games/coloring/lines"; SZ=900
           elif [ "$KIND" = "custom" ]; then
             DEST="$DEST_IN"; SZ="${SIZE_IN:-512}"
-            # 安全策: 保存先は必須・リポジトリ内のみ（絶対パスや .. は拒否）
             case "$DEST" in
               ""|/*|*..*) echo "✗ dest が不正です: '$DEST'（リポジトリ相対・.. なし で指定）"; exit 1;;
             esac
@@ -104,11 +128,10 @@ jobs:
           fi
           echo "DEST=$DEST" >> "$GITHUB_ENV"   # コミット段で再利用
           mkdir -p "$DEST"
-          printf '%s\n' "$PROMPTS" | while IFS= read -r line; do
+          while IFS= read -r line; do
             case "$line" in ''|\#*) continue;; esac
             slug=$(printf '%s' "$line" | sed -E 's/ *\|.*//' | tr -d '[:space:]')
             [ -z "$slug" ] && continue
-            # その slug の最新の生成物（NNN_slug.png）を選ぶ
             src=$(ls -1 "$IMAGEGEN_DIR"/images/*_"$slug".png 2>/dev/null | sort | tail -1 || true)
             if [ -n "${src:-}" ]; then
               sips -Z "$SZ" "$src" --out "$DEST/$slug.png" >/dev/null
@@ -119,11 +142,9 @@ jobs:
             else
               echo "⚠ 生成物が見つからない: $slug（生成に失敗した可能性）"
             fi
-          done
+          done < "$PROMPTS_FILE"
 
       - name: コミット＆プッシュ
-        env:
-          KIND: ${{ inputs.kind }}
         run: |
           set -euo pipefail
           # 前ステップで $GITHUB_ENV に書いた DEST を使う
@@ -137,4 +158,5 @@ jobs:
 
           Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
           # actions/checkout が設定した認証情報（GITHUB_TOKEN）でそのまま push できる。
+          # この push は images だけで request.txt を変えないので再トリガーしない（GITHUB_TOKEN push は元々workflowを再起動しない）。
           git push origin HEAD:main

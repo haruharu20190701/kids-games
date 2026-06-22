@@ -102,10 +102,20 @@ kids/
    - custom: 用途に合わせて自由。**GPT Image 2 は白背景で出る**が、`-f transparent=true` を付けると外周の白を抜いて**透明PNG**にできる（黒い輪郭線で囲まれた素材向け。中の白＝目等は残る）。透明にしない場合は白タイル前提のデザイン/配置にする。
    - 複数枚なら `slug | プロンプト` を改行で並べて1回の `prompts` に渡す。著作権ポリシー厳守（第三者IP不可）。
 3. **起動**：
-   - `gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | …'`
-   - custom例：`gh workflow run generate-images.yml -f kind=custom -f dest=games/<game>/assets -f size=512 -f transparent=true -f prompts=$'slug | …'`（`dest` はリポ相対・`..`不可、`size`は長辺px、`transparent=true`で白背景を透明化）
+   - **リモート（推奨・ハンズフリー）**：`imagegen-requests/request.txt` を下記形式で**書いて push**すると自動起動。`gh workflow run` の権限が無いリモート環境でも、コミット権限だけで起動できる。
+     ```
+     kind: custom            # icon / coloring / custom
+     dest: games/<game>/assets   # custom のときの保存先（リポ相対・.. 不可）
+     size: 512               # custom のときの長辺px
+     transparent: true       # 白背景を透明化するなら true
+     ---
+     slug | プロンプト
+     slug2 | プロンプト
+     ```
+   - **ローカルでghが使える場合**：`gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | …'`（custom は `-f dest=… -f size=… -f transparent=true`）。
 4. **完了を待つ**：`gh run list --workflow=generate-images.yml --limit 1` で run id を取り、`gh run view <id> --json status,conclusion -q '.status+" "+(.conclusion//"")'` を `completed success` になるまでポーリング（生成は数分）。
-   - 何分も `queued` のまま＝**ランナーが起動していない**。ユーザーに「PCで `cd ~/kids-runner && ./svc.sh start`（または `./run.sh`）」と伝える。
+   - ⚠ リモートの GitHub トークンは **Actions閲覧/起動の権限が無いことがある**（`gh run`/`gh workflow run` が 403）。その場合は push起動を使い、進捗は `git fetch` で main が動いたか（＝生成コミット）で判断する。
+   - 何分も動かない＝**ランナーが起動していない**。ユーザーに「PCで `cd ~/kids-runner && ./svc.sh start`（または `./run.sh`）」と伝える。
 5. **取り込み**：成功したら `git fetch origin && git merge --ff-only origin/main`（ワークフローが画像を main にコミット済み）。生成画像を `Read` で目視確認。
 6. **登録（重要・ワークフローはやらない）**：
    - coloring → `games/coloring/index.html` の `PICS` に `{emoji,name:"<ひらがな>",src:"lines/<slug>.png"}` を追記。
