@@ -229,8 +229,7 @@ function speak(text){
   }catch(e){}
 }
 function speakCurrent(){
-  const c=LETTERS[idx];
-  speak(c.k + " for " + c.w);   // れい "A for apple"
+  speak(LETTERS[idx].w);   // たんごだけ よみあげる（れい "apple"）
 }
 
 // ── ねこ ──
