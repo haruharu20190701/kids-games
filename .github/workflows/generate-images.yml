@@ -39,8 +39,8 @@ jobs:
     runs-on: [self-hosted, macOS]
     env:
       # PC 上の imagegen 実体（Chromeのログインセッション user-data/ と node_modules がある場所）。
-      # 別の場所に置いている場合はここを直す。
-      IMAGEGEN_DIR: /Users/fc-yamaguchi/Desktop/kids/imagegen
+      # ※launchd常駐は ~/Desktop（TCC保護）にアクセスできないため、Desktopの外に置く。
+      IMAGEGEN_DIR: /Users/fc-yamaguchi/kids-imagegen
     steps:
       # コミット用のクリーンなチェックアウト（_work 配下）。ユーザーの作業ツリーには触らない。
       - name: チェックアウト
