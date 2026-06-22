@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="キャッチ" />
+<title>キャッチ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの キャッチゲーム。かごを うごかして おちてくる フルーツを うけとめよう。じかんせいげんなし。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/catch/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="キャッチ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの キャッチゲーム。かごで フルーツを うけとめよう！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/catch/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ キャッチ（かごで フルーツを うける）── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #hud{font-size:18px;font-weight:900;color:#e07b00;margin-top:2px;}
+  #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 10px 12px;min-height:0;}
+  #pad{min-width:0;min-height:0;width:100%;height:100%;max-width:540px;
+    background:linear-gradient(#eaf6ff,#d6ecff);border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;}
+  #cat{position:fixed;right:10px;top:8px;font-size:34px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{position:fixed;right:50px;top:14px;z-index:66;background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:14px;font-weight:800;color:#5b4636;white-space:nowrap;box-shadow:0 3px 0 #f0c000;padding:5px 11px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right top;transition:opacity .15s, transform .15s;}
+  #bubble.show{opacity:1;transform:scale(1);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+    background:rgba(91,70,54,.72);z-index:95;padding:20px;}
+  #start.hide{display:none;}
+  #start .big{font-size:60px;}
+  #start .msg{color:#fff;font-weight:900;font-size:19px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.45);line-height:1.5;}
+  #startBtn{border:none;font-family:inherit;font-weight:900;font-size:24px;color:#fff;
+    background:linear-gradient(180deg,#7bdc8a,#34c759);border-radius:999px;padding:14px 38px;box-shadow:0 5px 0 #1f9e44;cursor:pointer;}
+  #startBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #1f9e44;}
+  @media (orientation:landscape) and (max-height:480px){ header{padding:4px 14px 0;} .title{font-size:18px;} #hud{font-size:15px;} #cat{font-size:28px;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🧺 キャッチ</div>
+    <div id="hud">とった 🍎 <span id="score">0</span></div>
+  </header>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+  <div id="start">
+    <div class="big">🧺</div>
+    <div class="msg">かごを ゆびで うごかして<br>おちてくる フルーツを うけとめよう！</div>
+    <button id="startBtn">▶ スタート</button>
+  </div>
+
+<script>
+/* =========================================================
+   5さいむけ キャッチ
+   - かごを ゆびで うごかして、おちてくる フルーツを うける
+   - とりそこねても ゲームオーバーなし（やさしい）。だんだん はやくなる
+   - 10こ ごとに おいわい。フルーツ画像／おとは アセット内
+   ========================================================= */
+const FRUITS=["apple","orange","lemon","strawberry","grape"];
+const imgs={}; FRUITS.forEach(n=>{const im=new Image();im.src="assets/"+n+".png";imgs[n]=im;});
+function ready(n){const im=imgs[n];return im&&im.complete&&im.naturalWidth>0;}
+const FCOL={apple:"#e63946",orange:"#f39800",lemon:"#ffd900",strawberry:"#ff5a7a",grape:"#9b2d8e"};
+
+const canvas=document.getElementById("pad"), ctx=canvas.getContext("2d");
+let CW=320,CH=480;
+let basket={x:160,w:90}, drops=[], score=0, running=false;
+let spawnT=0, speed=1;
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function ping(){ [740,988].forEach((f,i)=>setTimeout(()=>beep(f,0.08,"triangle",0.16),i*60)); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+const catEl=document.getElementById("cat"),bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face,word){catEl.textContent=face;catEl.classList.remove("jump");void catEl.offsetWidth;catEl.classList.add("jump");
+  if(word){bubbleEl.textContent=word;bubbleEl.classList.add("show");clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1400);}
+  setTimeout(()=>{catEl.textContent="🐱";},900);}
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🍎","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── サイズ ──
+function fit(){
+  const rect=canvas.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);
+  const ow=CW;CW=Math.max(1,Math.round(rect.width));CH=Math.max(1,Math.round(rect.height));
+  canvas.width=Math.round(CW*dpr);canvas.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap="round";ctx.lineJoin="round";
+  basket.w=Math.max(64,CW*0.24);
+  if(ow>1) basket.x*=CW/ow; else basket.x=CW/2;
+  basket.x=Math.max(basket.w/2,Math.min(CW-basket.w/2,basket.x));
+  draw();
+}
+let rt=null;
+window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,150);});
+window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(fit,60);});ro.observe(canvas);}
+window.addEventListener("load",()=>{clearTimeout(rt);rt=setTimeout(fit,60);});
+
+// ── そうさ ──
+function moveTo(e){const r=canvas.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*CW;basket.x=Math.max(basket.w/2,Math.min(CW-basket.w/2,x));}
+canvas.addEventListener("pointerdown",(e)=>{e.preventDefault();if(actx&&actx.state==="suspended")actx.resume();moveTo(e);try{canvas.setPointerCapture(e.pointerId);}catch(_){}});
+canvas.addEventListener("pointermove",(e)=>{if(e.buttons||e.pointerType==="touch"){e.preventDefault();moveTo(e);}});
+
+// ── かごの え ──
+function basketTopY(){ return CH-CH*0.10; }
+function drawBasket(){
+  const x=basket.x,w=basket.w,topY=basketTopY(),h=w*0.62;
+  const lx=x-w/2,rx=x+w/2;
+  // ふち
+  ctx.fillStyle="#c98a3c";
+  ctx.beginPath();ctx.ellipse(x,topY,w/2,h*0.16,0,0,Math.PI*2);ctx.fill();
+  // ほんたい（だいけい）
+  ctx.fillStyle="#e0a85a";
+  ctx.beginPath();
+  ctx.moveTo(lx,topY);ctx.lineTo(lx+w*0.12,topY+h);ctx.lineTo(rx-w*0.12,topY+h);ctx.lineTo(rx,topY);ctx.closePath();ctx.fill();
+  // あみめ
+  ctx.strokeStyle="#b9772f";ctx.lineWidth=Math.max(2,w*0.03);
+  for(let i=1;i<4;i++){const t=i/4;ctx.beginPath();ctx.moveTo(lx+w*0.12*t,topY+h*t);ctx.lineTo(rx-w*0.12*t,topY+h*t);ctx.stroke();}
+  ctx.fillStyle="#8a5a2b";ctx.beginPath();ctx.ellipse(x,topY,w/2,h*0.16,0,0,Math.PI,true);ctx.fill();
+}
+
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  for(const d of drops){
+    const s=d.r*2;
+    if(ready(d.type)) ctx.drawImage(imgs[d.type],d.x-d.r,d.y-d.r,s,s);
+    else{ctx.fillStyle=FCOL[d.type]||"#e63946";ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();}
+  }
+  drawBasket();
+}
+
+// ── ループ ──
+let last=0;
+function spawn(){const r=Math.max(14,CW*0.05);drops.push({x:r+Math.random()*(CW-2*r),y:-r,r,type:FRUITS[(Math.random()*FRUITS.length)|0],vy:(CH*0.40)*speed});}
+function loop(t){
+  if(!running)return;
+  if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>1/30)dt=1/30;
+  spawnT-=dt;
+  if(spawnT<=0){ spawn(); spawnT=Math.max(0.55,1.15-score*0.02); }
+  speed=Math.min(2.2,1+score*0.02);
+  const topY=basketTopY();
+  for(let i=drops.length-1;i>=0;i--){
+    const d=drops[i]; d.y+=d.vy*dt;
+    // かごで うける
+    if(d.y+d.r>=topY && d.y-d.r<=topY+d.r*2 && d.x>=basket.x-basket.w/2 && d.x<=basket.x+basket.w/2){
+      drops.splice(i,1); score++; document.getElementById("score").textContent=score; ping();
+      if(score%10===0){fanfare();confetti();catReact("😻",score+"こ とった！");}
+      continue;
+    }
+    if(d.y-d.r>CH){ drops.splice(i,1); }   // とりそこね→ペナルティなし
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function begin(){document.getElementById("start").classList.add("hide");running=true;last=0;drops=[];score=0;speed=1;spawnT=0;document.getElementById("score").textContent=0;beep(660,0.06,"sine",0.12);catReact("😺","いくよー！");requestAnimationFrame(loop);}
+document.getElementById("startBtn").addEventListener("click",begin);
+
+fit(); draw();
+FRUITS.forEach(n=>imgs[n].addEventListener("load",draw));
+</script>
+</body>
+</html>
