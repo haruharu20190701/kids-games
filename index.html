@@ -54,6 +54,8 @@
   }
   .card:active{transform:translateY(4px);box-shadow:0 2px 0 #e8c98a, 0 6px 12px rgba(0,0,0,.10);}
   .card .emoji{font-size:54px;line-height:1;}
+  .card .icon{width:84px;height:84px;object-fit:contain;line-height:0;
+    border-radius:18px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.12);}
   .card .name{font-size:19px;font-weight:800;text-align:center;}
   /* ── まだ ないゲーム（じゅんびちゅう）── */
   .card.soon{opacity:.55;box-shadow:0 6px 0 #ddd0b0;pointer-events:none;}
@@ -74,19 +76,20 @@
    soon … true にすると「じゅんびちゅう」ひょうじ（クリックふか）
    ========================================================= */
 const GAMES = [
-  { name:"ぱずるぶろっく", emoji:"🧩", path:"games/puzzle-block/index.html" },
-  { name:"ぴあの", emoji:"🎹", path:"games/piano/index.html" },
-  { name:"おえかき", emoji:"🎨", path:"games/draw/index.html" },
-  { name:"しんけいすいじゃく", emoji:"🃏", path:"games/memory/index.html" },
-  { name:"かずあそび", emoji:"🔢", path:"games/numbers/index.html" },
-  { name:"エアホッケー", emoji:"🏒", path:"games/airhockey/index.html" },
-  { name:"ぬりえ", emoji:"🖍️", path:"games/coloring/index.html" },
-  { name:"ひらがな", emoji:"✏️", path:"games/hiragana/index.html" },
-  { name:"ABC", emoji:"🔤", path:"games/abc/index.html" },
-  { name:"とけい", emoji:"🕐", path:"games/clock/index.html" },
-  { name:"もぐらたたき", emoji:"🐹", path:"games/mole/index.html" },
-  { name:"いろまぜ", emoji:"🎨", path:"games/colormix/index.html" },
+  { name:"ぱずるぶろっく", emoji:"🧩", img:"icons/puzzle-block.png", path:"games/puzzle-block/index.html" },
+  { name:"ぴあの", emoji:"🎹", img:"icons/piano.png", path:"games/piano/index.html" },
+  { name:"おえかき", emoji:"🎨", img:"icons/draw.png", path:"games/draw/index.html" },
+  { name:"しんけいすいじゃく", emoji:"🃏", img:"icons/memory.png", path:"games/memory/index.html" },
+  { name:"かずあそび", emoji:"🔢", img:"icons/numbers.png", path:"games/numbers/index.html" },
+  { name:"エアホッケー", emoji:"🏒", img:"icons/airhockey.png", path:"games/airhockey/index.html" },
+  { name:"ぬりえ", emoji:"🖍️", img:"icons/coloring.png", path:"games/coloring/index.html" },
+  { name:"ひらがな", emoji:"✏️", img:"icons/hiragana.png", path:"games/hiragana/index.html" },
+  { name:"ABC", emoji:"🔤", img:"icons/abc.png", path:"games/abc/index.html" },
+  { name:"とけい", emoji:"🕐", img:"icons/clock.png", path:"games/clock/index.html" },
+  { name:"もぐらたたき", emoji:"🐹", img:"icons/mole.png", path:"games/mole/index.html" },
+  { name:"いろまぜ", emoji:"🎨", img:"icons/colormix.png", path:"games/colormix/index.html" },
   // れい: { name:"じゅんびちゅう", emoji:"❓", soon:true },
+  // img … メニューのアイコン画像（icons/<slug>.png）。読み込み失敗時は emoji にもどる。
 ];
 
 const grid = document.getElementById("grid");
@@ -95,8 +98,13 @@ for(const g of GAMES){
   const el = document.createElement(g.soon ? "div" : "a");
   el.className = "card" + (g.soon ? " soon" : "");
   if(!g.soon){ el.href = g.path; ready++; }
+  // アイコン画像があれば画像、なければ絵文字。画像が読めなければ絵文字へ自動フォールバック。
+  const icon = g.img
+    ? `<img class="icon" src="${g.img}" alt="" ` +
+      `onerror="this.outerHTML='<div class=\\'emoji\\'>${g.emoji||"🎮"}</div>'">`
+    : `<div class="emoji">${g.emoji||"🎮"}</div>`;
   el.innerHTML =
-    `<div class="emoji">${g.emoji||"🎮"}</div>` +
+    icon +
     `<div class="name">${g.name}</div>` +
     (g.soon ? `<div class="badge">じゅんびちゅう</div>` : "");
   grid.appendChild(el);
