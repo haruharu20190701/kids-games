@@ -1,8 +1,7 @@
-# menu icons: 新しい5ゲームのアイコン
-kind: icon
+# mushi: ホームの主役絵（虫どうしのバトル・色つき透明）
+kind: custom
+dest: games/mushi/assets
+size: 640
+transparent: true
 ---
-breakout | cute kawaii flat vector app icon of a red bouncy ball and colorful building blocks, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-keisan | cute kawaii flat vector app icon of a big colorful plus sign and minus sign math symbols on number blocks, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-catch | cute kawaii flat vector app icon of a wicker basket catching falling colorful fruit, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-fishing | cute kawaii flat vector app icon of a fishing rod with a cute fish, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-mushi | cute kawaii flat vector app icon of a cute rhinoceros beetle kabutomushi, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+battle | cute kawaii cartoon of a rhinoceros beetle and a stag beetle facing each other locking horns in a friendly battle, two cute bugs, dynamic side view, FULLY COLORED with bright flat colors, thick clean black outlines, this is a COLORED illustration NOT a line drawing NOT a coloring page NOT black and white, plain solid white background, simple, no text, no watermark
