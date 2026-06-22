@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="とけい" />
+<title>とけい｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの とけいの れんしゅう。はりを うごかして じこくを あわせたり、なんじか あてっこ。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/clock/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="とけい｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの とけいの れんしゅう。はりを うごかして じこくを あわせよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/clock/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ とけい（あわせる／よむ）── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+    --hour:#ff5a5f; --min:#3a86ff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:620px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #legend{font-size:13px;color:#8a7a66;margin-top:2px;}
+  #legend b.h{color:var(--hour);} #legend b.m{color:var(--min);}
+  /* ── タブ・なんもど ── */
+  #nav{display:flex;gap:8px;justify-content:center;align-items:center;padding:6px 10px 2px;flex-wrap:wrap;}
+  .btn{
+    border:none;font-family:inherit;font-weight:800;font-size:16px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:8px 15px;
+    box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;display:flex;align-items:center;gap:4px;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .btn.on{color:#fff;background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 3px 0 #c96a00;}
+  .btn.tab.on{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 3px 0 #1f9e44;}
+  /* ── おだい／しつもん ── */
+  #prompt{font-size:20px;font-weight:900;color:#5b4636;min-height:28px;text-align:center;padding:2px 10px;}
+  #prompt .big{font-size:26px;color:#e07b00;}
+  /* ── とけい ── */
+  #stage{flex:1;width:100%;max-width:620px;display:flex;align-items:center;justify-content:center;padding:4px 10px 6px;min-height:0;}
+  #clock{min-width:0;min-height:0;width:100%;height:100%;touch-action:none;display:block;}
+  /* ── こたえ（よむモードの 3たく）── */
+  #answers{display:none;gap:10px;justify-content:center;align-items:center;padding:4px 10px 10px;flex-wrap:wrap;}
+  #answers.show{display:flex;}
+  .ans{font-size:22px;font-weight:900;padding:12px 22px;border-radius:16px;min-width:96px;
+    background:#fffdf5;color:#5b4636;box-shadow:0 4px 0 #e8c98a;border:none;cursor:pointer;transition:transform .08s;}
+  .ans:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .ans.ng{opacity:.4;}
+  /* ── あわせるモードの したバー ── */
+  #setbar{display:none;gap:10px;justify-content:center;align-items:center;padding:4px 10px 10px;}
+  #setbar.show{display:flex;}
+  /* ── ねこ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-18px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:54px;bottom:20px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  /* ── かみふぶき ── */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;}
+    .title{font-size:18px;} #legend{font-size:11px;}
+    #prompt{font-size:16px;min-height:20px;}
+    #cat{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🕐 とけい</div>
+    <div id="legend"><b class="h">🔴みじかいはり＝じ</b>　<b class="m">🔵ながいはり＝ふん</b></div>
+  </header>
+
+  <div id="nav">
+    <button class="btn tab on" id="tabSet">✋ あわせる</button>
+    <button class="btn tab" id="tabRead">👀 よむ</button>
+    <button class="btn" id="diff">＋30ぷん</button>
+  </div>
+
+  <div id="prompt"></div>
+
+  <div id="stage"><canvas id="clock"></canvas></div>
+
+  <div id="answers"></div>
+  <div id="setbar">
+    <button class="btn" id="setNext">つぎ ▶</button>
+  </div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   5さいむけ とけい
+   - ✋あわせる：はり（みじかい🔴=じ／ながい🔵=ふん）を ゆびで うごかして
+     おだいの じこくに あわせる。あうと おいわい。
+   - 👀よむ：とけいを みて「なんじ？」を 3たくで こたえる。
+   - ＋30ぷん：30ぷんの もんだいも まぜる（きほんは ちょうど＝〇じ）。
+   - おとは Web Audio（ファイル ふよう）。
+   ========================================================= */
+
+let mode = "set";     // set | read
+let half = false;     // 30ぷんを まぜるか
+// あわせるモードの いまの はり
+let curH = 12, curM = 0;
+let targetH = 3, targetM = 0;
+// よむモードの しゅつだい
+let qH = 3, qM = 0;
+let answered = false;
+
+const canvas = document.getElementById("clock");
+const ctx = canvas.getContext("2d");
+let CW=300, CH=300, R=120, cx=150, cy=150;
+
+// ── おと ──
+let actx=null;
+function beep(freq, dur=0.08, type="sine", vol=0.15){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function tick(){ beep(620,0.04,"sine",0.10); }
+function nope(){ beep(200,0.18,"sawtooth",0.14); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.18,"triangle",0.22),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1500);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},1000);
+}
+
+// ── かみふぶき ──
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","🕐","🌈"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div");
+    s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100, dur=1100+Math.random()*900, delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;
+      s.style.opacity="0.2";
+    });
+    setTimeout(()=>s.remove(), dur+delay+100);
+  }
+}
+
+// ── じこくの ことば（〇じ／〇じはん）──
+function label(h,m){ return m===30 ? `${h}じはん` : `${h}じ`; }
+
+// ── とけいを えがく ──
+// hourOnNumber=true: みじかいはりを すうじの うえに のせる（あわせるモード用）
+function drawClock(h, m, hourOnNumber){
+  ctx.clearRect(0,0,CW,CH);
+  // ばんめん
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.fillStyle="#fffdf5"; ctx.fill();
+  ctx.lineWidth=R*0.06; ctx.strokeStyle="#e8c98a"; ctx.stroke();
+  // めもり
+  for(let i=0;i<60;i++){
+    const a=i/60*Math.PI*2, big=(i%5===0);
+    const r1=R*(big?0.84:0.88), r2=R*0.94;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.sin(a)*r1, cy-Math.cos(a)*r1);
+    ctx.lineTo(cx+Math.sin(a)*r2, cy-Math.cos(a)*r2);
+    ctx.lineWidth=big?R*0.03:R*0.012; ctx.strokeStyle=big?"#bfa97e":"#dccaa6"; ctx.stroke();
+  }
+  // すうじ（1〜12）
+  ctx.fillStyle="#5b4636"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.font="900 "+(R*0.20)+'px "Hiragino Maru Gothic ProN",sans-serif';
+  for(let n=1;n<=12;n++){
+    const a=n/12*Math.PI*2, rr=R*0.70;
+    ctx.fillText(n, cx+Math.sin(a)*rr, cy-Math.cos(a)*rr);
+  }
+  // ながいはり（ふん・あお）
+  const ma=(m/60)*Math.PI*2;
+  drawHand(ma, R*0.80, R*0.045, "#3a86ff");
+  // みじかいはり（じ・あか）
+  const ha=hourOnNumber ? (h%12)/12*Math.PI*2 : ((h%12)+m/60)/12*Math.PI*2;
+  drawHand(ha, R*0.52, R*0.065, "#ff5a5f");
+  // ちゅうしん
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.06,0,Math.PI*2); ctx.fillStyle="#5b4636"; ctx.fill();
+}
+function drawHand(angle, len, w, col){
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.sin(angle)*len, cy-Math.cos(angle)*len);
+  ctx.lineWidth=w; ctx.lineCap="round"; ctx.strokeStyle=col; ctx.stroke();
+}
+function render(){
+  if(mode==="set") drawClock(curH, curM, true);
+  else drawClock(qH, qM, false);
+}
+
+// ── キャンバスの サイズあわせ ──
+function fitCanvas(){
+  const rect=canvas.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1, 2);
+  CW=Math.max(1,Math.round(rect.width)); CH=Math.max(1,Math.round(rect.height));
+  canvas.width=Math.round(CW*dpr); canvas.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  cx=CW/2; cy=CH/2; R=Math.min(CW,CH)/2 - Math.min(CW,CH)*0.04;
+  render();
+}
+let resizeT=null;
+window.addEventListener("resize",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,150); });
+window.addEventListener("orientationchange",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,200); });
+
+// ── あわせるモード：はりを ドラッグ ──
+let grabbing=null;   // "min" | "hour" | null
+function angleAt(e){
+  const r=canvas.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*CW - cx;
+  const y=(e.clientY-r.top)/r.height*CH - cy;
+  let deg=Math.atan2(x,-y)*180/Math.PI;   // 12じが 0、とけいまわりで ぞうか
+  if(deg<0) deg+=360;
+  return {deg, dist:Math.hypot(x,y)};
+}
+canvas.addEventListener("pointerdown",(e)=>{
+  if(mode!=="set") return;
+  e.preventDefault();
+  if(actx&&actx.state==="suspended") actx.resume();
+  const a=angleAt(e);
+  // そとがわ＝ながいはり、うちがわ＝みじかいはり
+  grabbing = (a.dist > R*0.40) ? "min" : "hour";
+  moveHand(a);
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+});
+canvas.addEventListener("pointermove",(e)=>{
+  if(mode!=="set" || !grabbing) return;
+  e.preventDefault();
+  moveHand(angleAt(e));
+});
+function moveHand(a){
+  if(grabbing==="min"){
+    // 5ふんきざみに マグネット
+    let m=Math.round(a.deg/360*60/5)*5; if(m>=60) m=0;
+    if(m!==curM){ curM=m; tick(); }
+  }else{
+    // ちかい すうじに マグネット（1〜12）
+    let h=Math.round(a.deg/360*12); if(h===0) h=12;
+    if(h!==curH){ curH=h; tick(); }
+  }
+  render();
+}
+function endHand(){
+  if(mode!=="set" || !grabbing) return;
+  grabbing=null;
+  checkSet();
+}
+canvas.addEventListener("pointerup",endHand);
+canvas.addEventListener("pointercancel",endHand);
+
+function checkSet(){
+  if(curH===targetH && curM===targetM){
+    fanfare(); confetti(); catReact("😻", label(targetH,targetM)+" ぴったり！");
+    setTimeout(newTarget, 1400);
+  }
+}
+
+// ── おだいを つくる（あわせる）──
+function randH(){ return 1+((Math.random()*12)|0); }
+function newTarget(){
+  let h=randH(), m=(half && Math.random()<0.5)?30:0;
+  // いまと おなじ おだいは さける
+  if(h===targetH && m===targetM){ h=randH(); }
+  targetH=h; targetM=m;
+  // はりを おだいと ちがう ところに リセット
+  curH = (targetH%12)+1; curM = (targetM===0?30:0);
+  document.getElementById("prompt").innerHTML = `<span class="big">${label(targetH,targetM)}</span> に あわせてね`;
+  render();
+}
+
+// ── よむモード：3たく ──
+const answersEl=document.getElementById("answers");
+function newQuiz(){
+  answered=false;
+  qH=randH(); qM=(half && Math.random()<0.5)?30:0;
+  document.getElementById("prompt").textContent = "いま なんじ かな？";
+  // せんたくし（せいかい＋ダミー2つ）
+  const opts=[{h:qH,m:qM}];
+  let guard=0;
+  while(opts.length<3 && guard++<50){
+    const o={h:randH(), m:(half && Math.random()<0.5)?30:0};
+    if(!opts.some(p=>p.h===o.h && p.m===o.m)) opts.push(o);
+  }
+  for(let i=opts.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [opts[i],opts[j]]=[opts[j],opts[i]]; }
+  answersEl.innerHTML="";
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.className="ans"; b.textContent=label(o.h,o.m);
+    b.addEventListener("click",()=>{
+      if(answered) return;
+      if(o.h===qH && o.m===qM){
+        answered=true; fanfare(); confetti(); catReact("😻","せいかい！");
+        setTimeout(newQuiz, 1400);
+      }else{
+        nope(); b.classList.add("ng"); catReact("😺","もういちど！");
+      }
+    });
+    answersEl.appendChild(b);
+  });
+  render();
+}
+
+// ── モードきりかえ ──
+const tabSet=document.getElementById("tabSet"), tabRead=document.getElementById("tabRead");
+const setbar=document.getElementById("setbar");
+function setMode(m){
+  mode=m;
+  tabSet.classList.toggle("on", m==="set");
+  tabRead.classList.toggle("on", m==="read");
+  answersEl.classList.toggle("show", m==="read");
+  setbar.classList.toggle("show", m==="set");
+  if(m==="set") newTarget(); else newQuiz();
+}
+tabSet.addEventListener("click",()=>{ if(mode!=="set"){ tick(); setMode("set"); } });
+tabRead.addEventListener("click",()=>{ if(mode!=="read"){ tick(); setMode("read"); } });
+document.getElementById("diff").addEventListener("click",()=>{
+  half=!half;
+  document.getElementById("diff").classList.toggle("on", half);
+  beep(half?740:440,0.07,"sine",0.12);
+  if(mode==="set") newTarget(); else newQuiz();
+});
+document.getElementById("setNext").addEventListener("click",()=>{ tick(); newTarget(); });
+
+// ── スタート ──
+function init(){
+  fitCanvas();
+  setMode("set");
+  setTimeout(()=>catReact("😺","はりを うごかして あわせてね！"),500);
+}
+init();
+</script>
+</body>
+</html>
