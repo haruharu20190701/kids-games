@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="もぐらたたき" />
+<title>もぐらたたき｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの もぐらたたき。あなから でてくる どうぶつを タッチ。じかんせいげんなし・しっぱいにやさしい。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/mole/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="もぐらたたき｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの もぐらたたき。あなから でてくる どうぶつを タッチ！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/mole/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ もぐらたたき（じかんせいげんなし・やさしい）── */
+  :root{
+    --bg1:#fff7d6; --bg2:#ffe1b8;
+    --ink:#5b4636; --card:#fffdf5;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;
+    background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #hud{font-size:20px;font-weight:900;color:#e07b00;margin-top:2px;}
+  #hud .n{font-size:26px;}
+  /* ── もぐらの ばん ── */
+  #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 12px 12px;min-height:0;}
+  #board{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    width:100%;max-width:520px;
+  }
+  .hole{position:relative;aspect-ratio:1/1;}
+  /* あなの なかみ（どうぶつ）。ちめんで クリップして「でてくる」かんじ */
+  .pit{position:absolute;left:0;right:0;top:0;bottom:16%;overflow:hidden;}
+  .animal{
+    position:absolute;left:50%;bottom:0;
+    transform:translate(-50%,118%);
+    font-size:clamp(34px,13vw,64px);line-height:1;cursor:pointer;
+    transition:transform .2s cubic-bezier(.34,1.56,.6,1);
+  }
+  .hole.up .animal{transform:translate(-50%,-4%);}
+  .hole.up .animal.caught{
+    transform:translate(-50%,-34%) scale(1.6) rotate(18deg);opacity:0;
+    transition:transform .26s ease, opacity .26s ease;
+  }
+  /* あな（つちの もりあがり）*/
+  .mound{
+    position:absolute;left:5%;right:5%;bottom:4%;height:30%;border-radius:50%;
+    background:radial-gradient(ellipse at 50% 32%, #4a2f17 0 34%, #6e4a28 35% 56%, #98774d 57% 100%);
+    box-shadow:0 5px 0 rgba(0,0,0,.10);
+  }
+  .star{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-size:30px;pointer-events:none;
+    animation:starUp .6s ease forwards;z-index:5;}
+  @keyframes starUp{0%{opacity:1;transform:translate(-50%,0) scale(.5);}100%{opacity:0;transform:translate(-50%,-58px) scale(1.3);}}
+  /* ── ねこ（みぎうえ すみ）── */
+  #cat{position:fixed;right:10px;top:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-18px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:52px;top:14px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:15px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:6px 12px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right top;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  /* ── かみふぶき ── */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  /* ── スタート オーバーレイ ── */
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:rgba(91,70,54,.72);z-index:95;padding:20px;}
+  #start.hide{display:none;}
+  #start .big{font-size:64px;}
+  #start .msg{color:#fff;font-weight:900;font-size:20px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.45);line-height:1.5;}
+  #startBtn{border:none;font-family:inherit;font-weight:900;font-size:24px;color:#fff;
+    background:linear-gradient(180deg,#7bdc8a,#34c759);border-radius:999px;padding:14px 38px;
+    box-shadow:0 5px 0 #1f9e44;cursor:pointer;}
+  #startBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #1f9e44;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;}
+    .title{font-size:18px;} #hud{font-size:16px;}
+    #board{max-width:none;width:auto;height:100%;gap:8px;}
+    #cat{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🐹 もぐらたたき</div>
+    <div id="hud">つかまえた 🐾 <span class="n" id="score">0</span></div>
+  </header>
+
+  <div id="stage"><div id="board"></div></div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+  <!-- スタート（iOSの おと ゆるしも かねる）-->
+  <div id="start">
+    <div class="big">🐹</div>
+    <div class="msg">あなから でてくる どうぶつを<br>ゆびで タッチしてね！</div>
+    <button id="startBtn">▶ スタート</button>
+  </div>
+
+<script>
+/* =========================================================
+   5さいむけ もぐらたたき
+   - あなから どうぶつが ぴょこっと でる → タッチで つかまえる
+   - じかんせいげんなし・ゲームオーバーなし（しっぱいにやさしい）
+   - 10ひきごとに おいわい。おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+
+const ANIMALS = ["🐹","🐰","🐱","🐶","🐸","🐭","🦔","🐻","🐨","🦊","🐯","🐷","🐰","🐹"];
+const HOLES = 9;          // 3×3
+const MAXUP = 2;          // どうじに でる さいだいすう
+const UP_MS = 1200;       // でている じかん
+const SPAWN_MS = 820;     // でる かんかく
+
+let running=false, score=0, upCount=0;
+let spawnT=null;
+
+// ── おと ──
+let actx=null;
+function beep(freq, dur=0.08, type="sine", vol=0.15){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function pop(){ [880,1320].forEach((f,i)=>setTimeout(()=>beep(f,0.09,"triangle",0.18),i*55)); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.18,"triangle",0.22),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face, word){
+  catEl.textContent=face;
+  catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){
+    bubbleEl.textContent=word; bubbleEl.classList.add("show");
+    clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1500);
+  }
+  setTimeout(()=>{catEl.textContent="🐱";},1000);
+}
+
+// ── かみふぶき ──
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","🐾","🌈"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div");
+    s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100, dur=1100+Math.random()*900, delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;
+      s.style.opacity="0.2";
+    });
+    setTimeout(()=>s.remove(), dur+delay+100);
+  }
+}
+
+// ── ばんを つくる ──
+const board=document.getElementById("board");
+const holes=[];
+function buildBoard(){
+  for(let i=0;i<HOLES;i++){
+    const el=document.createElement("div"); el.className="hole";
+    const pit=document.createElement("div"); pit.className="pit";
+    const an=document.createElement("div"); an.className="animal"; an.textContent="🐹";
+    const mo=document.createElement("div"); mo.className="mound";
+    pit.appendChild(an); el.appendChild(pit); el.appendChild(mo);
+    const h={el, an, up:false, caught:false, retract:null};
+    el.addEventListener("pointerdown",(e)=>{ e.preventDefault(); onHit(h); });
+    holes.push(h); board.appendChild(el);
+  }
+}
+
+// ── でる／ひっこむ ──
+function popUp(h){
+  h.up=true; h.caught=false; upCount++;
+  h.an.textContent = ANIMALS[(Math.random()*ANIMALS.length)|0];
+  h.el.classList.add("up");
+  beep(520,0.05,"sine",0.08);
+  h.retract=setTimeout(()=>retract(h), UP_MS + Math.random()*500);
+}
+function retract(h){
+  if(!h.up || h.caught) return;
+  h.up=false; upCount--;
+  h.el.classList.remove("up");
+}
+function onHit(h){
+  if(!running || !h.up || h.caught) return;
+  h.caught=true;
+  clearTimeout(h.retract);
+  h.an.classList.add("caught");
+  pop(); star(h);
+  score++; document.getElementById("score").textContent=score;
+  if(score%10===0){ fanfare(); confetti(); catReact("😻","すごい！"+score+"ひき！"); }
+  setTimeout(()=>{
+    h.el.classList.remove("up"); h.an.classList.remove("caught");
+    h.up=false; h.caught=false; upCount--;
+  }, 260);
+}
+function star(h){
+  const s=document.createElement("div"); s.className="star"; s.textContent="⭐";
+  h.el.appendChild(s); setTimeout(()=>s.remove(), 620);
+}
+
+// ── スケジューラ（じかんせいげんなし・えんえん）──
+function tickSpawn(){
+  if(!running) return;
+  if(upCount<MAXUP){
+    const free=holes.filter(h=>!h.up);
+    if(free.length) popUp(free[(Math.random()*free.length)|0]);
+  }
+  spawnT=setTimeout(tickSpawn, SPAWN_MS + Math.random()*350);
+}
+
+// ── スタート ──
+function begin(){
+  document.getElementById("start").classList.add("hide");
+  running=true;
+  beep(660,0.06,"sine",0.12);   // iOSの おと ゆるし
+  catReact("😺","つかまえてね！");
+  tickSpawn();
+}
+document.getElementById("startBtn").addEventListener("click",begin);
+
+buildBoard();
+</script>
+</body>
+</html>
