@@ -40,6 +40,11 @@ on:
         type: string
         required: false
         default: "512"
+      transparent:
+        description: "白背景を透明に抜く（黒枠で囲まれた素材向け。icon/custom で有効。coloringは不可）"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write   # 生成画像を main にコミット＆プッシュするため
@@ -81,8 +86,10 @@ jobs:
           KIND: ${{ inputs.kind }}
           DEST_IN: ${{ inputs.dest }}
           SIZE_IN: ${{ inputs.size }}
+          TRANSPARENT: ${{ inputs.transparent }}
         run: |
           set -euo pipefail
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"   # python3(Pillow) を拾う
           # kind ごとに 保存先(DEST) と 縮小サイズ(SZ) を決める
           if [ "$KIND" = "coloring" ]; then
             DEST="games/coloring/lines"; SZ=900
@@ -105,6 +112,9 @@ jobs:
             src=$(ls -1 "$IMAGEGEN_DIR"/images/*_"$slug".png 2>/dev/null | sort | tail -1 || true)
             if [ -n "${src:-}" ]; then
               sips -Z "$SZ" "$src" --out "$DEST/$slug.png" >/dev/null
+              if [ "$TRANSPARENT" = "true" ]; then
+                python3 "$GITHUB_WORKSPACE/.github/scripts/transify.py" "$DEST/$slug.png" "$DEST/$slug.png" 60
+              fi
               echo "✓ $DEST/$slug.png ← $(basename "$src")"
             else
               echo "⚠ 生成物が見つからない: $slug（生成に失敗した可能性）"

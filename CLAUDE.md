@@ -99,11 +99,11 @@ kids/
 2. **slug（半角小文字・英語）とプロンプトを作る**。プロンプトは下記スタイルを守る（バケツ塗り・統一感のため）：
    - coloring: `simple cute coloring book line art of <主題>, bold clean BLACK OUTLINES ONLY, no color, no shading, pure white background, big simple fully-closed shapes, thick smooth lines, low detail, centered, line drawing for kids, no text, no watermark`
    - icon: `cute kawaii flat vector app icon of <主題>, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality`
-   - custom: 用途に合わせて自由。ただし **GPT Image 2 は白背景で出る**（透明背景は不可）。ゲーム内に置くなら白タイル前提にするか、白背景でも馴染むデザイン/配置にする。
+   - custom: 用途に合わせて自由。**GPT Image 2 は白背景で出る**が、`-f transparent=true` を付けると外周の白を抜いて**透明PNG**にできる（黒い輪郭線で囲まれた素材向け。中の白＝目等は残る）。透明にしない場合は白タイル前提のデザイン/配置にする。
    - 複数枚なら `slug | プロンプト` を改行で並べて1回の `prompts` に渡す。著作権ポリシー厳守（第三者IP不可）。
 3. **起動**：
    - `gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | …'`
-   - custom例：`gh workflow run generate-images.yml -f kind=custom -f dest=games/<game>/assets -f size=512 -f prompts=$'slug | …'`（`dest` はリポ相対・`..`不可、`size`は長辺px）
+   - custom例：`gh workflow run generate-images.yml -f kind=custom -f dest=games/<game>/assets -f size=512 -f transparent=true -f prompts=$'slug | …'`（`dest` はリポ相対・`..`不可、`size`は長辺px、`transparent=true`で白背景を透明化）
 4. **完了を待つ**：`gh run list --workflow=generate-images.yml --limit 1` で run id を取り、`gh run view <id> --json status,conclusion -q '.status+" "+(.conclusion//"")'` を `completed success` になるまでポーリング（生成は数分）。
    - 何分も `queued` のまま＝**ランナーが起動していない**。ユーザーに「PCで `cd ~/kids-runner && ./svc.sh start`（または `./run.sh`）」と伝える。
 5. **取り込み**：成功したら `git fetch origin && git merge --ff-only origin/main`（ワークフローが画像を main にコミット済み）。生成画像を `Read` で目視確認。
