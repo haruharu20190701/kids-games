@@ -23,7 +23,7 @@
 <meta name="twitter:card" content="summary" />
 <style>
   :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --card:#fffdf5; }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
   html,body{margin:0;height:100%;}
   body{
     font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
@@ -79,7 +79,8 @@
   #saveov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(91,70,54,.72);z-index:90;padding:20px;}
   #saveov.show{display:flex;}
   #saveov .savemsg{color:#fff;font-weight:800;font-size:16px;text-align:center;line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.45);}
-  #saveov img{max-width:84vw;max-height:60vh;border-radius:12px;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.45);}
+  /* ほぞんオーバーレイの えは ながおしで しゃしんに ほぞん（iOS）。コールアウトを もどす */
+  #saveov img{max-width:84vw;max-height:60vh;border-radius:12px;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.45);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto;}
 </style>
 </head>
 <body>
