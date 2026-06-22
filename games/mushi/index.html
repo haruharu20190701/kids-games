@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="むしバトル" />
+<title>むしバトル｜こどもあそびば</title>
+<meta name="description" content="6〜8さいくらいの こども向けの むしバトル。カブトムシや クワガタを あつめて じゃんけんバトル。ずかんを コンプリートしよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/mushi/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="むしバトル｜こどもあそびば" />
+<meta property="og:description" content="カブトムシや クワガタを あつめて じゃんけんバトル！ずかんを コンプリートしよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/mushi/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── むしバトル（あつめて じゃんけんバトル）── */
+  :root{ --bg1:#eaf7d8; --bg2:#cdebb0; --ink:#3e4a2e; --card:#fffdf5; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #a9c47e;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #a9c47e;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;color:#3e4a2e;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#fff;border-radius:999px;cursor:pointer;transition:transform .08s;}
+  .btn:active{transform:translateY(2px);}
+  .btn.green{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  .btn.orange{background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;}
+  .btn.blue{background:linear-gradient(180deg,#4cc9f0,#3a86ff);box-shadow:0 4px 0 #2563c9;}
+  .btn.brown{background:linear-gradient(180deg,#b98a52,#8a5a2b);box-shadow:0 4px 0 #5e3c1c;}
+  .btn:disabled{opacity:.5;}
+  /* ── がめん ── */
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:6px 12px 14px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── ホーム ── */
+  #home-s{align-items:center;justify-content:center;gap:18px;}
+  #home-s .hero{font-size:74px;}
+  #home-s .big{font-size:24px;padding:16px 34px;}
+  #home-s .prog{font-size:15px;color:#6b7a52;font-weight:800;}
+  /* ── むしカード（共通）── */
+  .bug{display:flex;flex-direction:column;align-items:center;}
+  .bi{width:100%;height:100%;object-fit:contain;display:block;}
+  .bi.emo{display:flex;align-items:center;justify-content:center;font-size:2.4em;}
+  /* ── あいぼうえらび／ずかん グリッド ── */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto;padding:4px;}
+  .cell{background:var(--card);border-radius:16px;box-shadow:0 4px 0 #c7b98a;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+  .cell:active{transform:translateY(2px);box-shadow:0 2px 0 #c7b98a;}
+  .cell .pic{width:100%;aspect-ratio:1/1;}
+  .cell .nm{font-size:13px;font-weight:800;text-align:center;line-height:1.1;}
+  .cell .stars{font-size:11px;color:#f0a500;}
+  .cell.locked{opacity:.85;cursor:default;}
+  .cell.locked .pic{filter:grayscale(1) brightness(.5) contrast(.4);}
+  .scrtitle{font-weight:900;font-size:18px;text-align:center;margin:2px 0 6px;}
+  .scrtitle small{font-weight:800;color:#6b7a52;font-size:13px;}
+  /* ── バトル ── */
+  #battle-s{gap:6px;}
+  .arena{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:0;}
+  .row{display:flex;align-items:center;gap:10px;}
+  .fighter{flex:1;display:flex;align-items:center;gap:10px;}
+  .fighter.enemy{flex-direction:row-reverse;text-align:right;}
+  .fpic{width:34%;max-width:130px;aspect-ratio:1/1;}
+  .fighter.enemy .fpic{transform:scaleX(-1);}
+  .finfo{flex:1;min-width:0;}
+  .fname{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hpbar{height:16px;background:#e3e0cf;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.2);margin-top:3px;}
+  .hpfill{height:100%;width:100%;background:linear-gradient(90deg,#7bdc8a,#34c759);transition:width .35s;}
+  .hpfill.low{background:linear-gradient(90deg,#ff8f6b,#ff5a5f);}
+  .hand{font-size:34px;width:44px;text-align:center;}
+  .shake{animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px) rotate(-4deg);}50%{transform:translateX(8px) rotate(4deg);}80%{transform:translateX(-5px);}}
+  .fighter.enemy .shake{animation:shakeR .4s;}
+  @keyframes shakeR{0%,100%{transform:scaleX(-1) translateX(0);}20%{transform:scaleX(-1) translateX(8px) rotate(4deg);}50%{transform:scaleX(-1) translateX(-8px) rotate(-4deg);}80%{transform:scaleX(-1) translateX(5px);}}
+  #msg{text-align:center;font-weight:900;font-size:18px;min-height:24px;color:#3e4a2e;}
+  #hands{display:flex;justify-content:center;gap:30px;min-height:40px;align-items:center;}
+  #janken{display:flex;gap:10px;justify-content:center;}
+  #janken .btn{font-size:30px;width:74px;height:64px;background:#fffdf5;color:#3e4a2e;box-shadow:0 4px 0 #c7b98a;}
+  #janken .btn:active{box-shadow:0 1px 0 #c7b98a;}
+  #endbtns{display:none;gap:10px;justify-content:center;}
+  #endbtns.show{display:flex;}
+  #endbtns .btn{font-size:17px;padding:11px 18px;}
+  /* ── ずかん しょうさい モーダル ── */
+  #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(40,50,30,.7);z-index:90;padding:20px;}
+  #modal.show{display:flex;}
+  .sheet{background:#fffdf5;border-radius:20px;padding:16px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.4);}
+  .sheet .pic{width:55%;aspect-ratio:1/1;margin:0 auto;}
+  .sheet .nm{font-size:22px;font-weight:900;margin-top:4px;}
+  .sheet .ty{font-size:13px;color:#6b7a52;font-weight:800;}
+  .sheet .st{display:flex;justify-content:center;gap:18px;margin:8px 0;font-weight:900;}
+  .sheet .st b{color:#e07b00;font-size:20px;display:block;}
+  .sheet .st span{font-size:12px;color:#6b7a52;}
+  .sheet .fact{font-size:14px;color:#3e4a2e;line-height:1.5;background:#f1f6e4;border-radius:12px;padding:8px 10px;margin-top:6px;}
+  /* ── ねこ・えんしゅつ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:32px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;} .title{font-size:18px;} .fpic{max-width:90px;} #cat{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🪲 むしバトル</div></header>
+
+  <div id="app">
+    <!-- ホーム -->
+    <section id="home-s" class="screen show">
+      <div class="hero">🪲⚔️🪲</div>
+      <button class="btn green big" id="toSelect">⚔️ バトル</button>
+      <button class="btn brown big" id="toZukan">📖 ずかん</button>
+      <div class="prog">つかまえた むし：<span id="homeCount">0</span> / <span id="homeTotal">0</span></div>
+    </section>
+
+    <!-- あいぼうえらび -->
+    <section id="select-s" class="screen">
+      <div class="scrtitle">たたかう むしを えらんでね</div>
+      <div class="grid" id="selectGrid"></div>
+    </section>
+
+    <!-- バトル -->
+    <section id="battle-s" class="screen">
+      <div class="arena">
+        <div class="fighter enemy" id="eF">
+          <div class="fpic bug" id="ePic"></div>
+          <div class="finfo"><div class="fname" id="eName"></div><div class="hpbar"><div class="hpfill" id="eHp"></div></div></div>
+        </div>
+        <div id="hands"><span class="hand" id="pHand"></span><span style="font-weight:900">VS</span><span class="hand" id="eHand"></span></div>
+        <div class="fighter" id="pF">
+          <div class="fpic bug" id="pPic"></div>
+          <div class="finfo"><div class="fname" id="pName"></div><div class="hpbar"><div class="hpfill" id="pHp"></div></div></div>
+        </div>
+      </div>
+      <div id="msg"></div>
+      <div id="janken">
+        <button class="btn" data-h="0">✊</button>
+        <button class="btn" data-h="1">✌️</button>
+        <button class="btn" data-h="2">✋</button>
+      </div>
+      <div id="endbtns">
+        <button class="btn green" id="again">つぎ ▶</button>
+        <button class="btn brown" id="backHome">ホームへ</button>
+      </div>
+    </section>
+
+    <!-- ずかん -->
+    <section id="zukan-s" class="screen">
+      <div class="scrtitle">むしずかん <small>(<span id="zCount">0</span>/<span id="zTotal">0</span>)</small></div>
+      <div class="grid" id="zukanGrid"></div>
+    </section>
+  </div>
+
+  <div id="cat">🐱</div>
+  <div id="confetti"></div>
+
+  <!-- しょうさい -->
+  <div id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* =========================================================
+   むしバトル
+   - カブト・クワガタ等を あつめて じゃんけんバトル
+   - じゃんけんに かったほうが「つよさ」ぶん こうげき。HP0で けっちゃく
+   - かつと やせいの むしを つかまえる → ずかんが ふえる
+   - つかまえた むしは localStorage に ほぞん（つぎも のこる）
+   - むしのえは 生成画像（無ければ emoji）。おとは Web Audio
+   ========================================================= */
+
+// ── むしデータ（id, なまえ, タイプ, HP, つよさ, レア★, emoji, まめちしき）──
+const BUGS=[
+  {id:"kabuto",   name:"カブトムシ",          type:"カブト", hp:110, pow:22, rare:2, e:"🪲", fact:"つので なげとばす にんきの むしのおうさま。"},
+  {id:"hercules", name:"ヘラクレスオオカブト", type:"カブト", hp:145, pow:32, rare:3, e:"🪲", fact:"せかいで いちばん つのが ながい カブトムシ。"},
+  {id:"atlas",    name:"アトラスオオカブト",   type:"カブト", hp:130, pow:28, rare:2, e:"🪲", fact:"つのが 3ぼん ある ちからもち。"},
+  {id:"caucasus", name:"コーカサスオオカブト", type:"カブト", hp:135, pow:30, rare:3, e:"🪲", fact:"3ぼんづので はさんで なげる さいきょうきゅう。"},
+  {id:"nokogiri", name:"ノコギリクワガタ",     type:"クワガタ", hp:100, pow:20, rare:1, e:"🪲", fact:"ジャギジャギの あごを もつ クワガタ。"},
+  {id:"miyama",   name:"ミヤマクワガタ",       type:"クワガタ", hp:105, pow:21, rare:2, e:"🪲", fact:"あたまが かんむりみたい。すずしい やまに すむ。"},
+  {id:"ookuwagata",name:"オオクワガタ",        type:"クワガタ", hp:120, pow:26, rare:3, e:"🪲", fact:"ぶといあごの くろい クワガタ。レアで にんき。"},
+  {id:"nijiiro",  name:"ニジイロクワガタ",     type:"クワガタ", hp:115, pow:24, rare:3, e:"🪲", fact:"にじいろに ひかる きれいな クワガタ。"},
+  {id:"giraffa",  name:"ギラファノコギリ",     type:"クワガタ", hp:125, pow:27, rare:3, e:"🪲", fact:"あごが とっても ながい クワガタ。"},
+  {id:"kamakiri", name:"カマキリ",            type:"そのた", hp:90,  pow:19, rare:1, e:"🦗", fact:"かまで えものを つかまえる ハンター。"},
+  {id:"tentou",   name:"テントウムシ",        type:"そのた", hp:70,  pow:12, rare:1, e:"🐞", fact:"あかに くろぼし。ちいさくて かわいい。"},
+  {id:"tonbo",    name:"トンボ",              type:"そのた", hp:80,  pow:15, rare:1, e:"🪰", fact:"そらを すいすい とぶ むし。"},
+];
+const BYID={}; BUGS.forEach(b=>BYID[b.id]=b);
+const EMO={}; BUGS.forEach(b=>EMO[b.id]=b.e);
+const stars=n=>"★".repeat(n)+"☆".repeat(3-n);
+
+// ── つかまえた むし（セーブ）──
+const SAVE="mushibattle.caught";
+let caught=new Set(["kabuto"]);
+try{ const s=JSON.parse(localStorage.getItem(SAVE)); if(Array.isArray(s)&&s.length) caught=new Set(s.filter(id=>BYID[id])); }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify([...caught])); }catch(e){} }
+
+// ── むしの え（画像→emojiフォールバック）──
+function picHTML(id){
+  return `<img class="bi" src="assets/${id}.png" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'bi emo',textContent:(window.EMO&&EMO['${id}'])||'🪲'}))">`;
+}
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function tick(){ beep(620,0.04,"sine",0.1); }
+function hitSnd(){ beep(180,0.1,"sawtooth",0.16); }
+function winSnd(){ [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.12,"triangle",0.18),i*80)); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+const catEl=document.getElementById("cat");
+function catJump(face){ catEl.textContent=face||"🐱"; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump"); if(face) setTimeout(()=>catEl.textContent="🐱",1000); }
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🪲","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── がめん きりかえ ──
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+function refreshHome(){ document.getElementById("homeCount").textContent=caught.size; document.getElementById("homeTotal").textContent=BUGS.length; }
+
+document.getElementById("toSelect").addEventListener("click",()=>{ if(actx&&actx.state==="suspended")actx.resume(); tick(); buildSelect(); show("select-s"); });
+document.getElementById("toZukan").addEventListener("click",()=>{ tick(); buildZukan(); show("zukan-s"); });
+document.getElementById("backHome").addEventListener("click",()=>{ tick(); refreshHome(); show("home-s"); });
+
+// ── あいぼうえらび ──
+function buildSelect(){
+  const g=document.getElementById("selectGrid"); g.innerHTML="";
+  [...caught].map(id=>BYID[id]).forEach(b=>{
+    const c=document.createElement("div"); c.className="cell";
+    c.innerHTML=`<div class="pic bug">${picHTML(b.id)}</div><div class="nm">${b.name}</div><div class="stars">${stars(b.rare)}</div>`;
+    c.addEventListener("click",()=>{ tick(); startBattle(b.id); });
+    g.appendChild(c);
+  });
+}
+
+// ── バトル ──
+let B=null; // {p,e,pHp,eHp,pMax,eMax,busy}
+function pickEnemy(playerId){
+  // やせい：ランダム（じぶんの あいぼうは のぞく）。みつかってない むしも でる
+  const pool=BUGS.filter(b=>b.id!==playerId);
+  return pool[(Math.random()*pool.length)|0];
+}
+function startBattle(playerId){
+  const p=BYID[playerId], e=pickEnemy(playerId);
+  B={p,e,pMax:p.hp,eMax:e.hp,pHp:p.hp,eHp:e.hp,busy:false,over:false};
+  document.getElementById("pPic").innerHTML=picHTML(p.id);
+  document.getElementById("ePic").innerHTML=picHTML(e.id);
+  document.getElementById("pName").textContent=p.name;
+  document.getElementById("eName").textContent="やせいの "+e.name;
+  document.getElementById("pHand").textContent=""; document.getElementById("eHand").textContent="";
+  document.getElementById("endbtns").classList.remove("show");
+  document.getElementById("janken").style.visibility="visible";
+  document.getElementById("msg").textContent="どの てを だす？";
+  updateHp();
+  show("battle-s");
+}
+function updateHp(){
+  const pf=document.getElementById("pHp"), ef=document.getElementById("eHp");
+  const pr=Math.max(0,B.pHp)/B.pMax, er=Math.max(0,B.eHp)/B.eMax;
+  pf.style.width=(pr*100)+"%"; ef.style.width=(er*100)+"%";
+  pf.classList.toggle("low",pr<0.34); ef.classList.toggle("low",er<0.34);
+}
+const HAND=["✊","✌️","✋"]; // グー チョキ パー
+function jankenWin(a,b){ if(a===b)return 0; if((a===0&&b===1)||(a===1&&b===2)||(a===2&&b===0))return 1; return -1; }
+function dmg(pow){ return Math.max(1,Math.round(pow*(0.8+Math.random()*0.5))); }
+document.querySelectorAll("#janken .btn").forEach(btn=>btn.addEventListener("click",()=>{
+  if(!B||B.busy||B.over) return;
+  if(actx&&actx.state==="suspended")actx.resume();
+  B.busy=true; tick();
+  const ph=+btn.dataset.h, eh=(Math.random()*3)|0;
+  document.getElementById("pHand").textContent=HAND[ph];
+  document.getElementById("eHand").textContent=HAND[eh];
+  const r=jankenWin(ph,eh);
+  setTimeout(()=>{
+    if(r===1){ const d=dmg(B.p.pow); B.eHp-=d; hitSnd(); shake("eF"); document.getElementById("msg").textContent="こうげき！ "+d+" ダメージ"; }
+    else if(r===-1){ const d=dmg(B.e.pow); B.pHp-=d; hitSnd(); shake("pF"); document.getElementById("msg").textContent="やられた！ "+d+" ダメージ"; }
+    else { document.getElementById("msg").textContent="あいこ！ もういちど"; }
+    updateHp();
+    setTimeout(()=>{
+      if(B.eHp<=0){ win(); }
+      else if(B.pHp<=0){ lose(); }
+      else { B.busy=false; }
+    },450);
+  },650);
+}));
+function shake(fid){ const el=document.getElementById(fid==="eF"?"ePic":"pPic"); el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+function endUI(text){
+  B.over=true; document.getElementById("janken").style.visibility="hidden";
+  document.getElementById("msg").textContent=text;
+  document.getElementById("endbtns").classList.add("show");
+}
+function win(){
+  winSnd(); catJump("😻");
+  if(!caught.has(B.e.id)){ caught.add(B.e.id); save(); fanfare(); confetti(); endUI("かった！ "+B.e.name+"を つかまえた！"); }
+  else { endUI("かった！ "+B.e.name+"に しょうり！"); }
+}
+function lose(){ beep(200,0.2,"sawtooth",0.14); catJump("🙀"); endUI("まけちゃった… もういちど！"); }
+document.getElementById("again").addEventListener("click",()=>{ tick(); startBattle(B.p.id); });
+
+// ── ずかん ──
+function buildZukan(){
+  document.getElementById("zCount").textContent=caught.size;
+  document.getElementById("zTotal").textContent=BUGS.length;
+  const g=document.getElementById("zukanGrid"); g.innerHTML="";
+  BUGS.forEach(b=>{
+    const got=caught.has(b.id);
+    const c=document.createElement("div"); c.className="cell"+(got?"":" locked");
+    c.innerHTML=`<div class="pic bug">${picHTML(b.id)}</div><div class="nm">${got?b.name:"？？？"}</div><div class="stars">${got?stars(b.rare):""}</div>`;
+    if(got) c.addEventListener("click",()=>{ tick(); openSheet(b); });
+    g.appendChild(c);
+  });
+}
+const modal=document.getElementById("modal");
+function openSheet(b){
+  document.getElementById("sheet").innerHTML=
+    `<div class="pic bug">${picHTML(b.id)}</div>`+
+    `<div class="nm">${b.name}</div>`+
+    `<div class="ty">${b.type}　${stars(b.rare)}</div>`+
+    `<div class="st"><div><b>${b.hp}</b><span>たいりょく</span></div><div><b>${b.pow}</b><span>つよさ</span></div></div>`+
+    `<div class="fact">${b.fact}</div>`+
+    `<button class="btn brown" style="font-size:16px;padding:10px 22px;margin-top:10px" id="sheetClose">とじる</button>`;
+  modal.classList.add("show");
+  document.getElementById("sheetClose").addEventListener("click",()=>modal.classList.remove("show"));
+}
+modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("show"); });
+
+// ── スタート ──
+refreshHome();
+setTimeout(()=>catJump("😺"),400);
+</script>
+</body>
+</html>
