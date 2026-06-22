@@ -89,7 +89,13 @@
   .fighter.enemy .shake{animation:shakeR .4s;}
   @keyframes shakeR{0%,100%{transform:scaleX(-1) translateX(0);}20%{transform:scaleX(-1) translateX(8px) rotate(4deg);}50%{transform:scaleX(-1) translateX(-8px) rotate(-4deg);}80%{transform:scaleX(-1) translateX(5px);}}
   #msg{text-align:center;font-weight:900;font-size:18px;min-height:24px;color:#3e4a2e;}
-  #hands{display:flex;justify-content:center;gap:30px;min-height:40px;align-items:center;}
+  #hands{display:flex;justify-content:center;gap:22px;min-height:56px;align-items:flex-end;}
+  .hcol{display:flex;flex-direction:column;align-items:center;gap:1px;}
+  .hlab{font-size:12px;font-weight:800;}
+  .hlab.hs{color:#2f9e44;} .hlab.he{color:#e03131;}
+  .vs{font-weight:900;align-self:center;}
+  .ftag{display:inline-block;font-size:11px;font-weight:800;color:#fff;padding:1px 9px;border-radius:999px;margin-bottom:2px;}
+  .ftag.hs{background:#34c759;} .ftag.he{background:#ff5a5f;}
   #janken{display:flex;gap:10px;justify-content:center;}
   #janken .btn{font-size:30px;width:74px;height:64px;background:#fffdf5;color:#3e4a2e;box-shadow:0 4px 0 #c7b98a;}
   #janken .btn:active{box-shadow:0 1px 0 #c7b98a;}
@@ -144,20 +150,24 @@
       <div class="arena">
         <div class="fighter enemy" id="eF">
           <div class="fpic bug" id="ePic"></div>
-          <div class="finfo"><div class="fname" id="eName"></div><div class="hpbar"><div class="hpfill" id="eHp"></div></div></div>
+          <div class="finfo"><span class="ftag he">あいて</span><div class="fname" id="eName"></div><div class="hpbar"><div class="hpfill" id="eHp"></div></div></div>
         </div>
-        <div id="hands"><span class="hand" id="pHand"></span><span style="font-weight:900">VS</span><span class="hand" id="eHand"></span></div>
+        <div id="hands">
+          <div class="hcol"><span class="hlab he">あいて</span><span class="hand" id="eHand"></span></div>
+          <span class="vs">VS</span>
+          <div class="hcol"><span class="hlab hs">じぶん</span><span class="hand" id="pHand"></span></div>
+        </div>
         <div class="fighter" id="pF">
           <div class="fpic bug" id="pPic"></div>
-          <div class="finfo"><div class="fname" id="pName"></div><div class="hpbar"><div class="hpfill" id="pHp"></div></div></div>
+          <div class="finfo"><span class="ftag hs">じぶん</span><div class="fname" id="pName"></div><div class="hpbar"><div class="hpfill" id="pHp"></div></div></div>
         </div>
       </div>
-      <div id="msg"></div>
       <div id="janken">
         <button class="btn" data-h="0">✊</button>
         <button class="btn" data-h="1">✌️</button>
         <button class="btn" data-h="2">✋</button>
       </div>
+      <div id="msg"></div>
       <div id="endbtns">
         <button class="btn green" id="again">つぎ ▶</button>
         <button class="btn brown" id="backHome">ホームへ</button>
