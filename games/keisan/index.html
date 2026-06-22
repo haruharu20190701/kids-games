@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="けいさん" />
+<title>けいさん｜こどもあそびば</title>
+<meta name="description" content="6〜8さいくらいの こども向けの けいさんゲーム。たしざん・ひきざんを レベル別に れんしゅう。れんぞくせいかいで たのしく。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/keisan/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="けいさん｜こどもあそびば" />
+<meta property="og:description" content="6〜8さいくらいの こども向けの けいさんゲーム。たしざん・ひきざんを たのしく れんしゅう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/keisan/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 6〜8さいむけ けいさん（たし・ひき・まぜ／レベル別）── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --card:#fffdf5; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:480px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #hud{display:flex;gap:16px;justify-content:center;font-weight:900;font-size:16px;margin-top:3px;}
+  #hud .lab{font-size:12px;color:#a98b5a;font-weight:800;}
+  #hud b{color:#e07b00;font-size:20px;}
+  /* ── きりかえ ── */
+  .bar{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;padding:6px 10px 2px;}
+  .tab{border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+    background:#fffdf5;border-radius:999px;padding:7px 14px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;}
+  .tab:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tab.on{color:#fff;background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 3px 0 #c96a00;}
+  /* ── もんだい ── */
+  #q{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;}
+  #prob{font-size:clamp(36px,11vw,60px);font-weight:900;letter-spacing:2px;}
+  #ans{min-width:120px;min-height:60px;font-size:clamp(32px,10vw,54px);font-weight:900;color:#e07b00;
+    background:#fffdf5;border-radius:16px;box-shadow:inset 0 0 0 3px #ffe9a8;padding:4px 18px;display:flex;align-items:center;justify-content:center;}
+  /* ── テンキー ── */
+  #stage{flex:1;width:100%;max-width:420px;display:flex;align-items:center;justify-content:center;padding:6px 14px 14px;min-height:0;}
+  #keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;}
+  .key{border:none;font-family:inherit;font-weight:900;font-size:30px;color:var(--ink);
+    background:#fffdf5;border-radius:16px;box-shadow:0 5px 0 #e8c98a;cursor:pointer;
+    padding:0;aspect-ratio:1.5/1;display:flex;align-items:center;justify-content:center;transition:transform .06s;}
+  .key:active{transform:translateY(3px);box-shadow:0 2px 0 #e8c98a;}
+  .key.del{background:#ffe0e0;box-shadow:0 5px 0 #e6a8a8;font-size:24px;}
+  .key.ok{background:linear-gradient(180deg,#7bdc8a,#34c759);color:#fff;box-shadow:0 5px 0 #1f9e44;font-size:22px;}
+  /* ── ○✕ マーク ── */
+  #mark{position:fixed;top:46%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:120px;z-index:75;pointer-events:none;}
+  #mark.show{animation:markpop .7s ease forwards;}
+  @keyframes markpop{0%{transform:translate(-50%,-50%) scale(0);opacity:0;}25%{transform:translate(-50%,-50%) scale(1.2);opacity:1;}70%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(-50%,-50%) scale(1.1);opacity:0;}}
+  /* ── ねこ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:36px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{position:fixed;right:52px;bottom:18px;z-index:66;background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:14px;font-weight:800;color:#5b4636;white-space:nowrap;box-shadow:0 3px 0 #f0c000;padding:5px 11px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;}
+  #bubble.show{opacity:1;transform:scale(1);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;} .title{font-size:18px;}
+    #prob{font-size:34px;} #ans{font-size:30px;min-height:46px;}
+    .key{font-size:24px;} #cat{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🧮 けいさん</div>
+    <div id="hud">
+      <div><span class="lab">せいかい</span> <b id="score">0</b></div>
+      <div><span class="lab">れんぞく</span> <b id="streak">0</b></div>
+    </div>
+  </header>
+
+  <div class="bar" id="modes">
+    <button class="tab on" data-mode="add">➕ たし</button>
+    <button class="tab" data-mode="sub">➖ ひき</button>
+    <button class="tab" data-mode="mix">🔀 まぜ</button>
+  </div>
+  <div class="bar" id="levels">
+    <button class="tab on" data-level="easy">〜10</button>
+    <button class="tab" data-level="mid">〜20</button>
+    <button class="tab" data-level="hard">〜100</button>
+  </div>
+
+  <div id="q">
+    <div id="prob">- + - =</div>
+    <div id="ans">?</div>
+  </div>
+
+  <div id="stage">
+    <div id="keys"></div>
+  </div>
+
+  <div id="mark"></div>
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   6〜8さいむけ けいさん
+   - たし算／ひき算／まぜ、レベル（〜10／〜20／〜100）
+   - テンキーで こたえを にゅうりょく（えらぶ式じゃないので ちからがつく）
+   - れんぞくせいかい・せいかいすう、10もんごとに おいわい
+   - おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+
+let mode="add", level="easy";
+let a=0,b=0,op="+",answer=0,input="";
+let score=0, streak=0, lock=false;
+
+// ── おと ──
+let actx=null;
+function beep(freq,dur=0.07,type="sine",vol=0.13){
+  try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(actx.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function tick(){ beep(620,0.04,"sine",0.10); }
+function correctSnd(){ [784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.1,"triangle",0.18),i*80)); }
+function wrongSnd(){ beep(200,0.18,"sawtooth",0.14); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face,word){
+  catEl.textContent=face; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){ bubbleEl.textContent=word; bubbleEl.classList.add("show"); clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1400); }
+  setTimeout(()=>{catEl.textContent="🐱";},900);
+}
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","💯","🌈"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div"); s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{ s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`; s.style.opacity="0.2"; });
+    setTimeout(()=>s.remove(),dur+delay+100);
+  }
+}
+const markEl=document.getElementById("mark");
+function showMark(m){ markEl.textContent=m; markEl.classList.remove("show"); void markEl.offsetWidth; markEl.classList.add("show"); }
+
+// ── もんだい せいせい ──
+const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+function makeProblem(){
+  let o = mode==="mix" ? (Math.random()<0.5?"+":"-") : (mode==="add"?"+":"-");
+  let max = level==="easy"?10 : level==="mid"?20 : 100;
+  let x,y;
+  if(o==="+"){
+    if(max<=20){ x=rnd(1,max-1); y=rnd(1,max-x); }
+    else { x=rnd(10,89); y=rnd(10,99-x<10?10:99-x); if(x+y>99){y=99-x;} if(y<1)y=1; }
+  } else { // ひき算（こたえ >=0）
+    if(max<=20){ x=rnd(2,max); y=rnd(1,x); }
+    else { x=rnd(20,99); y=rnd(10,x-1); }
+  }
+  a=x; b=y; op=o; answer = o==="+" ? a+b : a-b; input="";
+  document.getElementById("prob").textContent = `${a} ${op==="+"?"＋":"－"} ${b} =`;
+  render();
+}
+function render(){ document.getElementById("ans").textContent = input===""? "?" : input; }
+
+// ── テンキー ──
+const keysEl=document.getElementById("keys");
+function buildKeys(){
+  const labels=["1","2","3","4","5","6","7","8","9","del","0","ok"];
+  labels.forEach(l=>{
+    const b=document.createElement("button");
+    b.className="key"+(l==="del"?" del":l==="ok"?" ok":"");
+    b.textContent = l==="del"?"⌫" : l==="ok"?"こたえる" : l;
+    b.addEventListener("click",()=>press(l));
+    keysEl.appendChild(b);
+  });
+}
+function press(l){
+  if(actx&&actx.state==="suspended") actx.resume();
+  if(lock && l!=="ok") return;
+  if(l==="del"){ input=input.slice(0,-1); tick(); render(); return; }
+  if(l==="ok"){ submit(); return; }
+  if(input.length>=3) return;
+  if(input==="0") input="";        // さきあたまの0は おきかえ
+  input+=l; tick(); render();
+}
+function submit(){
+  if(input===""||lock) return;
+  if(parseInt(input,10)===answer){
+    lock=true; showMark("⭕"); correctSnd();
+    score++; streak++;
+    document.getElementById("score").textContent=score;
+    document.getElementById("streak").textContent=streak;
+    if(score%10===0){ fanfare(); confetti(); catReact("😻","10もん せいかい！"); }
+    else if(streak>0 && streak%5===0){ confetti(); catReact("😺","れんぞく"+streak+"！"); }
+    else catReact("😺","せいかい！");
+    setTimeout(()=>{ lock=false; makeProblem(); }, score%10===0?1200:650);
+  } else {
+    showMark("❌"); wrongSnd(); streak=0; document.getElementById("streak").textContent=0;
+    input=""; render(); catReact("🙀","もういちど！");
+  }
+}
+
+// ── きりかえ ──
+document.querySelectorAll("#modes .tab").forEach(t=>t.addEventListener("click",()=>{
+  mode=t.dataset.mode; document.querySelectorAll("#modes .tab").forEach(x=>x.classList.toggle("on",x===t));
+  tick(); makeProblem();
+}));
+document.querySelectorAll("#levels .tab").forEach(t=>t.addEventListener("click",()=>{
+  level=t.dataset.level; document.querySelectorAll("#levels .tab").forEach(x=>x.classList.toggle("on",x===t));
+  tick(); makeProblem();
+}));
+// PCキーボードでも（おまけ）
+window.addEventListener("keydown",(e)=>{
+  if(e.key>="0"&&e.key<="9") press(e.key);
+  else if(e.key==="Backspace") press("del");
+  else if(e.key==="Enter"||e.key==="=") press("ok");
+});
+
+// ── スタート ──
+buildKeys(); makeProblem();
+setTimeout(()=>catReact("😺","こたえを おしてね！"),500);
+</script>
+</body>
+</html>
