@@ -1,3 +1,4 @@
+# retry: run#5 のワークフローbug（$slug＋全角括弧）修正後に再生成
 kind: custom
 dest: games/memory/assets
 size: 512

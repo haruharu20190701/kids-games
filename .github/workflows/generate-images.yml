@@ -140,7 +140,7 @@ jobs:
               fi
               echo "✓ $DEST/$slug.png ← $(basename "$src")"
             else
-              echo "⚠ 生成物が見つからない: $slug（生成に失敗した可能性）"
+              echo "⚠ 生成物が見つからない: ${slug}（生成に失敗した可能性）"
             fi
           done < "$PROMPTS_FILE"
 
