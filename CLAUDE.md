@@ -95,18 +95,22 @@ kids/
 
 ### ★Claude向け実行手順：ユーザーが「画像作って／ぬりえ増やして／アイコン作って」と言ったら
 コマンドを打たせず、**Claude自身がこのワークフローを起動して最後まで仕上げる**こと。手順：
-1. **種類を決める**：ぬりえの線画なら `kind=coloring`、メニューのゲームアイコンなら `kind=icon`。
-2. **slug（半角小文字・英語）とプロンプトを作る**。プロンプトは下記スタイルを必ず守る（バケツ塗り・統一感のため）：
+1. **種類を決める**：ぬりえ線画→`kind=coloring`、メニューアイコン→`kind=icon`、その他の素材（ゲーム内パーツ・背景・キャラ等）→`kind=custom`（保存先と大きさを指定）。
+2. **slug（半角小文字・英語）とプロンプトを作る**。プロンプトは下記スタイルを守る（バケツ塗り・統一感のため）：
    - coloring: `simple cute coloring book line art of <主題>, bold clean BLACK OUTLINES ONLY, no color, no shading, pure white background, big simple fully-closed shapes, thick smooth lines, low detail, centered, line drawing for kids, no text, no watermark`
    - icon: `cute kawaii flat vector app icon of <主題>, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality`
+   - custom: 用途に合わせて自由。**GPT Image 2 は白背景で出る**が、`-f transparent=true` を付けると外周の白を抜いて**透明PNG**にできる（黒い輪郭線で囲まれた素材向け。中の白＝目等は残る）。透明にしない場合は白タイル前提のデザイン/配置にする。
    - 複数枚なら `slug | プロンプト` を改行で並べて1回の `prompts` に渡す。著作権ポリシー厳守（第三者IP不可）。
-3. **起動**：`gh workflow run generate-images.yml -f kind=<icon|coloring> -f prompts=$'slug | …\nslug2 | …'`
-4. **完了を待つ**：`gh run list --workflow=generate-images.yml --limit 1` で run id を取り、`gh run view <id> --json status,conclusion -q '.status+" "+(.conclusion//"")'` を `completed success` になるまでポーリング（生成は数分かかる）。
-   - 何分も `queued` のまま＝**ランナーが起動していない**。ユーザーに「PCで `actions-runner` の `./run.sh` を起動して（`Listening for Jobs` 表示）」と伝える。
+3. **起動**：
+   - `gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | …'`
+   - custom例：`gh workflow run generate-images.yml -f kind=custom -f dest=games/<game>/assets -f size=512 -f transparent=true -f prompts=$'slug | …'`（`dest` はリポ相対・`..`不可、`size`は長辺px、`transparent=true`で白背景を透明化）
+4. **完了を待つ**：`gh run list --workflow=generate-images.yml --limit 1` で run id を取り、`gh run view <id> --json status,conclusion -q '.status+" "+(.conclusion//"")'` を `completed success` になるまでポーリング（生成は数分）。
+   - 何分も `queued` のまま＝**ランナーが起動していない**。ユーザーに「PCで `cd ~/kids-runner && ./svc.sh start`（または `./run.sh`）」と伝える。
 5. **取り込み**：成功したら `git fetch origin && git merge --ff-only origin/main`（ワークフローが画像を main にコミット済み）。生成画像を `Read` で目視確認。
 6. **登録（重要・ワークフローはやらない）**：
    - coloring → `games/coloring/index.html` の `PICS` に `{emoji,name:"<ひらがな>",src:"lines/<slug>.png"}` を追記。
    - icon → 対象ゲームが存在するなら `index.html` の `GAMES` 該当行に `img:"icons/<slug>.png"` を追加。
+   - custom → そのゲームのHTMLで `dest/<slug>.png` を参照するコードを書く。
    - 登録の変更をコミット＆プッシュ（push 403 時は CLAUDE.md「push が 403」のトークンURL方式）。
 7. ユーザーに結果（slug・コミット・反映URL）を報告。失敗時は run のログ（`gh run view <id> --log-failed`）を確認。
 
