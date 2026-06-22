@@ -277,6 +277,12 @@ function fitCanvas(){
 let resizeT=null;
 window.addEventListener("resize",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,150); });
 window.addEventListener("orientationchange",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,200); });
+// レイアウト確定前に サイズを はかると キャンバスが つぶれるので、はかり直す
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,60); });
+  ro.observe(canvas);
+}
+window.addEventListener("load",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,60); });
 
 // ── えがく（おてほん → なぞり）──
 function drawStroke(pts, col, w){
