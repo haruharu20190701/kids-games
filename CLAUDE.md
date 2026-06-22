@@ -124,6 +124,13 @@ kids/
    - 登録の変更をコミット＆プッシュ（push 403 時は CLAUDE.md「push が 403」のトークンURL方式）。
 7. ユーザーに結果（slug・コミット・反映URL）を報告。失敗時は run のログ（`gh run view <id> --log-failed`）を確認。
 
+### ★生成パイプラインの ハマりどころ（実戦の学び）⚠️
+- **slug単位で「生成済み」判定**：`generate.js` は同じ slug を **再生成しない**（プロンプト文だけ変えても作り直されない）。作り直したいときは **別の slug**（例 `dog`→別の動物、または `dog2`）にする。
+- **生成中は main へ別pushしない**：ワークフローは checkout→生成→`git push origin HEAD:main` の順。その間に別のコミットを main へ push すると、ワークフローの push が `! [rejected] (fetch first)` で **失敗**する（生成画像は出来ているが main に乗らない）。対処：**再トリガー**すれば生成はスキップされ、配置→コミットだけ走って復帰する。リモートで生成を起動したら、**完了（main が動く）まで自分から main へ push しない**運用にする。
+- **genspark は色指定でも たまに線画で出す**：プロンプトに `FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT a coloring page NOT black and white` を強めに入れると安定。頭アップ/クローズアップ構図も色つきになりやすい。
+- **ハンズフリー起動の待ち方**：`imagegen-requests/request.txt` を push→自動起動。完了検知は `git ls-remote origin -h refs/heads/main` の SHA が変わるまでポーリング（自分の push と取り違えないよう、待機中は他の push をしない）。run の成否は GitHub MCP `actions_list`/`get_job_logs`（read系）で確認できる（dispatchは403でも閲覧は可のことが多い）。
+- **生成画像のゲーム組み込みパターン**：`<img>`／`drawImage` で表示し、**読めない時は emoji や図形にフォールバック**（例 `STAMP_EMOJI` マップ、`ready(slug)` 判定、canvasは図形描画）。透明PNGは `transparent:true`。横長/縦長は アスペクト比を保って描く。フルーツ等は別ゲームから複製して流用可。
+
 ## そざい（線画・画像）の著作権ポリシー ⚠️
 - 公開サイトに載せる素材は **自作 / 生成AIのオリジナル / CC0・パブリックドメイン** のみ。
 - **第三者IPは不可**（例：ポケモン等の公式ぬりえ。「家庭で印刷OK」でも別サイトへの転載・ホスティングは許可されていない）。見た目が無料でも転載しない。
