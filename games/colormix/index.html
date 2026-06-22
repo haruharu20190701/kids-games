@@ -58,7 +58,7 @@
   .slot .nm{font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);}
   .plus{font-size:30px;font-weight:900;color:#8a7a66;}
   /* ── いろ パレット ── */
-  #palette{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+  #palette{display:flex;flex-wrap:wrap;gap:26px 14px;justify-content:center;margin-bottom:6px;}
   .sw{width:60px;height:60px;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 6px rgba(0,0,0,.18);
     cursor:pointer;transition:transform .08s;position:relative;}
   .sw:active{transform:translateY(2px);}
@@ -146,40 +146,88 @@
    - おとは Web Audio（ファイル ふよう）
    ========================================================= */
 
-// ── えらべる いろ ──
+// ── えらべる いろ（正確な いろと なまえ）──
 const COLORS = [
-  {id:"red",   name:"あか",   hex:"#e63946"},
-  {id:"blue",  name:"あお",   hex:"#1d6fe0"},
-  {id:"yellow",name:"きいろ", hex:"#ffd23f"},
-  {id:"green", name:"みどり", hex:"#36b24a"},
+  {id:"red",   name:"あか",   hex:"#e60012"},
+  {id:"orange",name:"オレンジ",hex:"#f39800"},
+  {id:"yellow",name:"きいろ", hex:"#ffd900"},
+  {id:"lime",  name:"きみどり",hex:"#b8d200"},
+  {id:"green", name:"みどり", hex:"#1ba84f"},
+  {id:"sky",   name:"みずいろ",hex:"#7ec8ff"},
+  {id:"blue",  name:"あお",   hex:"#0068b7"},
+  {id:"purple",name:"むらさき",hex:"#9b2d8e"},
+  {id:"pink",  name:"ピンク", hex:"#ff8bb0"},
+  {id:"brown", name:"ちゃいろ",hex:"#8b4513"},
   {id:"white", name:"しろ",   hex:"#ffffff"},
-  {id:"black", name:"くろ",   hex:"#444444"},
+  {id:"black", name:"くろ",   hex:"#1a1a1a"},
 ];
-// ── まぜた けっか（id 2つを アルファベットじゅんに ＋ でつなぐ）──
+// ── きほんの まざりかた（id 2つを ABCじゅんに ＋ でつなぐ）。
+//    ここに ない くみあわせは えのぐ風に まぜて 色から なまえを きめる ──
 const MIX = {
-  "blue+red":     {name:"むらさき",   hex:"#8e44ad"},
-  "red+yellow":   {name:"オレンジ",   hex:"#ff8c1a"},
-  "blue+yellow":  {name:"みどり",     hex:"#36b24a"},
-  "red+white":    {name:"ピンク",     hex:"#ff9ec4"},
-  "blue+white":   {name:"みずいろ",   hex:"#7ec8ff"},
-  "white+yellow": {name:"クリームいろ",hex:"#fff3c0"},
-  "green+white":  {name:"きみどり",   hex:"#a5d84a"},
-  "black+white":  {name:"はいいろ",   hex:"#9aa0a6"},
-  "black+red":    {name:"えんじ",     hex:"#9b2d3a"},
-  "black+blue":   {name:"こんいろ",   hex:"#1b365d"},
-  "black+yellow": {name:"オリーブ",   hex:"#8a7d2a"},
-  "black+green":  {name:"ふかみどり", hex:"#245c39"},
-  "green+red":    {name:"ちゃいろ",   hex:"#8a5a2b"},
-  "blue+green":   {name:"あおみどり", hex:"#1f9e9e"},
-  "green+yellow": {name:"きみどり",   hex:"#9bd13f"},
+  "blue+red":     {name:"むらさき",    hex:"#9b2d8e"},
+  "red+yellow":   {name:"オレンジ",    hex:"#f39800"},
+  "blue+yellow":  {name:"みどり",      hex:"#1ba84f"},
+  "red+white":    {name:"ピンク",      hex:"#ff8bb0"},
+  "blue+white":   {name:"みずいろ",    hex:"#7ec8ff"},
+  "white+yellow": {name:"クリームいろ", hex:"#fff6b0"},
+  "green+white":  {name:"わかみどり",  hex:"#7ed957"},
+  "black+white":  {name:"はいいろ",    hex:"#949599"},
+  "black+red":    {name:"えんじ",      hex:"#7b1f2b"},
+  "black+blue":   {name:"こんいろ",    hex:"#14315c"},
+  "black+yellow": {name:"オリーブ",    hex:"#8a7d2a"},
+  "black+green":  {name:"ふかみどり",  hex:"#1d5b32"},
+  "green+red":    {name:"ちゃいろ",    hex:"#8b4513"},
+  "blue+green":   {name:"あおみどり",  hex:"#1f9e9e"},
+  "green+yellow": {name:"きみどり",    hex:"#b8d200"},
+  "orange+red":   {name:"あかだいだい",hex:"#ea5514"},
+  "orange+yellow":{name:"やまぶきいろ",hex:"#f8b500"},
+  "purple+red":   {name:"あかむらさき",hex:"#b5318f"},
+  "blue+purple":  {name:"あいいろ",    hex:"#4b3c8f"},
+  "pink+white":   {name:"ももいろ",    hex:"#ffc0d8"},
+  "black+orange": {name:"こげちゃ",    hex:"#6b4423"},
 };
 function hexToRgb(h){ h=h.replace("#",""); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
-function rgbToHex(r){ return "#"+r.map(v=>Math.max(0,Math.min(255,v|0)).toString(16).padStart(2,"0")).join(""); }
-function avgHex(a,b){ const x=hexToRgb(a),y=hexToRgb(b); return rgbToHex([0,1,2].map(i=>(x[i]+y[i])/2)); }
+function rgbToHex(r){ return "#"+r.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join(""); }
+function avgRgb(a,b){ const x=hexToRgb(a),y=hexToRgb(b); return [0,1,2].map(i=>(x[i]+y[i])/2); }
+// RGB→HSL（いろの なまえを きめるのに つかう）
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  let h=0; const l=(mx+mn)/2;
+  const s=d===0?0:d/(1-Math.abs(2*l-1));
+  if(d!==0){
+    if(mx===r) h=((g-b)/d)%6;
+    else if(mx===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h*=60; if(h<0) h+=360;
+  }
+  return [h,s,l];
+}
+// いろ（RGB）から ちかい なまえを きめる
+function nameOfRgb(r,g,b){
+  const [h,s,l]=rgbToHsl(r,g,b);
+  if(l>=0.93 && s<0.20) return "しろ";
+  if(l<=0.12) return "くろ";
+  if(s<0.15) return "はいいろ";
+  if(h>=15 && h<50 && l<0.42 && s>0.2) return "ちゃいろ";
+  if((h>=330||h<15) && l>0.68) return "ピンク";
+  if(h<15||h>=345) return "あか";
+  if(h<45) return "オレンジ";
+  if(h<66) return "きいろ";
+  if(h<90) return "きみどり";
+  if(h<155) return "みどり";
+  if(h<195) return l>0.6?"みずいろ":"あおみどり";
+  if(h<240) return l>0.7?"みずいろ":"あお";
+  if(h<290) return "むらさき";
+  if(h<330) return l>0.62?"ピンク":"むらさき";
+  return "あか";
+}
 function mixResult(a,b){
   if(a.id===b.id) return {name:a.name, hex:a.hex};
   const key=[a.id,b.id].sort().join("+");
-  return MIX[key] || {name:"あたらしい いろ", hex:avgHex(a.hex,b.hex)};
+  if(MIX[key]) return MIX[key];
+  const rgb=avgRgb(a.hex,b.hex);
+  return {name:nameOfRgb(rgb[0],rgb[1],rgb[2]), hex:rgbToHex(rgb)};
 }
 
 let chosen=[];           // えらんだ いろ（さいだい2）
