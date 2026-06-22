@@ -73,8 +73,12 @@
   .ans:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
   .ans.ng{opacity:.4;}
   /* ── あわせるモードの したバー ── */
-  #setbar{display:none;gap:10px;justify-content:center;align-items:center;padding:4px 10px 10px;}
+  #setbar{display:none;gap:8px;justify-content:center;align-items:center;padding:4px 10px 10px;flex-wrap:wrap;}
   #setbar.show{display:flex;}
+  .stp{display:flex;align-items:center;gap:5px;background:#fffdf5;border-radius:16px;padding:5px 10px;box-shadow:0 3px 0 #e8c98a;}
+  .stp .lab{font-weight:900;font-size:16px;}
+  .stp .lab.h{color:var(--hour);} .stp .lab.m{color:var(--min);}
+  .btn.sb{font-size:24px;font-weight:900;padding:4px 0;min-width:48px;justify-content:center;}
   /* ── ねこ ── */
   #cat{position:fixed;right:10px;bottom:8px;font-size:38px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
   #cat.jump{animation:catjump .6s ease;}
@@ -118,6 +122,8 @@
 
   <div id="answers"></div>
   <div id="setbar">
+    <div class="stp"><span class="lab h">🔴じ</span><button class="btn sb" id="hMinus">−</button><button class="btn sb" id="hPlus">＋</button></div>
+    <div class="stp"><span class="lab m">🔵ふん</span><button class="btn sb" id="mMinus">−</button><button class="btn sb" id="mPlus">＋</button></div>
     <button class="btn" id="setNext">つぎ ▶</button>
   </div>
 
@@ -258,43 +264,64 @@ let resizeT=null;
 window.addEventListener("resize",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,150); });
 window.addEventListener("orientationchange",()=>{ clearTimeout(resizeT); resizeT=setTimeout(fitCanvas,200); });
 
-// ── あわせるモード：はりを ドラッグ ──
+// ── あわせるモード：はりを さわって うごかす ──
 let grabbing=null;   // "min" | "hour" | null
-function angleAt(e){
+function posAt(e){
   const r=canvas.getBoundingClientRect();
-  const x=(e.clientX-r.left)/r.width*CW - cx;
-  const y=(e.clientY-r.top)/r.height*CH - cy;
-  let deg=Math.atan2(x,-y)*180/Math.PI;   // 12じが 0、とけいまわりで ぞうか
+  return {x:(e.clientX-r.left)/r.width*CW, y:(e.clientY-r.top)/r.height*CH};
+}
+function degFromXY(x,y){
+  let deg=Math.atan2(x-cx, -(y-cy))*180/Math.PI;   // 12じが 0、とけいまわりで ぞうか
   if(deg<0) deg+=360;
-  return {deg, dist:Math.hypot(x,y)};
+  return deg;
+}
+// てんから せんぶん（ちゅうしん→はりさき）までの きょり
+function distSeg(px,py,bx,by){
+  const dx=bx-cx, dy=by-cy, l2=dx*dx+dy*dy;
+  let t=l2 ? ((px-cx)*dx+(py-cy)*dy)/l2 : 0; t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(cx+t*dx), py-(cy+t*dy));
+}
+// さわった ばしょに ちかい はりを えらぶ（さわった はりを うごかす）
+function pickHand(x,y){
+  const ma=curM/60*Math.PI*2, ha=(curH%12)/12*Math.PI*2;
+  const dMin=distSeg(x,y, cx+Math.sin(ma)*R*0.80, cy-Math.cos(ma)*R*0.80);
+  const dHour=distSeg(x,y, cx+Math.sin(ha)*R*0.52, cy-Math.cos(ha)*R*0.52);
+  return dMin<=dHour ? "min" : "hour";
 }
 canvas.addEventListener("pointerdown",(e)=>{
   if(mode!=="set") return;
   e.preventDefault();
   if(actx&&actx.state==="suspended") actx.resume();
-  const a=angleAt(e);
-  // そとがわ＝ながいはり、うちがわ＝みじかいはり
-  grabbing = (a.dist > R*0.40) ? "min" : "hour";
-  moveHand(a);
+  const p=posAt(e);
+  grabbing = pickHand(p.x, p.y);
+  moveHand(degFromXY(p.x,p.y));
   try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
 });
 canvas.addEventListener("pointermove",(e)=>{
   if(mode!=="set" || !grabbing) return;
   e.preventDefault();
-  moveHand(angleAt(e));
+  const p=posAt(e);
+  moveHand(degFromXY(p.x,p.y));
 });
-function moveHand(a){
+function moveHand(deg){
   if(grabbing==="min"){
     // 5ふんきざみに マグネット
-    let m=Math.round(a.deg/360*60/5)*5; if(m>=60) m=0;
+    let m=Math.round(deg/360*60/5)*5; if(m>=60) m=0;
     if(m!==curM){ curM=m; tick(); }
   }else{
     // ちかい すうじに マグネット（1〜12）
-    let h=Math.round(a.deg/360*12); if(h===0) h=12;
+    let h=Math.round(deg/360*12); if(h===0) h=12;
     if(h!==curH){ curH=h; tick(); }
   }
   render();
 }
+// ── ＋／− ボタンで あわせる（ドラッグが にがてでも かくじつ）──
+function hourStep(d){ curH=((curH-1+d+12)%12)+1; tick(); render(); checkSet(); }
+function minStep(d){ curM=(curM+d*5+60)%60; tick(); render(); checkSet(); }
+document.getElementById("hPlus").addEventListener("click",()=>hourStep(1));
+document.getElementById("hMinus").addEventListener("click",()=>hourStep(-1));
+document.getElementById("mPlus").addEventListener("click",()=>minStep(1));
+document.getElementById("mMinus").addEventListener("click",()=>minStep(-1));
 function endHand(){
   if(mode!=="set" || !grabbing) return;
   grabbing=null;
@@ -380,7 +407,7 @@ document.getElementById("setNext").addEventListener("click",()=>{ tick(); newTar
 function init(){
   fitCanvas();
   setMode("set");
-  setTimeout(()=>catReact("😺","はりを うごかして あわせてね！"),500);
+  setTimeout(()=>catReact("😺","はりを さわるか ＋−で あわせてね！"),500);
 }
 init();
 </script>
