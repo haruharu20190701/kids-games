@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ブロックくずし" />
+<title>ブロックくずし｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ブロックくずし。ボールを はねかえして フルーツを こわそう。じかんせいげんなし・しっぱいにやさしい。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/breakout/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ブロックくずし｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの ブロックくずし。ボールで フルーツを こわそう！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/breakout/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── 5さいむけ ブロックくずし（やさしい・じかんせいげんなし）── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{
+    position:fixed;left:12px;top:10px;z-index:70;
+    width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;
+  }
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #hud{font-size:18px;font-weight:900;color:#e07b00;margin-top:2px;}
+  #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 10px 12px;min-height:0;position:relative;}
+  #pad{
+    min-width:0;min-height:0;width:100%;height:100%;max-width:540px;
+    background:linear-gradient(#eaf6ff,#d6ecff);border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;
+  }
+  /* ── ねこ（みぎした すみ）── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:34px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #bubble{
+    position:fixed;right:50px;bottom:18px;z-index:66;
+    background:#fff;border:3px solid #ffd23f;border-radius:14px;
+    font-size:14px;font-weight:800;color:#5b4636;white-space:nowrap;
+    box-shadow:0 3px 0 #f0c000;padding:5px 11px;pointer-events:none;
+    opacity:0;transform:scale(0);transform-origin:right bottom;transition:opacity .15s, transform .15s;
+  }
+  #bubble.show{opacity:1;transform:scale(1);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  /* ── スタート オーバーレイ ── */
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+    background:rgba(91,70,54,.72);z-index:95;padding:20px;}
+  #start.hide{display:none;}
+  #start .big{font-size:60px;}
+  #start .msg{color:#fff;font-weight:900;font-size:19px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.45);line-height:1.5;}
+  #startBtn{border:none;font-family:inherit;font-weight:900;font-size:24px;color:#fff;
+    background:linear-gradient(180deg,#7bdc8a,#34c759);border-radius:999px;padding:14px 38px;box-shadow:0 5px 0 #1f9e44;cursor:pointer;}
+  #startBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #1f9e44;}
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;} .title{font-size:18px;} #hud{font-size:15px;} #cat{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🧱 ブロックくずし</div>
+    <div id="hud">こわした 🍎 <span id="score">0</span></div>
+  </header>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+
+  <div id="cat">🐱</div>
+  <div id="bubble"></div>
+  <div id="confetti"></div>
+
+  <div id="start">
+    <div class="big">🧱</div>
+    <div class="msg">したの バーを ゆびで うごかして<br>ボールを はねかえそう！</div>
+    <button id="startBtn">▶ スタート</button>
+  </div>
+
+<script>
+/* =========================================================
+   5さいむけ ブロックくずし
+   - ゆびで バー（パドル）を うごかして ボールを はねかえす
+   - フルーツの ブロックに あてると こわれる
+   - ボールが おちても ゲームオーバーなし → すぐ ふっかつ（やさしい）
+   - ぜんぶ こわしたら おいわい → あたらしい ばん
+   - フルーツ／ボールは 生成画像（無ければ 図形で だいよう）
+   - おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+
+const FRUITS = ["apple","orange","lemon","strawberry","grape"];
+const FRUIT_COLOR = {apple:"#e63946",orange:"#f39800",lemon:"#ffd900",strawberry:"#ff5a7a",grape:"#9b2d8e"};
+const COLS = 6, ROWS = 4;
+
+// 画像よみこみ（無くても 図形で うごく）
+const imgs = {};
+["ball"].concat(FRUITS).forEach(n=>{ const im=new Image(); im.src="assets/"+n+".png"; imgs[n]=im; });
+function ready(n){ const im=imgs[n]; return im && im.complete && im.naturalWidth>0; }
+
+const canvas = document.getElementById("pad");
+const ctx = canvas.getContext("2d");
+let CW=320, CH=480;
+
+// ── じょうたい ──
+let blocks=[];            // {x,y,w,h,fruit,alive}
+let ball={x:0,y:0,r:10,vx:0,vy:0,stuck:true};
+let paddle={x:0,y:0,w:90,h:16};
+let score=0, speed=300, running=false, launchT=0;
+
+// ── おと ──
+let actx=null;
+function beep(freq,dur=0.07,type="sine",vol=0.13){
+  try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(actx.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function ping(){ beep(880,0.06,"triangle",0.16); }
+function bonk(){ beep(300,0.06,"sine",0.12); }
+function oops(){ [400,300,220].forEach((f,i)=>setTimeout(()=>beep(f,0.1,"sawtooth",0.12),i*70)); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+// ── ねこ ──
+const catEl=document.getElementById("cat"), bubbleEl=document.getElementById("bubble");
+let bubbleTimer=null;
+function catReact(face,word){
+  catEl.textContent=face; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump");
+  if(word){ bubbleEl.textContent=word; bubbleEl.classList.add("show"); clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.classList.remove("show"),1400); }
+  setTimeout(()=>{catEl.textContent="🐱";},900);
+}
+const confEl=document.getElementById("confetti");
+function confetti(){
+  const emo=["🎉","⭐","🌟","✨","🎊","🍎","🌈"];
+  for(let i=0;i<22;i++){
+    const s=document.createElement("div"); s.className="conf"; s.textContent=emo[(Math.random()*emo.length)|0];
+    const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;
+    s.style.left=x+"vw"; s.style.top="-40px";
+    s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;
+    confEl.appendChild(s);
+    requestAnimationFrame(()=>{ s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`; s.style.opacity="0.2"; });
+    setTimeout(()=>s.remove(),dur+delay+100);
+  }
+}
+
+// ── レイアウト（キャンバスサイズに あわせる）──
+function layout(keep){
+  const padTop=CH*0.10, gap=Math.max(4,CW*0.012), side=CW*0.04;
+  const bw=(CW-side*2-gap*(COLS-1))/COLS, bh=bw*0.78;
+  const old = keep ? blocks.slice() : null;
+  blocks=[];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const x=side+c*(bw+gap), y=padTop+r*(bh+gap);
+    let alive=true;
+    if(old){ const o=old[r*COLS+c]; if(o) alive=o.alive; }
+    blocks.push({x,y,w:bw,h:bh,fruit:FRUITS[r%FRUITS.length],alive});
+  }
+  ball.r=Math.max(8,Math.min(CW,CH)*0.028);
+  paddle.w=CW*0.26; paddle.h=Math.max(12,ball.r*1.3); paddle.y=CH-paddle.h-CH*0.04;
+  if(paddle.x===0||paddle.x<paddle.w/2||paddle.x>CW-paddle.w/2) paddle.x=CW/2;
+  speed=Math.min(CW,CH)*1.15;
+}
+function resetBall(){
+  ball.stuck=true; ball.x=paddle.x; ball.y=paddle.y-ball.r-2; ball.vx=0; ball.vy=0;
+  launchT=performance.now()+700;
+}
+function launch(){
+  ball.stuck=false;
+  const ang=(-Math.PI/2)+(Math.random()*0.5-0.25); // ほぼ上向き
+  ball.vx=Math.cos(ang)*speed; ball.vy=Math.sin(ang)*speed; ping();
+}
+function newBoard(){ layout(false); resetBall(); }
+
+// ── キャンバス サイズあわせ ──
+function fit(){
+  const rect=canvas.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const oldW=CW, oldH=CH;
+  CW=Math.max(1,Math.round(rect.width)); CH=Math.max(1,Math.round(rect.height));
+  canvas.width=Math.round(CW*dpr); canvas.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.lineCap="round"; ctx.lineJoin="round";
+  // ボール位置を ひれいで うつす
+  if(oldW>1 && oldH>1){
+    ball.x*=CW/oldW; ball.y*=CH/oldH; paddle.x*=CW/oldW;
+  }
+  layout(true);
+  if(paddle.x<paddle.w/2) paddle.x=paddle.w/2;
+  if(paddle.x>CW-paddle.w/2) paddle.x=CW-paddle.w/2;
+  if(ball.stuck) resetBall();
+  draw();
+}
+let rt=null;
+window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,150);});
+window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+if(window.ResizeObserver){ const ro=new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(fit,60);}); ro.observe(canvas); }
+window.addEventListener("load",()=>{clearTimeout(rt);rt=setTimeout(fit,60);});
+
+// ── パドルそうさ（タッチ＆マウス）──
+function moveTo(e){
+  const r=canvas.getBoundingClientRect();
+  let x=(e.clientX-r.left)/r.width*CW;
+  paddle.x=Math.max(paddle.w/2,Math.min(CW-paddle.w/2,x));
+  if(ball.stuck){ ball.x=paddle.x; }
+}
+canvas.addEventListener("pointerdown",(e)=>{ e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume(); moveTo(e); try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+});
+canvas.addEventListener("pointermove",(e)=>{ if(e.buttons||e.pointerType==="touch"){ e.preventDefault(); moveTo(e);} });
+
+// ── えがく ──
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  // ブロック
+  for(const b of blocks){ if(!b.alive) continue;
+    if(ready(b.fruit)){ ctx.drawImage(imgs[b.fruit], b.x, b.y, b.w, b.h); }
+    else { ctx.fillStyle=FRUIT_COLOR[b.fruit]||"#e63946"; roundRect(b.x+1,b.y+1,b.w-2,b.h-2,6); ctx.fill(); }
+  }
+  // パドル
+  ctx.fillStyle="#5b4636"; roundRect(paddle.x-paddle.w/2,paddle.y,paddle.w,paddle.h,paddle.h/2); ctx.fill();
+  ctx.fillStyle="#ff8fab"; roundRect(paddle.x-paddle.w/2+3,paddle.y+2,paddle.w-6,paddle.h*0.45,paddle.h*0.3); ctx.fill();
+  // ボール
+  const d=ball.r*2;
+  if(ready("ball")){ ctx.drawImage(imgs["ball"], ball.x-ball.r, ball.y-ball.r, d, d); }
+  else { ctx.fillStyle="#ff5a5f"; ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill(); }
+}
+
+// ── ぶつかり（ボール×ブロック）──
+function hitBlocks(){
+  for(const b of blocks){
+    if(!b.alive) continue;
+    const cx=Math.max(b.x,Math.min(ball.x,b.x+b.w));
+    const cy=Math.max(b.y,Math.min(ball.y,b.y+b.h));
+    const dx=ball.x-cx, dy=ball.y-cy;
+    if(dx*dx+dy*dy <= ball.r*ball.r){
+      b.alive=false; score++; document.getElementById("score").textContent=score; ping();
+      // はねかえる むき（めりこみの ちいさい じくで）
+      const ox=(ball.r+b.w/2)-Math.abs(ball.x-(b.x+b.w/2));
+      const oy=(ball.r+b.h/2)-Math.abs(ball.y-(b.y+b.h/2));
+      if(ox<oy){ ball.vx=-ball.vx; } else { ball.vy=-ball.vy; }
+      if(blocks.every(z=>!z.alive)){ // クリア
+        fanfare(); confetti(); catReact("😻","ぜんぶ こわした！");
+        setTimeout(newBoard,1300);
+      }
+      return;
+    }
+  }
+}
+
+// ── メインループ ──
+let last=0;
+function loop(t){
+  if(!running){ return; }
+  if(!last) last=t;
+  let dt=(t-last)/1000; last=t; if(dt>1/30) dt=1/30;
+  if(ball.stuck){
+    if(t>=launchT) launch();
+  } else {
+    // サブステップで すりぬけ ぼうし
+    const steps=Math.max(1,Math.ceil((speed*dt)/(ball.r)));
+    const sdt=dt/steps;
+    for(let s=0;s<steps;s++){
+      ball.x+=ball.vx*sdt; ball.y+=ball.vy*sdt;
+      // かべ
+      if(ball.x<ball.r){ ball.x=ball.r; ball.vx=Math.abs(ball.vx); bonk(); }
+      if(ball.x>CW-ball.r){ ball.x=CW-ball.r; ball.vx=-Math.abs(ball.vx); bonk(); }
+      if(ball.y<ball.r){ ball.y=ball.r; ball.vy=Math.abs(ball.vy); bonk(); }
+      // パドル
+      if(ball.vy>0 && ball.y+ball.r>=paddle.y && ball.y-ball.r<=paddle.y+paddle.h &&
+         ball.x>=paddle.x-paddle.w/2-ball.r && ball.x<=paddle.x+paddle.w/2+ball.r){
+        ball.y=paddle.y-ball.r;
+        const off=(ball.x-paddle.x)/(paddle.w/2); // -1..1
+        const ang=(-Math.PI/2)+off*(Math.PI*0.38);
+        ball.vx=Math.cos(ang)*speed; ball.vy=Math.sin(ang)*speed; ping();
+      }
+      hitBlocks();
+      // おちた
+      if(ball.y-ball.r>CH){ oops(); catReact("😺","だいじょうぶ！"); resetBall(); break; }
+    }
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ── スタート ──
+function begin(){
+  document.getElementById("start").classList.add("hide");
+  running=true; last=0;
+  beep(660,0.06,"sine",0.12);
+  catReact("😺","がんばって！");
+  requestAnimationFrame(loop);
+}
+document.getElementById("startBtn").addEventListener("click",begin);
+
+// ── しょきか ──
+fit(); newBoard(); draw();
+// 画像が あとから よめたら かきなおす
+["ball"].concat(FRUITS).forEach(n=>{ imgs[n].addEventListener("load",draw); });
+</script>
+</body>
+</html>
