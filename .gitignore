@@ -17,3 +17,6 @@ A_fun_coloring_page_*.png
 
 # 画像生成ツールキット（ローカル専用。node_modules等が重い）
 imagegen/
+
+# GitHub Actions セルフホストランナー本体（ローカル専用。リポジトリ内に置いてある）
+actions-runner/
