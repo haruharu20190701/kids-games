@@ -80,16 +80,18 @@ kids/
 - 線画は2種類対応：ベクター（`draw(g,S)` で閉じた領域を stroke）／**画像**（PNGの暗いピクセルだけを線として取り込み＝白背景は塗れる）。縦横比は線画に合わせる。
 - 線画を増やすには `PICS` に1行：ベクターは `{emoji,name,ratio:1,draw}`、画像は `{emoji,name,src:"lines/xxx.png"}`（`sips -Z 900` 程度に縮小）。サムネイル一覧に自動で並ぶ。
 
-## ぬりえ線画の作りかた（imagegen/ ・要対話ログイン）
-- ローカルの `imagegen/`（gitignore）に AI画像生成ツールキットがある（genspark.ai をブラウザ自動操作、モデル「GPT Image 2」）。`prompts.txt`（塗り絵50枚・線画指定済み）→ `images/` に保存。
-- **Claude は自走で生成できない**：`node save-session.js` が実Chromeでの**手動ログイン**必須のため。ユーザーが `save-session.js`→`generate.js` を実行する。手順は `imagegen/README.md`。
-- 生成後の取り込みは Claude がやる：`sips -Z 900 imagegen/images/NNN_slug.png --out games/coloring/lines/slug.png` → `coloring` の `PICS` に `{emoji,name,src}` を追加。画像が十分そろったらベクター線画は削除可。
+## ぬりえ線画の作りかた（imagegen ・要対話ログイン）
+- AI画像生成ツールキット `~/kids-imagegen`（ローカル専用・gitignore外。※元は `imagegen/` だったが launchd常駐のTCC回避で `~/Desktop` の外へ移動した）。genspark.ai をブラウザ自動操作、モデル「GPT Image 2」。`prompts.txt` → `images/` に保存。
+- 初回ログインのみ手動：`node save-session.js`（実Chrome）。以降は `generate.js`（手動でもリモートトリガーでも）。
+- 生成後の取り込み：`sips -Z 900 ~/kids-imagegen/images/NNN_slug.png --out games/coloring/lines/slug.png` → `coloring` の `PICS` に `{emoji,name,src}` を追加。画像が十分そろったらベクター線画は削除可。
 - メニューのゲームアイコンも同じ仕組みで生成（色つき・白背景・正方形）→ `sips -Z 256 … --out icons/<slug>.png` → `index.html` の `GAMES` に `img:"icons/<slug>.png"` を追加（読み込み失敗時は emoji にフォールバック）。
 
 ## リモートから画像生成（GitHub Actions セルフホストランナー）
 - リモートのClaude（クラウド実行）には PC の Chrome もログインセッションも無いので生成できない。そこで **PC をこのリポの self-hosted runner に登録**し、`.github/workflows/generate-images.yml` を **`gh workflow run` で起動**して、生成本体は PC の実Chromeで動かす。
 - **追加課金はほぼ無し**：ワークフローはただの node スクリプト実行で **Claude API/Agent SDK は不使用**。self-hosted runner は GitHub Actions 分をほぼ消費しない（生成枠は genspark 側のみ）。
-- ⚠ **トリガーは `workflow_dispatch` のみ**にすること（公開リポなので、pull_request トリガーを置くと fork から実行され得る）。ランナーは **GUIセッションで起動**（headless:false のため画面が必要）。セッション失効時のみ手動 `save-session.js`。手順は `imagegen/README.md`。
+- ⚠ **トリガーは `workflow_dispatch` のみ**にすること（公開リポなので、pull_request トリガーを置くと fork から実行され得る）。
+- **常駐**：ランナーは `~/kids-runner`、imagegen は `~/kids-imagegen`（ともに **~/Desktop の外**。launchd常駐は `~/Desktop`/Documents/Downloads にTCCでアクセス不可なため必須）。`cd ~/kids-runner && ./svc.sh install && ./svc.sh start` でLaunchAgent常駐（ログイン時に自動起動）。状態は `./svc.sh status` / `gh api repos/haruharu20190701/kids-games/actions/runners`。
+- genspark セッション失効時のみ手動 `cd ~/kids-imagegen && node save-session.js`。詳細は `~/kids-imagegen/README.md`。
 
 ### ★Claude向け実行手順：ユーザーが「画像作って／ぬりえ増やして／アイコン作って」と言ったら
 コマンドを打たせず、**Claude自身がこのワークフローを起動して最後まで仕上げる**こと。手順：
