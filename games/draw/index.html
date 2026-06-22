@@ -73,6 +73,7 @@
   .stamp{font-size:24px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
     background:#fffdf5;border-radius:12px;box-shadow:0 2px 0 #e8c98a;cursor:pointer;}
   .stamp.on{background:#ffe9a8;transform:scale(1.1);}
+  .stamp img{width:90%;height:90%;object-fit:contain;pointer-events:none;}
   /* ── キャンバス ── */
   #stage{flex:1;width:100%;max-width:860px;display:flex;padding:6px 10px 10px;min-height:0;}
   #pad{
@@ -147,14 +148,18 @@
 // ── いろ（5さいが すきな はっきりした 色）──
 const COLORS = ["#222222","#ff5a5f","#ff9f45","#ffd23f","#7bdc8a","#34c759",
                 "#4cc9f0","#3a86ff","#b388ff","#ff6fb5","#a0522d","#ffffff"];
-const STAMPS = ["⭐","🌸","❤️","🐱","🦋","🌈","🚗","🍎","😊","🌟","🐶","🌼","🍓","🐟","🌙","🎈"];
+// スタンプ＝自前生成の色つき透明シール（assets/<slug>.png）。絵文字はフォールバック用。
+const STAMPS = ["star","heart","flower","butterfly","rainbow","catface","fish","balloon"];
+const STAMP_EMOJI = {star:"⭐",heart:"❤️",flower:"🌸",butterfly:"🦋",rainbow:"🌈",catface:"🐱",fish:"🐟",balloon:"🎈"};
+const stampImgs = {};
+STAMPS.forEach(sl=>{ const im=new Image(); im.src="assets/"+sl+".png"; stampImgs[sl]=im; });
 
 const canvas = document.getElementById("pad");
 const ctx = canvas.getContext("2d", {willReadFrequently:true});
 let color = "#222222";
 let size = 16;
 let tool = "pen";        // pen | eraser | stamp
-let stamp = "⭐";
+let stamp = "star";
 
 // ── おと ──
 let actx=null;
@@ -200,11 +205,12 @@ function buildPalette(){
     });
     paletteEl.appendChild(s);
   });
-  STAMPS.forEach((e,i)=>{
+  STAMPS.forEach((sl,i)=>{
     const s=document.createElement("div");
-    s.className="stamp"+(i===0?" on":""); s.textContent=e; s.dataset.stamp=e;
+    s.className="stamp"+(i===0?" on":""); s.dataset.stamp=sl;
+    s.innerHTML=`<img src="assets/${sl}.png" alt="${STAMP_EMOJI[sl]||""}" draggable="false">`;
     s.addEventListener("click",()=>{
-      stamp=e; tool="stamp";
+      stamp=sl; tool="stamp";
       document.querySelectorAll(".stamp").forEach(x=>x.classList.toggle("on",x===s));
       setToolBtns(); pop();
     });
@@ -305,8 +311,16 @@ canvas.addEventListener("pointerdown",(e)=>{
   pushUndo();                       // この そうさを もどせるように
   const p=pos(e);
   if(tool==="stamp"){
-    ctx.font=(size*2.2)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(stamp,p.x,p.y); pop(); return;
+    const im=stampImgs[stamp];
+    if(im && im.complete && im.naturalWidth){
+      const base=size*3.4, ar=im.naturalWidth/im.naturalHeight;
+      let w=base, h=base; if(ar>=1) h=base/ar; else w=base*ar;  // たてよこ比をたもつ
+      ctx.drawImage(im, p.x-w/2, p.y-h/2, w, h);
+    } else {                              // 画像がまだ／読めない時は絵文字
+      ctx.font=(size*2.4)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(STAMP_EMOJI[stamp]||"⭐", p.x, p.y);
+    }
+    pop(); return;
   }
   drawing=true; lastX=p.x; lastY=p.y;
   ctx.strokeStyle = (tool==="eraser") ? "#ffffff" : color;
