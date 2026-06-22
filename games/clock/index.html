@@ -113,7 +113,6 @@
   <div id="nav">
     <button class="btn tab on" id="tabSet">✋ あわせる</button>
     <button class="btn tab" id="tabRead">👀 よむ</button>
-    <button class="btn" id="diff">＋30ぷん</button>
   </div>
 
   <div id="prompt"></div>
@@ -404,12 +403,6 @@ function setMode(m){
 }
 tabSet.addEventListener("click",()=>{ if(mode!=="set"){ tick(); setMode("set"); } });
 tabRead.addEventListener("click",()=>{ if(mode!=="read"){ tick(); setMode("read"); } });
-document.getElementById("diff").addEventListener("click",()=>{
-  half=!half;
-  document.getElementById("diff").classList.toggle("on", half);
-  beep(half?740:440,0.07,"sine",0.12);
-  if(mode==="set") newTarget(); else newQuiz();
-});
 document.getElementById("setNext").addEventListener("click",()=>{ tick(); newTarget(); });
 
 // ── スタート ──
