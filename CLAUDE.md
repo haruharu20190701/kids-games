@@ -88,9 +88,25 @@ kids/
 
 ## リモートから画像生成（GitHub Actions セルフホストランナー）
 - リモートのClaude（クラウド実行）には PC の Chrome もログインセッションも無いので生成できない。そこで **PC をこのリポの self-hosted runner に登録**し、`.github/workflows/generate-images.yml` を **`gh workflow run` で起動**して、生成本体は PC の実Chromeで動かす。
-- 起動例（kindは icon / coloring）: `gh workflow run generate-images.yml -f kind=icon -f prompts=$'slug | プロンプト'` → 生成→縮小→`icons/`（or `games/coloring/lines/`）へコミット＆プッシュ。`gh run watch` で進捗。
 - **追加課金はほぼ無し**：ワークフローはただの node スクリプト実行で **Claude API/Agent SDK は不使用**。self-hosted runner は GitHub Actions 分をほぼ消費しない（生成枠は genspark 側のみ）。
-- ⚠ **トリガーは `workflow_dispatch` のみ**にすること（公開リポなので、pull_request トリガーを置くと fork から実行され得る）。ランナーは **GUIセッションで起動**（headless:false のため画面が必要）。セッション失効時のみ手動 `save-session.js`。詳細は `imagegen/README.md`。
+- ⚠ **トリガーは `workflow_dispatch` のみ**にすること（公開リポなので、pull_request トリガーを置くと fork から実行され得る）。ランナーは **GUIセッションで起動**（headless:false のため画面が必要）。セッション失効時のみ手動 `save-session.js`。手順は `imagegen/README.md`。
+
+### ★Claude向け実行手順：ユーザーが「画像作って／ぬりえ増やして／アイコン作って」と言ったら
+コマンドを打たせず、**Claude自身がこのワークフローを起動して最後まで仕上げる**こと。手順：
+1. **種類を決める**：ぬりえの線画なら `kind=coloring`、メニューのゲームアイコンなら `kind=icon`。
+2. **slug（半角小文字・英語）とプロンプトを作る**。プロンプトは下記スタイルを必ず守る（バケツ塗り・統一感のため）：
+   - coloring: `simple cute coloring book line art of <主題>, bold clean BLACK OUTLINES ONLY, no color, no shading, pure white background, big simple fully-closed shapes, thick smooth lines, low detail, centered, line drawing for kids, no text, no watermark`
+   - icon: `cute kawaii flat vector app icon of <主題>, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality`
+   - 複数枚なら `slug | プロンプト` を改行で並べて1回の `prompts` に渡す。著作権ポリシー厳守（第三者IP不可）。
+3. **起動**：`gh workflow run generate-images.yml -f kind=<icon|coloring> -f prompts=$'slug | …\nslug2 | …'`
+4. **完了を待つ**：`gh run list --workflow=generate-images.yml --limit 1` で run id を取り、`gh run view <id> --json status,conclusion -q '.status+" "+(.conclusion//"")'` を `completed success` になるまでポーリング（生成は数分かかる）。
+   - 何分も `queued` のまま＝**ランナーが起動していない**。ユーザーに「PCで `actions-runner` の `./run.sh` を起動して（`Listening for Jobs` 表示）」と伝える。
+5. **取り込み**：成功したら `git fetch origin && git merge --ff-only origin/main`（ワークフローが画像を main にコミット済み）。生成画像を `Read` で目視確認。
+6. **登録（重要・ワークフローはやらない）**：
+   - coloring → `games/coloring/index.html` の `PICS` に `{emoji,name:"<ひらがな>",src:"lines/<slug>.png"}` を追記。
+   - icon → 対象ゲームが存在するなら `index.html` の `GAMES` 該当行に `img:"icons/<slug>.png"` を追加。
+   - 登録の変更をコミット＆プッシュ（push 403 時は CLAUDE.md「push が 403」のトークンURL方式）。
+7. ユーザーに結果（slug・コミット・反映URL）を報告。失敗時は run のログ（`gh run view <id> --log-failed`）を確認。
 
 ## そざい（線画・画像）の著作権ポリシー ⚠️
 - 公開サイトに載せる素材は **自作 / 生成AIのオリジナル / CC0・パブリックドメイン** のみ。
