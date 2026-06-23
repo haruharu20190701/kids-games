@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ブロックワールド" />
+<title>ブロックワールド｜こどもあそびば</title>
+<meta name="description" content="5〜10さいくらいの こども向けの 3Dブロック建築。タップで ブロックを おいたり こわしたり、じゆうに つくって あそぼう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/blockworld/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ブロックワールド｜こどもあそびば" />
+<meta property="og:description" content="3Dの ブロックで じゆうに つくって あそぼう！おいて・こわして・まわして。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/blockworld/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  :root{ --ink:#5b4636; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,#fff7d6,#ffe1b8);
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:760px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  /* ── どうぐ ── */
+  #bar{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;padding:6px 10px 2px;}
+  .tool{border:none;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);background:#fffdf5;border-radius:999px;
+    padding:8px 14px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;}
+  .tool:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tool.on{color:#fff;background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 3px 0 #1f9e44;}
+  #palette{display:flex;gap:8px;overflow-x:auto;max-width:100%;padding:4px 8px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  #palette::-webkit-scrollbar{display:none;}
+  .sw{flex:0 0 auto;width:40px;height:40px;border-radius:10px;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.2);cursor:pointer;position:relative;}
+  .sw.on{outline:3px solid #34c759;outline-offset:1px;}
+  .sw .nm{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);font-size:10px;font-weight:800;color:#5b4636;white-space:nowrap;}
+  #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:14px 10px 12px;min-height:0;}
+  #pad{min-width:0;min-height:0;width:100%;height:100%;max-width:760px;border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;background:#bfe9ff;}
+  .hint{font-size:13px;color:#8a7a66;text-align:center;padding:2px 12px 8px;}
+  @media (orientation:landscape) and (max-height:480px){ header{padding:4px 14px 0;} .title{font-size:18px;} .hint{display:none;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🟩 ブロックワールド</div></header>
+
+  <div id="bar">
+    <button class="tool on" id="placeBtn">🧱 おく</button>
+    <button class="tool" id="breakBtn">⛏️ こわす</button>
+    <button class="tool" id="zoomIn">➕</button>
+    <button class="tool" id="zoomOut">➖</button>
+    <button class="tool" id="resetBtn">🗑️ ぜんぶけす</button>
+  </div>
+  <div id="palette"></div>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+  <div class="hint">タップで ブロックを おく／こわす・ドラッグで まわす</div>
+
+<script type="module">
+/* =========================================================
+   ブロックワールド（three.js・自前ホスト／CDN不使用）
+   - 立方体ブロックを タップで おく／こわす（クリエイティブ建築）
+   - ドラッグで してんを まわす、＋−で ズーム
+   - three.js は ../../shared/three/（MIT・同梱）。おとは Web Audio
+   ========================================================= */
+import * as THREE from "../../shared/three/three.module.min.js";
+
+const BLOCKS=[
+  {id:"grass", name:"くさ",  sw:"#6ab04c"},
+  {id:"dirt",  name:"つち",  sw:"#7a5230", col:"#7a5230"},
+  {id:"stone", name:"いし",  sw:"#9098a1", col:"#9098a1"},
+  {id:"wood",  name:"き",    sw:"#a06a37", col:"#a06a37"},
+  {id:"leaf",  name:"はっぱ",sw:"#4a9e3f", col:"#4a9e3f"},
+  {id:"sand",  name:"すな",  sw:"#e6d59a", col:"#e6d59a"},
+  {id:"water", name:"みず",  sw:"#3aa0e6", col:"#3aa0e6"},
+  {id:"red",   name:"あか",  sw:"#e74c3c", col:"#e74c3c"},
+  {id:"blue",  name:"あお",  sw:"#3a86ff", col:"#3a86ff"},
+  {id:"yellow",name:"きいろ",sw:"#ffd23f", col:"#ffd23f"},
+  {id:"pink",  name:"ピンク",sw:"#ff7faa", col:"#ff7faa"},
+  {id:"black", name:"くろ",  sw:"#3a3a3a", col:"#3a3a3a"},
+];
+let selBlock=BLOCKS[0], mode="place";
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.06,t="sine",v=0.12){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function placeSnd(){ beep(440,0.05,"square",0.10); beep(660,0.05,"square",0.08); }
+function breakSnd(){ beep(220,0.08,"sawtooth",0.12); }
+
+// ── three.js ──
+const canvas=document.getElementById("pad");
+let renderer,scene,camera,raycaster,pointer,groundPlane;
+const world=new Map();       // "x,y,z" -> mesh
+const geo=new THREE.BoxGeometry(1,1,1);
+const matCache={};
+function mat(c){ return new THREE.MeshLambertMaterial({color:c}); }
+function matFor(b){
+  if(matCache[b.id]) return matCache[b.id];
+  let m;
+  if(b.id==="grass"){ const s=mat("#7a5230"),top=mat("#6ab04c"),bot=mat("#5e4326"); m=[s,s,top,bot,s,s]; }
+  else m=mat(b.col);
+  matCache[b.id]=m; return m;
+}
+function key(x,y,z){ return x+","+y+","+z; }
+function addBlock(x,y,z,b){
+  if(world.has(key(x,y,z))) return;
+  const me=new THREE.Mesh(geo, matFor(b)); me.position.set(x,y,z); me.userData={x,y,z};
+  scene.add(me); world.set(key(x,y,z),me);
+}
+function removeBlock(me){ const u=me.userData; scene.remove(me); world.delete(key(u.x,u.y,u.z)); }
+
+let camR=16, camTheta=0.9, camPhi=0.95;
+const target=new THREE.Vector3(0,1.2,0);
+function updateCam(){
+  camera.position.set(
+    target.x + camR*Math.sin(camPhi)*Math.cos(camTheta),
+    target.y + camR*Math.cos(camPhi),
+    target.z + camR*Math.sin(camPhi)*Math.sin(camTheta)
+  );
+  camera.lookAt(target);
+}
+function initScene(){
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  scene=new THREE.Scene(); scene.background=new THREE.Color(0xbfe9ff);
+  camera=new THREE.PerspectiveCamera(55,1,0.1,500);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x88aa66,1.05));
+  const d=new THREE.DirectionalLight(0xffffff,0.8); d.position.set(8,16,6); scene.add(d);
+  // した じめん（けしても のこる）
+  groundPlane=new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.MeshLambertMaterial({color:0x86c45a}));
+  groundPlane.rotation.x=-Math.PI/2; groundPlane.position.y=-0.5; scene.add(groundPlane);
+  raycaster=new THREE.Raycaster(); pointer=new THREE.Vector2();
+  // さいしょの くさ 9x9
+  for(let x=-4;x<=4;x++) for(let z=-4;z<=4;z++) addBlock(x,0,z,BLOCKS[0]);
+  updateCam();
+}
+function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; if(!w||!h)return; renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+window.addEventListener("resize",resize);
+window.addEventListener("orientationchange",()=>setTimeout(resize,200));
+if(window.ResizeObserver){ new ResizeObserver(()=>resize()).observe(canvas); }
+
+// ── レイキャスト ──
+function pickAt(cx,cy, includeGround){
+  const r=canvas.getBoundingClientRect();
+  pointer.x=((cx-r.left)/r.width)*2-1; pointer.y=-((cy-r.top)/r.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const list=[...world.values()]; if(includeGround) list.push(groundPlane);
+  return raycaster.intersectObjects(list,false)[0];
+}
+function actAt(cx,cy){
+  if(mode==="place"){
+    const hit=pickAt(cx,cy,true); if(!hit) return;
+    if(hit.object===groundPlane){
+      const p=hit.point; addBlock(Math.round(p.x),0,Math.round(p.z),selBlock); placeSnd();
+    } else {
+      const n=hit.face.normal, p=hit.object.position;
+      addBlock(Math.round(p.x+n.x),Math.round(p.y+n.y),Math.round(p.z+n.z),selBlock); placeSnd();
+    }
+  } else {
+    const hit=pickAt(cx,cy,false); if(!hit) return;
+    removeBlock(hit.object); breakSnd();
+  }
+}
+
+// ── そうさ：タップ＝アクション／ドラッグ＝かいてん ──
+let down=null, moved=false, lastX=0, lastY=0;
+canvas.addEventListener("pointerdown",(e)=>{ e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume();
+  down={x:e.clientX,y:e.clientY}; moved=false; lastX=e.clientX; lastY=e.clientY;
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+});
+canvas.addEventListener("pointermove",(e)=>{
+  if(!down) return; e.preventDefault();
+  const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+  if(Math.abs(e.clientX-down.x)+Math.abs(e.clientY-down.y)>8) moved=true;
+  if(moved){ camTheta-=dx*0.006; camPhi=Math.max(0.25,Math.min(1.45,camPhi-dy*0.006)); updateCam(); }
+});
+canvas.addEventListener("pointerup",(e)=>{
+  if(!down) return; e.preventDefault();
+  if(!moved) actAt(e.clientX,e.clientY);
+  down=null;
+});
+canvas.addEventListener("pointercancel",()=>{ down=null; });
+
+// ── どうぐUI ──
+const placeBtn=document.getElementById("placeBtn"), breakBtn=document.getElementById("breakBtn");
+placeBtn.addEventListener("click",()=>{ mode="place"; placeBtn.classList.add("on"); breakBtn.classList.remove("on"); beep(620,0.05); });
+breakBtn.addEventListener("click",()=>{ mode="break"; breakBtn.classList.add("on"); placeBtn.classList.remove("on"); beep(360,0.05); });
+document.getElementById("zoomIn").addEventListener("click",()=>{ camR=Math.max(6,camR-2); updateCam(); beep(700,0.04); });
+document.getElementById("zoomOut").addEventListener("click",()=>{ camR=Math.min(34,camR+2); updateCam(); beep(500,0.04); });
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  if(!confirm("ぜんぶ けして さいしょから つくる？")) return;
+  [...world.values()].forEach(m=>scene.remove(m)); world.clear();
+  for(let x=-4;x<=4;x++) for(let z=-4;z<=4;z++) addBlock(x,0,z,BLOCKS[0]);
+  beep(300,0.1);
+});
+const pal=document.getElementById("palette");
+BLOCKS.forEach((b,i)=>{
+  const s=document.createElement("div"); s.className="sw"+(i===0?" on":""); s.style.background=b.sw;
+  s.innerHTML=`<span class="nm">${b.name}</span>`;
+  s.addEventListener("click",()=>{ selBlock=b; mode="place"; placeBtn.classList.add("on"); breakBtn.classList.remove("on");
+    document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s)); beep(660,0.04); });
+  pal.appendChild(s);
+});
+
+// ── ループ ──
+function loop(){ requestAnimationFrame(loop); renderer.render(scene,camera); }
+initScene(); resize(); loop();
+</script>
+</body>
+</html>
