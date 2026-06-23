@@ -1,7 +1,16 @@
-# mushi: ホームの主役絵（虫どうしのバトル・色つき透明）
+# jigsaw: ジグソーパズル用の絵10枚（フルフレーム・色つき・四角）
 kind: custom
-dest: games/mushi/assets
+dest: games/jigsaw/assets
 size: 640
-transparent: true
+transparent: false
 ---
-battle | cute kawaii cartoon of a rhinoceros beetle and a stag beetle facing each other locking horns in a friendly battle, two cute bugs, dynamic side view, FULLY COLORED with bright flat colors, thick clean black outlines, this is a COLORED illustration NOT a line drawing NOT a coloring page NOT black and white, plain solid white background, simple, no text, no watermark
+lion | colorful full-frame cartoon scene for kids, a cute happy lion in a green savanna with trees and blue sky, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+elephant | colorful full-frame cartoon scene for kids, a cute elephant by a blue river with green hills and sky, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+penguin | colorful full-frame cartoon scene for kids, cute penguins on white ice with blue sky and snow, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+dolphin | colorful full-frame cartoon scene for kids, a happy dolphin jumping in the blue ocean with waves and sun, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+train | colorful full-frame cartoon scene for kids, a colorful train on railway tracks with green hills and clouds, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+rocket | colorful full-frame cartoon scene for kids, a rocket flying in outer space with stars planets and the moon, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+castle | colorful full-frame cartoon scene for kids, a colorful fairytale castle with a rainbow and clouds, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+dino | colorful full-frame cartoon scene for kids, a cute green dinosaur in a jungle with a volcano and palm trees, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+garden | colorful full-frame cartoon scene for kids, butterflies and flowers in a colorful sunny garden, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
+car | colorful full-frame cartoon scene for kids, a cute red car on a city street with buildings and trees, fills the entire square edge to edge, no white border, bright cheerful flat colors, thick clean outlines, simple, no text, no watermark
