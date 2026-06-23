@@ -13,7 +13,7 @@
 ```
 kids/
 ├── index.html              ゲーム選択メニュー（ランチャー・データ駆動・全ゲームにアイコン画像）
-├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結（現在 22本）
+├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結（現在 23本）
 │   ├── assets/             そのゲームの生成画像（透明PNG等）。例 mole/assets, jigsaw/assets
 │   └── coloring/lines/     ぬりえの線画（画像）。例 dino.png
 │   学び：hiragana / abc / numbers / keisan / clock
