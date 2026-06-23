@@ -49,11 +49,24 @@
   /* ── えらぶ ── */
   .bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:4px 0 8px;}
   .scrtitle{font-weight:900;font-size:16px;text-align:center;margin:2px 0 6px;}
-  #picGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto;padding:4px;}
-  .pcard{aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:#e8dcc0;cursor:pointer;box-shadow:0 4px 0 #c7b98a;position:relative;}
+  #picGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto;padding:4px;align-content:start;}
+  .pcard{border-radius:14px;overflow:hidden;background:#e8dcc0;cursor:pointer;box-shadow:0 4px 0 #c7b98a;}
   .pcard:active{transform:translateY(2px);box-shadow:0 2px 0 #c7b98a;}
-  .pcard img{width:100%;height:100%;object-fit:cover;display:block;}
-  .pcard .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px;}
+  .pcard img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;}
+  .pcard .ph{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:38px;}
+  /* むずかしさ えらび */
+  #diff-s{align-items:center;justify-content:center;gap:14px;}
+  #diffPreview{display:flex;flex-direction:column;align-items:center;gap:5px;font-weight:900;font-size:16px;}
+  #diffPreview img{width:104px;height:104px;object-fit:cover;border-radius:14px;box-shadow:0 4px 0 #c7b98a;}
+  #diffPreview .ph{width:104px;height:104px;display:flex;align-items:center;justify-content:center;font-size:52px;background:#e8dcc0;border-radius:14px;}
+  #diffOpts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .dopt{background:#fffdf5;border-radius:16px;box-shadow:0 4px 0 #c7b98a;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;width:100px;}
+  .dopt:active{transform:translateY(2px);box-shadow:0 2px 0 #c7b98a;}
+  .minigrid{width:64px;height:64px;display:grid;gap:2px;background:#bfa97e;padding:2px;border-radius:6px;}
+  .minigrid i{background:#cdeafd;border-radius:1px;}
+  .dlab{font-weight:900;font-size:15px;}
+  .dnum{font-size:11px;color:#8a7a66;}
+  .btn.back2{align-self:center;}
   /* ── パズル ── */
   #puzzle-s{align-items:center;gap:8px;}
   #board{display:grid;width:min(92vw,460px,70vh);aspect-ratio:1/1;gap:2px;
@@ -87,13 +100,16 @@
   <div id="app">
     <!-- えらぶ -->
     <section id="select-s" class="screen show">
-      <div class="bar" id="diffBar">
-        <button class="btn on" data-n="3">やさしい</button>
-        <button class="btn" data-n="4">ふつう</button>
-        <button class="btn" data-n="5">むずかしい</button>
-      </div>
       <div class="scrtitle">すきな えを えらんでね</div>
       <div id="picGrid"></div>
+    </section>
+
+    <!-- むずかしさ -->
+    <section id="diff-s" class="screen">
+      <div class="scrtitle">むずかしさを えらんでね</div>
+      <div id="diffPreview"></div>
+      <div id="diffOpts"></div>
+      <button class="btn back2" id="diffBack">◀ えを えらびなおす</button>
     </section>
 
     <!-- パズル -->
@@ -103,7 +119,7 @@
       <div id="pbtns">
         <button class="btn" id="peekBtn">👀 みほん</button>
         <button class="btn" id="shuffleBtn">🔀 やりなおし</button>
-        <button class="btn" id="backBtn">◀ えらぶ</button>
+        <button class="btn" id="backBtn">◀ もどる</button>
       </div>
     </section>
   </div>
@@ -162,18 +178,32 @@ function buildSelect(){
   PICS.forEach(p=>{
     const c=document.createElement("div"); c.className="pcard";
     c.innerHTML=`<img src="assets/${p.id}.png" alt="${p.name}" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${p.e}'}))">`;
-    c.addEventListener("click",()=>{ if(actx&&actx.state==="suspended")actx.resume(); tick(); startPuzzle(p); });
+    c.addEventListener("click",()=>{ if(actx&&actx.state==="suspended")actx.resume(); tick(); openDiff(p); });
     picGrid.appendChild(c);
   });
 }
-document.querySelectorAll("#diffBar .btn").forEach(b=>b.addEventListener("click",()=>{
-  N=+b.dataset.n; document.querySelectorAll("#diffBar .btn").forEach(x=>x.classList.toggle("on",x===b)); tick();
-}));
+
+// ── むずかしさ えらび（えを えらんだ あとに）──
+const DIFFS=[{n:3,name:"やさしい"},{n:4,name:"ふつう"},{n:5,name:"むずかしい"}];
+function openDiff(p){
+  const pv=document.getElementById("diffPreview");
+  pv.innerHTML=`<img src="assets/${p.id}.png" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${p.e}'}))"><div>${p.name}</div>`;
+  const opts=document.getElementById("diffOpts"); opts.innerHTML="";
+  DIFFS.forEach(d=>{
+    const card=document.createElement("div"); card.className="dopt";
+    let cells=""; for(let i=0;i<d.n*d.n;i++) cells+="<i></i>";
+    card.innerHTML=`<div class="minigrid" style="grid-template-columns:repeat(${d.n},1fr)">${cells}</div><div class="dlab">${d.name}</div><div class="dnum">${d.n}×${d.n}・${d.n*d.n}ピース</div>`;
+    card.addEventListener("click",()=>{ tick(); startPuzzle(p,d.n); });
+    opts.appendChild(card);
+  });
+  show("diff-s");
+}
+document.getElementById("diffBack").addEventListener("click",()=>{ tick(); show("select-s"); });
 
 // ── パズル ──
 const board=document.getElementById("board");
-function startPuzzle(p){
-  pic=p;
+function startPuzzle(p,n){
+  pic=p; N=n;
   // えが よめるか かくにん
   imgOK=false;
   const probe=new Image();
@@ -258,8 +288,8 @@ function win(){
 }
 
 // ── ボタン ──
-document.getElementById("backBtn").addEventListener("click",()=>{ tick(); show("select-s"); });
-document.getElementById("shuffleBtn").addEventListener("click",()=>{ tick(); startPuzzle(pic); });
+document.getElementById("backBtn").addEventListener("click",()=>{ tick(); openDiff(pic); });
+document.getElementById("shuffleBtn").addEventListener("click",()=>{ tick(); startPuzzle(pic,N); });
 const peek=document.getElementById("peek");
 document.getElementById("peekBtn").addEventListener("click",()=>{
   tick();
