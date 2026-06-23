@@ -12,27 +12,27 @@
 ## 構成
 ```
 kids/
-├── index.html              ゲーム選択メニュー（ランチャー・データ駆動）
-├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結
-│   ├── puzzle-block/        ぱずるぶろっく（ステージ制パズル）
-│   ├── piano/              ぴあの（自由演奏＋おてほん曲）
-│   ├── draw/               おえかき（自由描画・スタンプ）
-│   ├── memory/             しんけいすいじゃく（神経衰弱）
-│   ├── numbers/            かずあそび（数を数える）
-│   ├── airhockey/          エアホッケー（CPU/2人・物理）
-│   └── coloring/           ぬりえ（バケツ塗り・選択→ぬる画面）
-│       └── lines/          ぬりえの線画（画像）。例 dino.png
-├── shared/                 （将来）共通CSS/JS
-├── robots.txt              全クロール許可＋sitemap の場所を明示
-├── sitemap.xml             公開ページ一覧（ゲーム追加時に1 URL追記）
+├── index.html              ゲーム選択メニュー（ランチャー・データ駆動・全ゲームにアイコン画像）
+├── games/<slug>/index.html 1ゲーム＝1フォルダ＝1ファイル完結（現在 22本）
+│   ├── assets/             そのゲームの生成画像（透明PNG等）。例 mole/assets, jigsaw/assets
+│   └── coloring/lines/     ぬりえの線画（画像）。例 dino.png
+│   学び：hiragana / abc / numbers / keisan / clock
+│   パズル/思考：puzzle-block / memory / jigsaw / marubatsu
+│   アクション：mole / airhockey / breakout / catch / fishing / tower / run / drive3d(3D)
+│   そうぞう：draw / coloring / colormix / piano ／ あつめる：mushi
+├── icons/<slug>.png        メニューのゲームアイコン（256px・生成）
+├── shared/three/           three.js r160（MIT・自前ホスト）。3Dゲーム drive3d で使用
+├── imagegen-requests/      画像生成の依頼ファイル（request.txt を push で自動生成起動）
+├── .github/workflows/      generate-images.yml（PCのセルフホストランナーで画像生成）
+├── robots.txt / sitemap.xml  クロール許可＋公開ページ一覧（ゲーム追加時に1 URL追記）
 ├── icon-1024.png / icon-180.png  ホーム画面・OGP用アイコン
-├── README.md               利用者向けの概要・追加手順
-├── PROJECT.md              プロジェクトの目的・学び・ロードマップ
+├── README.md / PROJECT.md  利用者向け概要・追加手順／目的・学び・ロードマップ
 └── .gitignore              .claude/ など非公開物を除外
 ```
 
 ## 基本ルール（ゲームの追加・編集はこれに従う）
-- **1ゲーム = 1ファイル**: `games/<slug>/index.html` にHTML/CSS/JSを全部入れる。バンドラ・npm・CDNライブラリは使わない（軽量・オフライン可）。
+- **1ゲーム = 1ファイル**: `games/<slug>/index.html` にHTML/CSS/JSを全部入れる。バンドラ・npm・**CDNライブラリは使わない**（軽量・オフライン可）。
+  - 例外：**3Dゲームのみ three.js を許可**。ただし **CDN不可・リポジトリに同梱**（`shared/three/`・MIT同梱）し、相対 import で読む（実行時の外部リクエストなし＝オフライン維持）。生成画像も `games/<slug>/assets/` に同梱。
 - **対象は約5歳**: ひらがな表記、大きなタップ領域、時間制限なし、失敗にやさしい、「できた！」の演出を厚く。
 - **音は Web Audio API**（オシレータのbeep）。音声ファイルは使わない（アセットゼロ）。
 - **入力はタッチ＆マウス両対応**（touchstart/mousedown 等の両方を張る）。
