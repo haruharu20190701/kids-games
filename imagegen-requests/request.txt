@@ -1,6 +1,4 @@
-# menu icons: jigsaw / marubatsu / tower
+# menu icon: run（はしってジャンプ）
 kind: icon
 ---
-jigsaw | cute kawaii flat vector app icon of colorful jigsaw puzzle pieces fitting together, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-marubatsu | cute kawaii flat vector app icon of a tic tac toe board with a blue circle and a red cross, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-tower | cute kawaii flat vector app icon of a tall stack of colorful toy blocks tower, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+run | cute kawaii flat vector app icon of a cute brown rabbit running and jumping happily, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
