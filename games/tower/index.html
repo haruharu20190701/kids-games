@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="つみきタワー" />
+<title>つみきタワー｜こどもあそびば</title>
+<meta name="description" content="5〜8さいくらいの こども向けの つみきタワー。うごく ブロックを タップで おとして たかく つもう。くずれる まえに どこまで つめるかな。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/tower/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="つみきタワー｜こどもあそびば" />
+<meta property="og:description" content="うごく ブロックを タップで おとして たかく つもう！どこまで つめるかな。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/tower/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  #hud{font-size:20px;font-weight:900;color:#e07b00;margin-top:2px;}
+  #stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 10px 12px;min-height:0;}
+  #pad{min-width:0;min-height:0;width:100%;height:100%;max-width:480px;
+    background:linear-gradient(#cdeafd,#eaf6ff);border-radius:18px;touch-action:none;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);display:block;}
+  #cat{position:fixed;right:10px;bottom:8px;font-size:32px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  .ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(91,70,54,.72);z-index:95;padding:20px;}
+  .ov.show{display:flex;}
+  .ov .big{font-size:60px;}
+  .ov .msg{color:#fff;font-weight:900;font-size:20px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.45);line-height:1.5;}
+  .ov button{border:none;font-family:inherit;font-weight:900;font-size:23px;color:#fff;
+    background:linear-gradient(180deg,#7bdc8a,#34c759);border-radius:999px;padding:14px 38px;box-shadow:0 5px 0 #1f9e44;cursor:pointer;}
+  .ov button:active{transform:translateY(3px);box-shadow:0 2px 0 #1f9e44;}
+  @media (orientation:landscape) and (max-height:480px){ header{padding:4px 14px 0;} .title{font-size:18px;} #hud{font-size:16px;} #cat{display:none;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🗼 つみきタワー</div>
+    <div id="hud">つんだ かず 🧱 <span id="score">0</span></div>
+  </header>
+
+  <div id="stage"><canvas id="pad"></canvas></div>
+
+  <div id="cat">🐱</div>
+  <div id="confetti"></div>
+
+  <div id="start" class="ov show">
+    <div class="big">🗼</div>
+    <div class="msg">うごく つみきを<br>タップで おとして たかく つもう！</div>
+    <button id="startBtn">▶ スタート</button>
+  </div>
+  <div id="over" class="ov">
+    <div class="big">🧱</div>
+    <div class="msg" id="overMsg"></div>
+    <button id="retryBtn">もういちど</button>
+  </div>
+
+<script>
+/* =========================================================
+   つみきタワー
+   - うごく ブロックを タップで おとす
+   - ずれた ぶんは きりおとされて ほそくなる→だんだん むずかしく（ハラハラ）
+   - ぴったり おけると ちょっと ひろがる＆キラッ
+   - まったく ずれて のらなかったら おわり →「○かい つめた！」
+   - おとは Web Audio。たかさで おとが あがって ドキドキ
+   ========================================================= */
+const canvas=document.getElementById("pad"), ctx=canvas.getContext("2d");
+let CW=320,CH=480, BH=28, AY=140;
+let stack=[], active=null, slivers=[], score=0, running=false, best=0;
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function dropSnd(){ beep(280+score*16,0.08,"square",0.10); }   // たかさで ピッチUP＝ドキドキ
+function perfectSnd(){ [880,1320].forEach((f,i)=>setTimeout(()=>beep(f,0.08,"triangle",0.16),i*60)); }
+function thud(){ beep(120,0.25,"sawtooth",0.16); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.2),i*90)); }
+
+const catEl=document.getElementById("cat");
+function catJump(face){ catEl.textContent=face||"🐱"; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump"); if(face) setTimeout(()=>catEl.textContent="🐱",1000); }
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🧱","🌈"];for(let i=0;i<20;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── サイズ ──
+function fit(){
+  const rect=canvas.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);
+  const ow=CW;CW=Math.max(1,Math.round(rect.width));CH=Math.max(1,Math.round(rect.height));
+  canvas.width=Math.round(CW*dpr);canvas.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap="round";ctx.lineJoin="round";
+  BH=Math.max(22,Math.min(40,CH*0.058)); AY=CH*0.26;
+  if(ow>1 && ow!==CW){ const r=CW/ow; stack.forEach(b=>{b.x*=r;b.w*=r;}); if(active){active.x*=r;active.w*=r;} }
+  draw();
+}
+let rt=null;
+window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(fit,150);});
+window.addEventListener("orientationchange",()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(fit,60);});ro.observe(canvas);}
+window.addEventListener("load",()=>{clearTimeout(rt);rt=setTimeout(fit,60);});
+
+// ── ブロックの いろ ──
+function hue(i){ return `hsl(${(i*32)%360},70%,60%)`; }
+function rrect(x,y,w,h,r){ r=Math.min(r,h/2,w/2); ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
+function blockAt(b, screenY){
+  ctx.fillStyle=b.color; rrect(b.x,screenY,b.w,BH-2,5); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.25)"; rrect(b.x,screenY,b.w,(BH-2)*0.4,5); ctx.fill();
+}
+function speed(){ return Math.min(CW*1.7, CW*0.55*(1+score*0.035)); }
+
+function startGame(){
+  stack=[]; slivers=[]; score=0; document.getElementById("score").textContent=0;
+  const w0=Math.min(CW*0.5,200);
+  stack.push({x:(CW-w0)/2, w:w0, color:hue(0)});
+  spawnActive();
+  running=true; last=0; requestAnimationFrame(loop);
+}
+function spawnActive(){
+  const top=stack[stack.length-1];
+  const dir=Math.random()<0.5?1:-1;
+  active={ x: dir>0?0:CW-top.w, w:top.w, color:hue(stack.length), vx:dir*speed() };
+}
+
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  // つみあがった ブロック（うえから したへ）
+  for(let k=stack.length-1;k>=0;k--){
+    const sy=AY+(stack.length-k)*BH;
+    if(sy>CH) break;
+    blockAt(stack[k], sy);
+  }
+  // きりおとし（おちる かけら）
+  for(const s of slivers){ ctx.save(); ctx.globalAlpha=s.a; blockAt(s, s.sy); ctx.restore(); }
+  // うごく ブロック
+  if(active && running){ blockAt(active, AY); }
+}
+
+let last=0;
+function loop(t){
+  if(!running){ return; }
+  if(!last)last=t; let dt=(t-last)/1000; last=t; if(dt>1/30)dt=1/30;
+  if(active){
+    active.x+=active.vx*dt;
+    if(active.x<0){ active.x=0; active.vx=Math.abs(active.vx); }
+    if(active.x+active.w>CW){ active.x=CW-active.w; active.vx=-Math.abs(active.vx); }
+  }
+  // かけら おとす
+  for(const s of slivers){ s.vy+=900*dt; s.sy+=s.vy*dt; s.x+=s.vx*dt; s.a-=dt*0.6; }
+  slivers=slivers.filter(s=>s.a>0 && s.sy<CH+80);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ── タップで おとす ──
+function dropBlock(){
+  if(!running||!active) return;
+  const top=stack[stack.length-1];
+  const L=Math.max(active.x, top.x), R=Math.min(active.x+active.w, top.x+top.w);
+  const ov=R-L;
+  if(ov<=0){ // のらなかった→おわり
+    // active を おとす えんしゅつ
+    slivers.push({x:active.x,w:active.w,color:active.color,sy:AY,vy:0,vx:active.vx*0.2,a:1});
+    active=null; thud(); gameOver(); return;
+  }
+  // きりおとし（はみだし ぶん）
+  if(active.x < L){ slivers.push({x:active.x,w:L-active.x,color:active.color,sy:AY+BH,vy:0,vx:-160,a:1}); }
+  if(active.x+active.w > R){ slivers.push({x:R,w:(active.x+active.w)-R,color:active.color,sy:AY+BH,vy:0,vx:160,a:1}); }
+  let nx=L, nw=ov;
+  const diff=Math.abs(active.x-top.x);
+  if(diff < BH*0.18){ // ぴったり！すこし ひろがる
+    nx=top.x; nw=Math.min(top.w+BH*0.45, CW*0.9);
+    perfectSnd(); catJump("😻"); sparkle(nx+nw/2, AY+BH);
+  } else { dropSnd(); }
+  stack.push({x:nx, w:nw, color:active.color});
+  score++; document.getElementById("score").textContent=score;
+  if(score%10===0){ fanfare(); confetti(); catJump("😻"); }
+  spawnActive();
+}
+function sparkle(x,y){ for(let i=0;i<6;i++){ slivers.push({x:x-3,w:6,color:"#ffe27a",sy:y,vy:-120-Math.random()*120,vx:(Math.random()*240-120),a:1}); } }
+
+canvas.addEventListener("pointerdown",(e)=>{ e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume(); dropBlock(); });
+
+function gameOver(){
+  running=false;
+  best=Math.max(best,score);
+  document.getElementById("overMsg").innerHTML=`${score} かい つめた！🧱<br><span style="font-size:15px">さいこう ${best} かい</span>`;
+  catJump("🙀");
+  setTimeout(()=>document.getElementById("over").classList.add("show"),500);
+}
+
+// ── スタート ──
+document.getElementById("startBtn").addEventListener("click",()=>{
+  if(actx&&actx.state==="suspended")actx.resume();
+  document.getElementById("start").classList.remove("show");
+  beep(660,0.06,"sine",0.12); catJump("😺"); startGame();
+});
+document.getElementById("retryBtn").addEventListener("click",()=>{
+  document.getElementById("over").classList.remove("show");
+  beep(660,0.06,"sine",0.12); startGame();
+});
+
+fit(); draw();
+</script>
+</body>
+</html>
