@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="まるばつ" />
+<title>まるばつ｜こどもあそびば</title>
+<meta name="description" content="5〜8さいくらいの こども向けの まるばつゲーム（○×）。ひとり（CPUと）でも ふたりでも あそべる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/marubatsu/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="まるばつ｜こどもあそびば" />
+<meta property="og:description" content="○×の まるばつゲーム。ひとり（CPUと）でも ふたりでも あそべる！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/marubatsu/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── まるばつ（○×）ひとり/ふたり ── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --o:#2f7be0; --x:#ff5a5f; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:480px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  .bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 10px 2px;}
+  .tab{border:none;font-family:inherit;font-weight:800;font-size:16px;color:var(--ink);background:#fffdf5;border-radius:999px;
+    padding:9px 18px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;}
+  .tab:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .tab.on{color:#fff;background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 3px 0 #c96a00;}
+  #status{font-size:20px;font-weight:900;min-height:30px;margin-top:6px;text-align:center;}
+  #status .o{color:var(--o);} #status .x{color:var(--x);}
+  /* ── ばん ── */
+  #stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;padding:8px 12px;}
+  #board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    width:min(86vw,70vh,400px);aspect-ratio:1/1;background:#bfa97e;border-radius:18px;padding:8px;
+    box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);}
+  .cell{background:#fffdf5;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:min(16vw,16vh,80px);position:relative;}
+  .cell:active{transform:scale(.97);}
+  .cell.win{background:#bff0c4;}
+  .mark{display:block;width:62%;height:62%;animation:pop .2s ease;}
+  @keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.15);}100%{transform:scale(1);}}
+  .mark.o{border:0.2em solid var(--o);border-radius:50%;}
+  .mark.x{position:relative;}
+  .mark.x::before,.mark.x::after{content:"";position:absolute;left:50%;top:0;width:0.2em;height:100%;
+    background:var(--x);border-radius:0.1em;transform-origin:center;}
+  .mark.x::before{transform:translateX(-50%) rotate(45deg);}
+  .mark.x::after{transform:translateX(-50%) rotate(-45deg);}
+  #again{display:none;border:none;font-family:inherit;font-weight:900;font-size:18px;color:#fff;
+    background:linear-gradient(180deg,#7bdc8a,#34c759);border-radius:999px;padding:12px 28px;box-shadow:0 4px 0 #1f9e44;cursor:pointer;margin-bottom:6px;}
+  #again.show{display:block;}
+  #again:active{transform:translateY(2px);box-shadow:0 1px 0 #1f9e44;}
+  /* ── ねこ・えんしゅつ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:34px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){ header{padding:4px 14px 0;} .title{font-size:18px;} #status{font-size:16px;} #board{width:min(60vw,70vh);} #cat{display:none;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">⭕❌ まるばつ</div></header>
+
+  <div class="bar" id="modeBar">
+    <button class="tab on" data-mode="1p">👤 ひとり</button>
+    <button class="tab" data-mode="2p">👥 ふたり</button>
+  </div>
+  <div id="status"></div>
+
+  <div id="stage"><div id="board"></div></div>
+  <button id="again">もういちど</button>
+
+  <div id="cat">🐱</div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   まるばつ（○×）
+   - ひとり：CPUと たいせん（あなた=○ せんて、CPU=×）
+   - ふたり：○と× こうたいで タップ
+   - そろったら かち、ぜんぶ うまったら ひきわけ
+   - CPUは「かてるなら かつ／ピンチは まもる／たまに すきあり」
+   - おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let mode="1p", board=[], cur="o", over=false, busy=false;
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function placeSnd(){ beep(620,0.05,"sine",0.12); }
+function winSnd(){ [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.12,"triangle",0.18),i*80)); }
+function drawSnd(){ beep(330,0.15,"sine",0.12); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+const catEl=document.getElementById("cat");
+function catJump(face){ catEl.textContent=face||"🐱"; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump"); if(face) setTimeout(()=>catEl.textContent="🐱",1100); }
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","⭕","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── ばんを つくる ──
+const boardEl=document.getElementById("board"), cells=[];
+function buildBoard(){
+  boardEl.innerHTML=""; cells.length=0;
+  for(let i=0;i<9;i++){
+    const c=document.createElement("div"); c.className="cell"; c.dataset.i=i;
+    c.addEventListener("pointerdown",(e)=>{ e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume(); tap(i); });
+    boardEl.appendChild(c); cells.push(c);
+  }
+}
+function render(){
+  for(let i=0;i<9;i++){
+    const c=cells[i];
+    if(board[i] && !c.firstChild){ const m=document.createElement("span"); m.className="mark "+board[i]; c.appendChild(m); }
+    else if(!board[i] && c.firstChild){ c.innerHTML=""; }
+    c.classList.remove("win");
+  }
+}
+
+// ── かちはんてい ──
+function winnerLine(b){ for(const L of LINES){ const[a,c,d]=L; if(b[a]&&b[a]===b[c]&&b[a]===b[d]) return L; } return null; }
+function full(b){ return b.every(v=>v); }
+
+// ── タップ ──
+function tap(i){
+  if(over||busy||board[i]) return;
+  if(mode==="1p" && cur!=="o") return;   // CPUのばんは おせない
+  doMove(i, cur);
+}
+function doMove(i, who){
+  board[i]=who; placeSnd(); render();
+  const L=winnerLine(board);
+  if(L){ endGame(who, L); return; }
+  if(full(board)){ endGame(null, null); return; }
+  cur = (who==="o") ? "x" : "o";
+  updateStatus();
+  if(mode==="1p" && cur==="x"){ busy=true; setTimeout(cpuTurn, 600); }
+}
+function cpuTurn(){
+  const i=cpuPick();
+  busy=false;
+  if(i>=0) doMove(i,"x");
+}
+// CPU：かてる手→（70%で）ふせぐ手→センター→かど→ランダム
+function cpuPick(){
+  const empty=[...board.keys()].filter(i=>!board[i]);
+  if(!empty.length) return -1;
+  // かてる手
+  for(const i of empty){ const b=board.slice(); b[i]="x"; if(winnerLine(b)) return i; }
+  // ふせぐ手（たまに みのがす＝子供が かてる）
+  if(Math.random()<0.72){ for(const i of empty){ const b=board.slice(); b[i]="o"; if(winnerLine(b)) return i; } }
+  // センター
+  if(!board[4]) return 4;
+  // かど
+  const corners=[0,2,6,8].filter(i=>!board[i]);
+  if(corners.length && Math.random()<0.7) return corners[(Math.random()*corners.length)|0];
+  // ランダム
+  return empty[(Math.random()*empty.length)|0];
+}
+
+// ── おわり ──
+function endGame(who, L){
+  over=true; busy=false;
+  if(L) L.forEach(i=>cells[i].classList.add("win"));
+  const st=document.getElementById("status");
+  if(!who){ st.innerHTML="ひきわけ！"; drawSnd(); catJump("😺"); }
+  else if(mode==="1p"){
+    if(who==="o"){ st.innerHTML="あなたの かち！🎉"; winSnd(); fanfare(); confetti(); catJump("😻"); }
+    else { st.innerHTML="CPUの かち！"; winSnd(); catJump("🙀"); }
+  } else {
+    st.innerHTML=`<span class="${who}">${who==="o"?"○":"×"}</span> の かち！🎉`; winSnd(); fanfare(); confetti(); catJump("😻");
+  }
+  document.getElementById("again").classList.add("show");
+}
+
+// ── ステータス ──
+function updateStatus(){
+  const st=document.getElementById("status");
+  if(mode==="1p"){
+    st.innerHTML = cur==="o" ? `あなた <span class="o">○</span> の ばん` : `CPU <span class="x">×</span> が かんがえてる…`;
+  } else {
+    st.innerHTML = `<span class="${cur}">${cur==="o"?"○":"×"}</span> の ばん`;
+  }
+}
+
+// ── あたらしい ゲーム ──
+function newGame(){
+  board=Array(9).fill(""); cur="o"; over=false; busy=false;
+  render(); cells.forEach(c=>c.classList.remove("win"));
+  document.getElementById("again").classList.remove("show");
+  updateStatus();
+}
+document.getElementById("again").addEventListener("click",()=>{ beep(660,0.06,"sine",0.12); newGame(); });
+document.querySelectorAll("#modeBar .tab").forEach(b=>b.addEventListener("click",()=>{
+  mode=b.dataset.mode; document.querySelectorAll("#modeBar .tab").forEach(x=>x.classList.toggle("on",x===b));
+  beep(620,0.05,"sine",0.1); newGame();
+}));
+
+// ── スタート ──
+buildBoard(); newGame();
+setTimeout(()=>catJump("😺"),400);
+</script>
+</body>
+</html>
