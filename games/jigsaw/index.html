@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="パズル" />
+<title>パズル｜こどもあそびば</title>
+<meta name="description" content="5〜8さいくらいの こども向けの ジグソーパズル。すきな えを えらんで、ピースを いれかえて かんせいさせよう。3つの むずかしさ。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/jigsaw/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="パズル｜こどもあそびば" />
+<meta property="og:description" content="すきな えを えらんで ピースを いれかえて かんせいさせよう！3つの むずかしさ。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/jigsaw/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── ジグソーパズル（えを えらぶ→ピースいれかえ）── */
+  :root{ --bg1:#fff7d6; --bg2:#ffe1b8; --ink:#5b4636; --card:#fffdf5; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:#fffdf5;box-shadow:0 4px 0 #e8c98a;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #e8c98a;}
+  header{width:100%;max-width:560px;text-align:center;padding:8px 14px 0;}
+  .title{font-size:21px;font-weight:900;letter-spacing:1px;}
+  .btn{border:none;font-family:inherit;font-weight:800;color:var(--ink);background:#fffdf5;border-radius:999px;
+    padding:8px 16px;box-shadow:0 3px 0 #e8c98a;cursor:pointer;transition:transform .08s;font-size:15px;}
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #e8c98a;}
+  .btn.on{color:#fff;background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 3px 0 #c96a00;}
+  .btn.go{color:#fff;background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 3px 0 #1f9e44;}
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:6px 12px 14px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── えらぶ ── */
+  .bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:4px 0 8px;}
+  .scrtitle{font-weight:900;font-size:16px;text-align:center;margin:2px 0 6px;}
+  #picGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto;padding:4px;}
+  .pcard{aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:#e8dcc0;cursor:pointer;box-shadow:0 4px 0 #c7b98a;position:relative;}
+  .pcard:active{transform:translateY(2px);box-shadow:0 2px 0 #c7b98a;}
+  .pcard img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pcard .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px;}
+  /* ── パズル ── */
+  #puzzle-s{align-items:center;gap:8px;}
+  #board{display:grid;width:min(92vw,460px,70vh);aspect-ratio:1/1;gap:2px;
+    background:#bfa97e;border-radius:12px;padding:2px;box-shadow:0 8px 0 #e8c98a, 0 14px 24px rgba(0,0,0,.12);touch-action:none;}
+  .pz{border-radius:4px;background-repeat:no-repeat;background-color:#cdeafd;cursor:grab;
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#3a6;font-size:5vw;overflow:hidden;}
+  .pz.correct{outline:2px solid #7bdc8a;outline-offset:-2px;}
+  .pz.dragging{opacity:.3;}
+  #ghost{position:fixed;pointer-events:none;z-index:90;border-radius:6px;background-repeat:no-repeat;
+    box-shadow:0 8px 18px rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;font-weight:900;color:#3a6;}
+  #pbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  #pmsg{font-weight:900;font-size:17px;min-height:22px;color:#e07b00;text-align:center;}
+  /* みほん オーバーレイ */
+  #peek{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(91,70,54,.7);z-index:88;padding:24px;}
+  #peek.show{display:flex;}
+  #peek img{max-width:86vw;max-height:74vh;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.4);background:#fff;}
+  /* ── ねこ・えんしゅつ ── */
+  #cat{position:fixed;right:10px;bottom:8px;font-size:32px;z-index:65;animation:bob 2.4s ease-in-out infinite;transform-origin:bottom center;pointer-events:none;}
+  #cat.jump{animation:catjump .6s ease;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+  @keyframes catjump{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-16px) scale(1.2) rotate(-8deg);}55%{transform:translateY(0) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:480px){ header{padding:4px 14px 0;} .title{font-size:18px;} #board{width:min(70vw,64vh);} #cat{display:none;} .pz{font-size:3vh;} }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🧩 パズル</div></header>
+
+  <div id="app">
+    <!-- えらぶ -->
+    <section id="select-s" class="screen show">
+      <div class="bar" id="diffBar">
+        <button class="btn on" data-n="3">やさしい</button>
+        <button class="btn" data-n="4">ふつう</button>
+        <button class="btn" data-n="5">むずかしい</button>
+      </div>
+      <div class="scrtitle">すきな えを えらんでね</div>
+      <div id="picGrid"></div>
+    </section>
+
+    <!-- パズル -->
+    <section id="puzzle-s" class="screen">
+      <div id="pmsg">ピースを いれかえて かんせいさせてね</div>
+      <div id="board"></div>
+      <div id="pbtns">
+        <button class="btn" id="peekBtn">👀 みほん</button>
+        <button class="btn" id="shuffleBtn">🔀 やりなおし</button>
+        <button class="btn" id="backBtn">◀ えらぶ</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="ghost"></div>
+  <div id="cat">🐱</div>
+  <div id="confetti"></div>
+  <div id="peek"><img id="peekImg" alt="みほん" /></div>
+
+<script>
+/* =========================================================
+   ジグソーパズル
+   - 10まいの えから えらぶ × むずかしさ3だんかい（3×3/4×4/5×5）
+   - ピースを ドラッグして いれかえ、ただしい いちに ならべる
+   - ピースは えを CSS で スライス（background-position % ＝ リサイズ自動）
+   - えが まだ／読めない時は ばんごう パズルで だいよう
+   - おとは Web Audio（ファイル ふよう）
+   ========================================================= */
+const PICS=[
+  {id:"lion",name:"ライオン",e:"🦁"},{id:"elephant",name:"ぞう",e:"🐘"},{id:"penguin",name:"ペンギン",e:"🐧"},
+  {id:"dolphin",name:"いるか",e:"🐬"},{id:"train",name:"でんしゃ",e:"🚆"},{id:"rocket",name:"ロケット",e:"🚀"},
+  {id:"castle",name:"おしろ",e:"🏰"},{id:"dino",name:"きょうりゅう",e:"🦖"},{id:"garden",name:"おはな",e:"🌼"},
+  {id:"car",name:"くるま",e:"🚗"},
+];
+let N=3, pic=null, order=[], imgOK=false;
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.06,t="sine",v=0.12){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function tick(){ beep(620,0.04,"sine",0.1); }
+function snap(){ beep(880,0.05,"triangle",0.14); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+
+const catEl=document.getElementById("cat");
+function catJump(face){ catEl.textContent=face||"🐱"; catEl.classList.remove("jump"); void catEl.offsetWidth; catEl.classList.add("jump"); if(face) setTimeout(()=>catEl.textContent="🐱",1100); }
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🧩","🌈"];for(let i=0;i<24;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── がめん ──
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+
+// ── えらぶ ──
+const picGrid=document.getElementById("picGrid");
+function buildSelect(){
+  picGrid.innerHTML="";
+  PICS.forEach(p=>{
+    const c=document.createElement("div"); c.className="pcard";
+    c.innerHTML=`<img src="assets/${p.id}.png" alt="${p.name}" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${p.e}'}))">`;
+    c.addEventListener("click",()=>{ if(actx&&actx.state==="suspended")actx.resume(); tick(); startPuzzle(p); });
+    picGrid.appendChild(c);
+  });
+}
+document.querySelectorAll("#diffBar .btn").forEach(b=>b.addEventListener("click",()=>{
+  N=+b.dataset.n; document.querySelectorAll("#diffBar .btn").forEach(x=>x.classList.toggle("on",x===b)); tick();
+}));
+
+// ── パズル ──
+const board=document.getElementById("board");
+function startPuzzle(p){
+  pic=p;
+  // えが よめるか かくにん
+  imgOK=false;
+  const probe=new Image();
+  probe.onload=()=>{ imgOK=true; render(); };
+  probe.onerror=()=>{ imgOK=false; render(); };
+  probe.src="assets/"+p.id+".png";
+  // ならびを シャッフル（とけてない じょうたいに）
+  do{ order=[...Array(N*N).keys()]; for(let i=order.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[order[i],order[j]]=[order[j],order[i]];} }while(isSolved());
+  document.getElementById("pmsg").textContent="ピースを いれかえて かんせいさせてね";
+  board.style.gridTemplateColumns=`repeat(${N},1fr)`;
+  render();
+  show("puzzle-s");
+}
+function pieceStyle(el, pieceIdx){
+  const r=Math.floor(pieceIdx/N), c=pieceIdx%N;
+  if(imgOK){
+    el.style.backgroundImage=`url(assets/${pic.id}.png)`;
+    el.style.backgroundSize=`${N*100}% ${N*100}%`;
+    el.style.backgroundPosition=`${N>1?c/(N-1)*100:0}% ${N>1?r/(N-1)*100:0}%`;
+    el.textContent="";
+  }else{
+    el.style.backgroundImage="none";
+    el.style.background=`hsl(${pieceIdx/(N*N)*360},70%,75%)`;
+    el.textContent=(pieceIdx+1);
+  }
+}
+function render(){
+  board.innerHTML="";
+  for(let cell=0;cell<N*N;cell++){
+    const pieceIdx=order[cell];
+    const el=document.createElement("div"); el.className="pz"+(pieceIdx===cell?" correct":"");
+    el.dataset.cell=cell;
+    pieceStyle(el, pieceIdx);
+    board.appendChild(el);
+  }
+}
+function isSolved(){ return order.every((v,i)=>v===i); }
+
+// ── ドラッグで いれかえ ──
+const ghost=document.getElementById("ghost");
+let drag=null; // {fromCell, pieceIdx}
+board.addEventListener("pointerdown",(e)=>{
+  const el=e.target.closest(".pz"); if(!el) return;
+  e.preventDefault(); if(actx&&actx.state==="suspended")actx.resume();
+  const fromCell=+el.dataset.cell, pieceIdx=order[fromCell];
+  drag={fromCell,pieceIdx,el};
+  el.classList.add("dragging");
+  const rect=el.getBoundingClientRect();
+  ghost.style.width=rect.width+"px"; ghost.style.height=rect.height+"px";
+  ghost.style.fontSize=getComputedStyle(el).fontSize;
+  // ghost の みため
+  if(imgOK){ ghost.style.backgroundImage=el.style.backgroundImage; ghost.style.backgroundSize=el.style.backgroundSize; ghost.style.backgroundPosition=el.style.backgroundPosition; ghost.textContent=""; }
+  else { ghost.style.backgroundImage="none"; ghost.style.background=el.style.background; ghost.textContent=el.textContent; }
+  ghost.style.display="flex";
+  moveGhost(e);
+  try{ board.setPointerCapture(e.pointerId); }catch(_){}
+});
+function moveGhost(e){ const w=parseFloat(ghost.style.width),h=parseFloat(ghost.style.height); ghost.style.left=(e.clientX-w/2)+"px"; ghost.style.top=(e.clientY-h/2)+"px"; }
+board.addEventListener("pointermove",(e)=>{ if(!drag) return; e.preventDefault(); moveGhost(e); });
+board.addEventListener("pointerup",(e)=>{
+  if(!drag) return; e.preventDefault();
+  ghost.style.display="none";
+  // どの セルに おとした？
+  const r=board.getBoundingClientRect();
+  const col=Math.floor((e.clientX-r.left)/(r.width/N));
+  const row=Math.floor((e.clientY-r.top)/(r.height/N));
+  if(col>=0&&col<N&&row>=0&&row<N){
+    const toCell=row*N+col;
+    if(toCell!==drag.fromCell){
+      [order[drag.fromCell],order[toCell]]=[order[toCell],order[drag.fromCell]];
+      snap();
+    }
+  }
+  drag=null; render();
+  if(isSolved()) win();
+});
+board.addEventListener("pointercancel",()=>{ if(drag){ghost.style.display="none";drag=null;render();} });
+
+function win(){
+  fanfare(); confetti(); catJump("😻");
+  document.getElementById("pmsg").textContent="できた！ かんせい！🎉";
+}
+
+// ── ボタン ──
+document.getElementById("backBtn").addEventListener("click",()=>{ tick(); show("select-s"); });
+document.getElementById("shuffleBtn").addEventListener("click",()=>{ tick(); startPuzzle(pic); });
+const peek=document.getElementById("peek");
+document.getElementById("peekBtn").addEventListener("click",()=>{
+  tick();
+  if(imgOK){ document.getElementById("peekImg").src="assets/"+pic.id+".png"; peek.classList.add("show"); }
+  else { document.getElementById("pmsg").textContent="えは じゅんびちゅう。ばんごうを 1から ならべてね"; }
+});
+peek.addEventListener("click",()=>peek.classList.remove("show"));
+
+// ── スタート ──
+buildSelect();
+setTimeout(()=>catJump("😺"),400);
+</script>
+</body>
+</html>
