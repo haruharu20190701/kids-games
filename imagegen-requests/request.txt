@@ -1,3 +1,6 @@
 kind: icon
 ---
-machigai | cute kawaii flat vector app icon of a big magnifying glass over a colorful picture with a small red question mark, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+pet | cute kawaii flat vector app icon of a happy puppy dog with a red heart, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+silhouette | cute kawaii flat vector app icon of a black cat silhouette next to a big colorful question mark, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids quiz game icon, high quality
+shopping | cute kawaii flat vector app icon of a shopping basket full of colorful groceries, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+dressup | cute kawaii flat vector app icon of a cute pink dress with a bow and a little hat, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
