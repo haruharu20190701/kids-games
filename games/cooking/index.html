@@ -89,6 +89,14 @@
   .ing{font-size:31px;width:52px;height:50px;border:none;border-radius:14px;background:#fff6ec;
     box-shadow:0 3px 0 #f0d4b4;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   .ing:active{transform:translateY(2px);box-shadow:0 1px 0 #f0d4b4;}
+  /* ── ざいりょうの みため（がぞう→なければ えもじ）── */
+  .ing .fimg{width:42px;height:42px;object-fit:contain;pointer-events:none;}
+  .ing .fchar{font-size:31px;line-height:1;}
+  .food .fimg{width:46px;height:46px;object-fit:contain;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));}
+  .food .fchar{font-size:40px;line-height:1;}
+  .chip .e{display:flex;align-items:center;}
+  .chip .e .fimg{width:22px;height:22px;object-fit:contain;display:block;}
+  .chip .e .fchar{font-size:18px;line-height:1;}
 
   /* ── キラキラ／ありがとう ── */
   .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
@@ -178,8 +186,23 @@ const DISHES=[
   {key:"donut",    name:"ドーナツとミルク",   emoji:"🍩", items:["🍩","🥛"]},
   {key:"tamago",   name:"たまごやきごはん",   emoji:"🍳", items:["🍚","🍳"]},
 ];
-// だなに まぜる ダミーの ざいりょう（ちゅうもんに ない もの）
-const EXTRA=["🍌","🍎","🍇","🥚","🍞","🍪","🧁","🍮","🍫","🍓","🥦","🍅","🌽","🥕","🍗","🍟","🥤","🍵","🥛","🧀","🍯","🍩","🍰","🍣","🥞","🥟"];
+// ざいりょうの えもじ → がぞうファイル名（assets/ing_<key>.png）。なければ えもじで えがく
+const ING={
+  "🍔":"burger","🍟":"fries","🥤":"soda","🍙":"onigiri","🍵":"tea","🍜":"ramen","🥟":"gyoza",
+  "🍛":"curryrice","🥗":"salad","🍣":"sushi","🥞":"pancake","🍓":"strawberry","🍯":"honey",
+  "🍕":"pizza","🍗":"chicken","🥦":"broccoli","🍅":"tomato","🍦":"icecream","🍰":"cake",
+  "🍫":"chocolate","🍝":"spaghetti","🧀":"cheese","🌭":"hotdog","🥪":"sandwich","🥛":"milk",
+  "🍚":"rice","🍳":"friedegg","🍩":"donut"
+};
+// だなに まぜる ダミー＝ほかの りょうりの ざいりょう（ぜんぶ がぞうあり）
+const EXTRA=Object.keys(ING);
+// ざいりょう1つの みため：がぞう（よめなければ えもじ）
+function foodInner(ch){
+  const k=ING[ch];
+  if(k) return `<img class="fimg" src="assets/ing_${k}.png" alt="${ch}" draggable="false" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fchar',textContent:this.alt}))">`;
+  return `<span class="fchar">${ch}</span>`;
+}
 const CUSTS=["🐰","🐱","🐶","🐻","🐼","🦊","🐯","🐵","🐷","🐸","🦁","🐨","🐧","🐮","🐹","🦄"];
 const THANKS=["おいしい！ありがとう！","とっても おいしい！","また きます！","だいすき！","ごちそうさま！","にこにこ！"];
 const HAPPYFACE=["😋","😻","🤩","😆","🥰","😸"];
@@ -227,7 +250,7 @@ function renderOrder(){
     const got=cooked.has(ch);
     const c=document.createElement("div");
     c.className="chip"+(got?" got":"");
-    c.innerHTML=`<span class="e">${ch}</span>`+(got?`<span class="ck">✓</span>`:"");
+    c.innerHTML=`<span class="e">${foodInner(ch)}</span>`+(got?`<span class="ck">✓</span>`:"");
     elNeed.appendChild(c);
   }
 }
@@ -237,7 +260,7 @@ function renderPlate(){
   [...elPlate.querySelectorAll(".food")].forEach(n=>n.remove());
   for(const p of plate){
     const s=document.createElement("span");
-    s.className="food "+(p.cooked?"cooked":"raw"); s.textContent=p.ch;
+    s.className="food "+(p.cooked?"cooked":"raw"); s.innerHTML=foodInner(p.ch);
     s.style.left=p.x+"%"; s.style.top=p.y+"%"; s.style.setProperty("--r",p.r+"deg");
     elPlate.appendChild(s);
   }
@@ -248,7 +271,7 @@ function renderPlate(){
 function renderShelf(list){
   elShelf.innerHTML='<div class="label">ざいりょうを タップして おさらに いれてね</div>';
   for(const ch of list){
-    const b=document.createElement("button"); b.className="ing"; b.textContent=ch;
+    const b=document.createElement("button"); b.className="ing"; b.innerHTML=foodInner(ch);
     b.addEventListener("click",()=>addFood(ch));
     elShelf.appendChild(b);
   }
