@@ -1,6 +1,8 @@
-kind: icon
+kind: custom
+dest: games/pet/assets
+size: 320
+transparent: true
 ---
-pet | cute kawaii flat vector app icon of a happy puppy dog with a red heart, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-silhouette | cute kawaii flat vector app icon of a black cat silhouette next to a big colorful question mark, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids quiz game icon, high quality
-shopping | cute kawaii flat vector app icon of a shopping basket full of colorful groceries, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
-dressup | cute kawaii flat vector app icon of a cute pink dress with a bow and a little hat, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+pet_dog | cute kawaii flat illustration of a happy sitting puppy dog facing front, full body, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids pet, high quality
+pet_cat | cute kawaii flat illustration of a happy sitting kitten cat facing front, full body, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids pet, high quality
+pet_rabbit | cute kawaii flat illustration of a happy sitting bunny rabbit facing front, full body, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids pet, high quality
