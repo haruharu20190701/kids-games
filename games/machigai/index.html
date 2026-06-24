@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#bfe3ff" />
+<title>まちがいさがし｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの まちがいさがし。2まいの えを くらべて ちがう ところを みつけてタップ。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/machigai/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="まちがいさがし｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの まちがいさがし。2まいの えを くらべて ちがう ところを さがそう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/machigai/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(#dff1ff,#cfe8ff);color:#2b5a82;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;
+  }
+  /* ── うえのバー ── */
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#aed8ff;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#1f5b8f;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #7fb6e6;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#1f5b8f;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #7fb6e6;}
+  #lv{font-size:15px;font-weight:900;color:#1f5b8f;background:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 3px 0 #7fb6e6;white-space:nowrap;}
+
+  /* ── すすみ（あと なんこ）── */
+  #prog{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;padding:5px 10px 2px;}
+  #prog .txt{font-size:16px;font-weight:900;color:#1f5b8f;}
+  #dots{display:flex;gap:5px;}
+  .dot{width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #9cc8ee;}
+  .dot.on{background:#ff3b6b;border-color:#ff3b6b;}
+
+  /* ── 2まいの え ── */
+  #pics{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:6px;}
+  .pic{position:relative;container-type:size;
+    width:min(94vw, calc((100dvh - 168px)/2 * 1.3333));
+    aspect-ratio:4/3;border-radius:18px;overflow:hidden;border:5px solid #fff;
+    box-shadow:0 6px 16px rgba(40,90,140,.22);background:#eaf6ff;cursor:pointer;}
+  .pic.bad{animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translate(0,0);}25%{transform:translate(-5px,2px);}75%{transform:translate(5px,-2px);}}
+  /* せかいの しゅるい（はいけい）*/
+  .th-park{background:linear-gradient(#bfe9ff 0 55%,#bff0b0 55% 100%);}
+  .th-sea{background:linear-gradient(#7fd6ff,#1f8fd6);}
+  .th-room{background:linear-gradient(#ffe6f2 0 60%,#ffd0a8 60% 100%);}
+  .th-sweet{background:linear-gradient(#fff0c2,#ffd9ec);}
+  .spr{position:absolute;transform:translate(-50%,-50%) scaleX(var(--fx,1));line-height:1;
+    font-size:calc(var(--sz,1) * 9cqw);filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));pointer-events:none;}
+  .ring{position:absolute;width:15cqw;height:15cqw;border:1cqw solid #ff2d6f;border-radius:50%;
+    transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 0 .4cqw rgba(255,255,255,.9) inset;animation:rpop .35s cubic-bezier(.3,1.6,.6,1);}
+  @keyframes rpop{0%{transform:translate(-50%,-50%) scale(.3);}100%{transform:translate(-50%,-50%) scale(1);}}
+  .hintring{position:absolute;width:17cqw;height:17cqw;border:1cqw dashed #ffb300;border-radius:50%;
+    transform:translate(-50%,-50%);pointer-events:none;animation:hp 1.2s ease-out forwards;}
+  @keyframes hp{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}30%{opacity:1;}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3);}}
+  .miss{position:absolute;font-size:11cqw;transform:translate(-50%,-50%);pointer-events:none;animation:mf .6s ease-out forwards;}
+  @keyframes mf{0%{opacity:1;transform:translate(-50%,-50%) scale(.6);}100%{opacity:0;transform:translate(-50%,-50%) scale(1.4);}}
+
+  /* ── したのボタン ── */
+  #acts{flex:0 0 auto;display:flex;gap:8px;padding:5px 12px;justify-content:center;}
+  .abtn{font-size:16px;font-weight:900;border:none;border-radius:16px;padding:11px 18px;cursor:pointer;color:#1f5b8f;background:#fff;box-shadow:0 4px 0 #7fb6e6;}
+  .abtn:active{transform:translateY(2px);box-shadow:0 2px 0 #7fb6e6;}
+
+  /* ── キラキラ／クリア ── */
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+  #clear{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:25;background:rgba(30,90,140,.18);}
+  #clear.show{display:flex;}
+  #clear .box{background:#fff;border-radius:26px;padding:22px 30px;text-align:center;box-shadow:0 16px 44px rgba(0,0,0,.28);animation:bp .35s cubic-bezier(.3,1.5,.6,1);}
+  @keyframes bp{0%{transform:scale(.4);}100%{transform:scale(1);}}
+  #clear .f{font-size:62px;}
+  #clear .t{font-size:26px;font-weight:900;color:#ff7a00;margin:4px 0 2px;}
+  #clear .s{font-size:15px;font-weight:800;color:#2b5a82;}
+
+  @media (min-aspect-ratio:1/1){
+    #pics{flex-direction:row;}
+    .pic{width:min(46vw, calc((100dvh - 150px) * 1.3333));}
+  }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">まちがいさがし</div>
+    <div id="lv">レベル 1</div>
+  </div>
+
+  <div id="prog">
+    <span class="txt" id="ptxt">ちがう ところを さがそう！</span>
+    <div id="dots"></div>
+  </div>
+
+  <div id="pics">
+    <div class="pic" id="picA"></div>
+    <div class="pic" id="picB"></div>
+  </div>
+
+  <div id="acts">
+    <button class="abtn" id="hint">💡 ヒント</button>
+    <button class="abtn" id="skip">つぎの え ▶</button>
+  </div>
+
+  <div id="clear"><div class="box"><div class="f" id="cf">🎉</div><div class="t" id="ct">ぜんぶ みつけた！</div><div class="s" id="cs"></div></div></div>
+
+<script>
+"use strict";
+/* =========================================================
+   まちがいさがし：おなじ シーンを 2まい つくり、かたほうだけ
+   「けす／ふやす／べつのものに／おおきさをかえる」で ちがいを つくる。
+   ちがう ところを タップ → ○がつく。ぜんぶ みつけたら クリア。
+   ・5さい向け：じかんせいげん なし、ヒント むせいげん、おおきめタップ
+   ・えもじで かんせい。あとで がぞうに さしかえ できる こうぞう
+   ========================================================= */
+
+// ── おと ──
+let actx=null;
+function tone(f,d=0.08,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function good(){tone(680,0.08,"triangle",0.13);tone(1020,0.10,"sine",0.11,0.05);}
+function bad(){tone(180,0.14,"square",0.10);}
+function cheer(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
+
+// ── せかいの しゅるい（はいけい＋でてくるもの）──
+const THEMES=[
+  {cls:"th-park", items:["🐶","🐱","🐰","🦊","🐻","🐤","🌸","🌷","🦋","🐝","🐞","🍄","🌳","🐢","🐌","🌼","🐶","🦔","🐿️"]},
+  {cls:"th-sea",  items:["🐠","🐟","🐡","🦀","🐙","🦑","🐚","⭐","🐬","🦈","🐳","🦐","🐢","🪸","🐧","🌊","🐊","🦭"]},
+  {cls:"th-room", items:["🧸","🎈","⚽","🚗","🪀","🎀","📚","🍭","🎁","🪁","🧩","🎨","🦄","🍪","🚂","🪅","🎺","🛹"]},
+  {cls:"th-sweet",items:["🍎","🍌","🍓","🍇","🍒","🍩","🍪","🧁","🍰","🍭","🍬","🍉","🍑","🥝","🍊","🍫","🍯","🥧"]},
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ── じょうたい ──
+let round=1, sprites=[], diffs=[], found=0;
+let cleared=0; try{cleared=parseInt(localStorage.getItem("machigaiCleared")||"0",10)||0;}catch(e){}
+
+const picA=document.getElementById("picA"), picB=document.getElementById("picB");
+const elDots=document.getElementById("dots"), elPtxt=document.getElementById("ptxt"), elLv=document.getElementById("lv");
+
+// ── おなじ ばしょに かさならないように おく ──
+function placePositions(n){
+  const pos=[]; let guard=0;
+  while(pos.length<n && guard<2000){
+    guard++;
+    const x=8+Math.random()*84, y=14+Math.random()*72;
+    if(pos.every(p=>Math.hypot(p.x-x,(p.y-y)*0.9)>16)) pos.push({x,y});
+  }
+  return pos;
+}
+
+// ── もんだいを つくる ──
+function makePuzzle(){
+  const theme=THEMES[(round-1)%THEMES.length];
+  const pool=theme.items;
+  const D=Math.min(3+Math.floor((round-1)/2),5);     // ちがいの かず 3→5
+  const N=8+D+Math.min(round,3);                       // ものの かず
+  const pos=placePositions(N);
+  sprites=pos.map(p=>{
+    const ch=pick(pool), sz=0.85+Math.random()*0.4, fx=Math.random()<0.5?1:-1;
+    return {x:p.x,y:p.y,
+      top:{show:true,ch,sz,fx}, bottom:{show:true,ch,sz,fx}};
+  });
+  // ちがいを えらぶ
+  diffs=[];
+  const idx=shuffle(sprites.map((_,i)=>i)).slice(0,D);
+  const types=shuffle(["remove","add","swap","resize","remove","swap","resize"]);
+  idx.forEach((i,k)=>{
+    const s=sprites[i], t=types[k%types.length];
+    if(t==="remove"){ s.bottom.show=false; }                       // したの えから けす
+    else if(t==="add"){ s.top.show=false; }                        // うえの えから けす（＝したに ふえる）
+    else if(t==="swap"){                                           // べつの ものに
+      let n=pick(pool); let g=0; while((n===s.top.ch)&&g++<20) n=pick(pool); s.bottom.ch=n;
+    } else if(t==="resize"){                                       // おおきさを かえる
+      s.bottom.sz = s.top.sz * (Math.random()<0.5?0.55:1.7);
+    }
+    diffs.push({x:s.x,y:s.y,found:false});
+  });
+  found=0;
+  theme.cls && (picA.className="pic "+theme.cls, picB.className="pic "+theme.cls);
+  renderPic(picA,"top"); renderPic(picB,"bottom");
+  renderDots();
+  elLv.textContent="レベル "+round;
+  elPtxt.textContent="ちがう ところを さがそう！";
+}
+
+// ── え を えがく ──
+function renderPic(el, side){
+  el.innerHTML="";
+  for(const s of sprites){
+    const d=s[side]; if(!d.show) continue;
+    const sp=document.createElement("span"); sp.className="spr"; sp.textContent=d.ch;
+    sp.style.left=s.x+"%"; sp.style.top=s.y+"%";
+    sp.style.setProperty("--sz",d.sz); sp.style.setProperty("--fx",d.fx||1);
+    el.appendChild(sp);
+  }
+  // みつけた ○ を のせなおす
+  diffs.forEach(df=>{ if(df.found) addRing(el,df.x,df.y); });
+}
+function addRing(el,x,y){
+  const r=document.createElement("div"); r.className="ring";
+  r.style.left=x+"%"; r.style.top=y+"%"; el.appendChild(r);
+}
+function renderDots(){
+  elDots.innerHTML="";
+  for(let i=0;i<diffs.length;i++){
+    const d=document.createElement("div"); d.className="dot"+(diffs[i].found?" on":""); elDots.appendChild(d);
+  }
+}
+
+// ── タップ はんてい ──
+function onTap(el,e){
+  if(busy) return;
+  const r=el.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX);
+  const cy=(e.touches?e.touches[0].clientY:e.clientY);
+  const px=(cx-r.left)/r.width*100, py=(cy-r.top)/r.height*100;
+  for(const df of diffs){
+    if(df.found) continue;
+    if(Math.hypot(px-df.x,py-df.y)<10){   // ちかければ せいかい
+      df.found=true; found++;
+      addRing(picA,df.x,df.y); addRing(picB,df.x,df.y);
+      good(); burst(cx,cy); renderDots();
+      if(found>=diffs.length) winRound();
+      return;
+    }
+  }
+  // はずれ：やさしく ✗
+  bad();
+  const m=document.createElement("div"); m.className="miss"; m.textContent="✗";
+  m.style.left=px+"%"; m.style.top=py+"%"; el.appendChild(m); setTimeout(()=>m.remove(),600);
+  el.classList.add("bad"); setTimeout(()=>el.classList.remove("bad"),300);
+}
+[picA,picB].forEach(el=>{
+  el.addEventListener("pointerdown",ev=>onTap(el,ev));
+});
+
+// ── ヒント ──
+document.getElementById("hint").addEventListener("click",()=>{
+  if(busy) return;
+  const rest=diffs.filter(d=>!d.found); if(!rest.length) return;
+  const d=pick(rest);
+  [picA,picB].forEach(el=>{
+    const h=document.createElement("div"); h.className="hintring";
+    h.style.left=d.x+"%"; h.style.top=d.y+"%"; el.appendChild(h); setTimeout(()=>h.remove(),1200);
+  });
+  tone(880,0.1,"sine",0.1);
+});
+
+// ── つぎの え ──
+document.getElementById("skip").addEventListener("click",()=>{ if(!busy) makePuzzle(); });
+
+// ── クリア ──
+let busy=false;
+const elClear=document.getElementById("clear"), elCf=document.getElementById("cf"), elCs=document.getElementById("cs");
+function winRound(){
+  busy=true; cheer();
+  cleared++; try{localStorage.setItem("machigaiCleared",cleared);}catch(e){}
+  for(let i=0;i<10;i++) setTimeout(()=>burst(innerWidth*(0.2+Math.random()*0.6),innerHeight*(0.3+Math.random()*0.3)),i*60);
+  elCf.textContent=pick(["🎉","🌟","🏆","😻","🥳"]);
+  elCs.textContent="クリア "+cleared+"かい！";
+  elClear.classList.add("show");
+  setTimeout(()=>{
+    elClear.classList.remove("show"); busy=false;
+    round++; makePuzzle();
+  },1700);
+}
+
+// ── キラキラ ──
+function burst(x,y){
+  for(let i=0;i<6;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=pick(["⭐","✨","🌟","💛","🎈"]);
+    s.style.left=(x+(Math.random()*60-30))+"px"; s.style.top=(y+(Math.random()*30-15))+"px";
+    s.style.animationDelay=(Math.random()*0.15)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1100);
+  }
+}
+
+window.addEventListener("contextmenu",e=>e.preventDefault());
+// むきが かわったら え を 作りなおさず さいレイアウト（％なので そのままでOK）
+makePuzzle();
+</script>
+</body>
+</html>
