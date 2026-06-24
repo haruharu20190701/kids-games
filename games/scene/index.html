@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#bfe9ff" />
+<title>せかいづくり｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの、すきな はいけいに どうぶつや のりものの シールを おいて じぶんだけの せかいを つくるあそび。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/scene/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="せかいづくり｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの、すきな はいけいに シールを おいて じぶんだけの せかいを つくるあそび。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/scene/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:#eaf6ff; color:#42556b;
+    height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+    touch-action:none;
+  }
+  /* ── うえのバー ── */
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#bfe9ff;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#356;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #8ec9e6;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #8ec9e6;}
+  /* ── はいけい えらび ── */
+  #bgrow{display:flex;gap:7px;padding:7px 10px;overflow-x:auto;flex:0 0 auto;background:#d6f0ff;}
+  #bgrow::-webkit-scrollbar{display:none;}
+  .bgb{flex:0 0 auto;font-size:20px;min-width:54px;height:40px;border:3px solid transparent;border-radius:13px;
+    background:#fff;box-shadow:0 2px 0 #a9d6ec;display:flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 8px;}
+  .bgb .t{font-size:12px;font-weight:800;color:#577;}
+  .bgb.on{border-color:#ff9d3c;}
+  /* ── まんなか（おえかきステージ）── */
+  #stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  /* せんたく中シールの まわりの ボタン */
+  #handles{position:absolute;inset:0;pointer-events:none;display:none;}
+  #handles button{position:absolute;pointer-events:auto;width:40px;height:40px;border:none;border-radius:50%;
+    font-size:20px;background:#fff;box-shadow:0 3px 7px rgba(0,0,0,.28);transform:translate(-50%,-50%);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  #handles button:active{filter:brightness(.92);}
+  #h-del{background:#ffd9d9;} #h-rot{background:#dde9ff;}
+  #h-big{background:#d9ffe0;} #h-small{background:#fff3cf;}
+  /* ── したのシールたな ── */
+  #tray{flex:0 0 auto;background:#fff;border-top:2px solid #d4e8f3;}
+  #tabs{display:flex;gap:6px;padding:6px 8px 0;overflow-x:auto;}
+  #tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;font-size:18px;padding:5px 11px;border:none;border-radius:12px 12px 0 0;
+    background:#eef6fb;cursor:pointer;display:flex;align-items:center;gap:4px;}
+  .tab .t{font-size:12px;font-weight:800;color:#688;}
+  .tab.on{background:#bfe9ff;}
+  #items{display:flex;flex-wrap:wrap;gap:4px;padding:8px;height:104px;overflow-y:auto;align-content:flex-start;
+    justify-content:center;}
+  .item{font-size:30px;width:50px;height:48px;border:none;border-radius:13px;background:#f3f9fd;
+    box-shadow:0 2px 0 #d4e8f3;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .item:active{transform:translateY(2px);box-shadow:0 0 0 #d4e8f3;}
+  /* ── ねこの おうえん ── */
+  #cat{position:absolute;left:50%;top:14px;transform:translateX(-50%) scale(.6);opacity:0;
+    background:#fff;border-radius:18px;padding:8px 16px;box-shadow:0 6px 16px rgba(0,0,0,.18);
+    font-size:17px;font-weight:800;color:#456;pointer-events:none;transition:.25s;white-space:nowrap;z-index:5;}
+  #cat.show{opacity:1;transform:translateX(-50%) scale(1);}
+  #cat .f{font-size:30px;}
+  /* ── オーバーレイ（かくにん・ほぞん）── */
+  .ov{position:fixed;inset:0;background:rgba(20,40,60,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:18px;}
+  .ov.show{display:flex;}
+  .panel{background:#fff;border-radius:22px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+  .panel p{font-size:19px;font-weight:800;margin:4px 0 18px;color:#456;}
+  .panel .row{display:flex;gap:12px;justify-content:center;}
+  .pbtn{font-size:18px;font-weight:800;border:none;border-radius:15px;padding:12px 22px;cursor:pointer;color:#fff;}
+  .pbtn.no{background:#cdd6dd;color:#566;} .pbtn.yes{background:#ff7a7a;}
+  #saveimg{max-width:100%;max-height:62vh;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  #saveov .panel{max-width:90vw;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">せかいづくり</div>
+    <button class="hbtn" id="saveBtn" aria-label="ほぞん">💾</button>
+    <button class="hbtn" id="clearBtn" aria-label="ぜんぶけす">🗑️</button>
+  </div>
+
+  <div id="bgrow"></div>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="handles">
+      <button id="h-del" aria-label="けす">🗑️</button>
+      <button id="h-rot" aria-label="まわす">🔄</button>
+      <button id="h-big" aria-label="おおきく">➕</button>
+      <button id="h-small" aria-label="ちいさく">➖</button>
+    </div>
+    <div id="cat"><span class="f">😺</span> <span id="catmsg"></span></div>
+  </div>
+
+  <div id="tray">
+    <div id="tabs"></div>
+    <div id="items"></div>
+  </div>
+
+  <!-- ぜんぶけす かくにん -->
+  <div class="ov" id="clearov">
+    <div class="panel">
+      <p>ぜんぶ けして いい？</p>
+      <div class="row">
+        <button class="pbtn no" id="clearno">やめる</button>
+        <button class="pbtn yes" id="clearyes">けす</button>
+      </div>
+    </div>
+  </div>
+  <!-- ほぞん（ふるいiOS むけ ながおし）-->
+  <div class="ov" id="saveov">
+    <div class="panel">
+      <p>がぞうを ながおしして「しゃしんに ほぞん」</p>
+      <img id="saveimg" alt="" />
+      <div class="row" style="margin-top:14px">
+        <button class="pbtn no" id="saveclose">とじる</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+/* =========================================================
+   せかいづくり：はいけいを えらんで、シールを おいて、
+   うごかす・おおきくする・まわす。じぶんだけの せかいを つくる。
+   ・シールは えもじ（がぞう不要・すぐ遊べる）
+   ・ざひょうは「ひりつ(0〜1)」でもち、リサイズしても くずれない
+   ========================================================= */
+
+// ── おと（Web Audio・ファイル不使用）──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);
+}catch(e){}}
+function pop(){beep(660,0.06,"triangle",0.14);beep(990,0.05,"sine",0.10);}
+function chime(){beep(784,0.10,"sine",0.14);setTimeout(()=>beep(1047,0.14,"sine",0.13),90);}
+
+// ── ねこの おうえん ──
+const cat=document.getElementById("cat"), catmsg=document.getElementById("catmsg");
+let catT=null;
+function catReact(face,msg){
+  cat.querySelector(".f").textContent=face; catmsg.textContent=msg;
+  cat.classList.add("show"); clearTimeout(catT);
+  catT=setTimeout(()=>cat.classList.remove("show"),1500);
+}
+
+// ── シールの しゅるい ──
+const CATS=[
+  {key:"どうぶつ", icon:"🐶", items:["🐶","🐱","🐰","🦁","🐯","🐻","🐼","🐨","🐸","🐵","🦊","🐷","🐮","🐔","🐧","🦄","🦖","🦕","🐢","🐠","🐙","🦋","🐝","🐞","🦀","🐬","🐳","🦓","🦒","🐘","🐍","🦜","🦉","🐺","🦝","🐹","🐴","🐗"]},
+  {key:"ひと", icon:"🧒", items:["👦","👧","👶","🧒","👨","👩","🧑","👴","👵","🤴","👸","🧙","🧚","🧜","🦸","🦹","🥷","🤖","👽","👻","🎅","🤡","🧑‍🍳","💂"]},
+  {key:"のりもの", icon:"🚗", items:["🚗","🚌","🚕","🚙","🚓","🚑","🚒","🚜","🚲","🛴","🚂","🚀","✈️","🚁","⛵","🛸","🚤","🚚","🛺","🚇","🏍️","🚠","🎈","🪁"]},
+  {key:"しぜん", icon:"🌳", items:["🌳","🌲","🌴","🌵","🌸","🌻","🌺","🌷","🍄","🌈","☀️","🌙","⭐","🌟","☁️","⛅","⛄","🔥","💧","🌊","🌋","🏔️","🍂","🪨","🌼","🍁"]},
+  {key:"たべもの", icon:"🍎", items:["🍎","🍌","🍓","🍉","🍇","🍊","🍑","🍒","🥕","🌽","🍰","🧁","🍦","🍭","🍬","🍩","🍪","🍕","🍔","🌭","🍟","🍿","🥪","🍙","🍡","🍫"]},
+  {key:"まほう", icon:"🏰", items:["🏰","⛪","🗼","🎡","🎠","⛲","🌉","🎪","👑","💎","🔮","🪄","🗝️","🎁","🎀","🐉","🧜","🧚","👻","🎃","🛸","🚩","⚔️","🛡️","🌟","🪙"]},
+];
+
+// ── はいけい ──
+const BGS=[
+  {key:"ひるま", icon:"🌤️"},
+  {key:"よる",   icon:"🌙"},
+  {key:"うみ",   icon:"🐠"},
+  {key:"うちゅう",icon:"🚀"},
+  {key:"もり",   icon:"🌳"},
+  {key:"ゆき",   icon:"⛄"},
+  {key:"しろ",   icon:"⬜"},
+];
+let bgKey="ひるま";
+
+// ── ランダムだけど こていの てん（ほし・あわ・ゆき）──
+function pts(n,seed){const a=[];let s=seed;
+  const r=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  for(let i=0;i<n;i++)a.push({x:r(),y:r(),s:r()});return a;}
+const STARS=pts(46,12345), SNOW=pts(34,777), BUB=pts(16,555);
+
+// ── シールいちらん（じっさいの えのなかみ）──
+// s = { ch, fx, fy, fs, rot }  fx,fy=0〜1 / fs=みじか辺にたいする ひりつ / rot=ラジアン
+const stickers=[];
+let sel=null;            // せんたく中の シール（オブジェクト or null）
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const stage=document.getElementById("stage");
+const handles=document.getElementById("handles");
+
+// ── はいけいを えがく（W,H=バックバッファpx）──
+function drawBG(W,H){
+  const m=Math.min(W,H);
+  if(bgKey==="しろ"){ ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H); return; }
+  if(bgKey==="ひるま"){
+    let g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#aee6ff"); g.addColorStop(1,"#e9f9ff");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#bdeea2"; ctx.fillRect(0,H*0.74,W,H*0.26);          // くさ
+    ctx.fillStyle="#ffe14d"; circle(W*0.84,H*0.16,m*0.085);            // たいよう
+    return;
+  }
+  if(bgKey==="よる"){
+    let g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0b1740"); g.addColorStop(1,"#27306a");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#fff"; for(const p of STARS){ circle(p.x*W,p.y*H*0.8,1+p.s*m*0.006); }
+    ctx.fillStyle="#fdf6c9"; circle(W*0.82,H*0.18,m*0.08);             // つき
+    ctx.fillStyle="#2a3460"; ctx.fillRect(0,H*0.82,W,H*0.18);
+    return;
+  }
+  if(bgKey==="うみ"){
+    let g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#6fe0ee"); g.addColorStop(1,"#0a4f86");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="rgba(255,255,255,.5)"; ctx.lineWidth=Math.max(1,m*0.006);
+    for(const p of BUB){ ctx.beginPath(); ctx.arc(p.x*W,p.y*H,m*(0.012+p.s*0.02),0,7); ctx.stroke(); }
+    ctx.fillStyle="#f3e2a8"; ctx.fillRect(0,H*0.85,W,H*0.15);          // すな
+    return;
+  }
+  if(bgKey==="うちゅう"){
+    ctx.fillStyle="#06030f"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#fff"; for(const p of STARS){ circle(p.x*W,p.y*H,1+p.s*m*0.007); }
+    ctx.fillStyle="#c9824f"; circle(W*0.24,H*0.74,m*0.13);             // わくせい
+    ctx.strokeStyle="rgba(255,210,150,.6)"; ctx.lineWidth=m*0.012;
+    ctx.beginPath(); ctx.ellipse(W*0.24,H*0.74,m*0.2,m*0.06,-0.5,0,7); ctx.stroke();
+    return;
+  }
+  if(bgKey==="もり"){
+    let g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#d6f3a6"); g.addColorStop(1,"#7ec466");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#6cb155"; ctx.beginPath(); ctx.moveTo(0,H*0.7);
+    ctx.quadraticCurveTo(W*0.3,H*0.55,W*0.6,H*0.7); ctx.quadraticCurveTo(W*0.85,H*0.8,W,H*0.66);
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+    return;
+  }
+  if(bgKey==="ゆき"){
+    let g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#d6efff"); g.addColorStop(1,"#ffffff");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#eef7ff"; ctx.fillRect(0,H*0.78,W,H*0.22);
+    ctx.fillStyle="rgba(180,210,235,.9)"; for(const p of SNOW){ circle(p.x*W,p.y*H*0.78,1+p.s*m*0.006); }
+    return;
+  }
+}
+function circle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+
+// ── ぜんぶ えがく ──
+function render(){
+  const W=cv.width, H=cv.height, m=Math.min(W,H);
+  ctx.setTransform(1,0,0,1,0,0);
+  drawBG(W,H);
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  for(const s of stickers){
+    const px=s.fx*W, py=s.fy*H, fp=s.fs*m;
+    ctx.save(); ctx.translate(px,py); ctx.rotate(s.rot);
+    ctx.font=fp+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    ctx.fillText(s.ch,0,0);
+    ctx.restore();
+  }
+  positionHandles();
+}
+
+// ── せんたく中シールの まわりの ボタンを おく（CSSpx）──
+function positionHandles(){
+  if(!sel){ handles.style.display="none"; return; }
+  const r=cv.getBoundingClientRect();
+  const cw=r.width, ch=r.height, m=Math.min(cw,ch);
+  const px=sel.fx*cw, py=sel.fy*ch, half=sel.fs*m*0.6+18;
+  handles.style.display="block";
+  place("h-del", px-half, py-half);
+  place("h-rot", px+half, py-half);
+  place("h-small",px-half, py+half);
+  place("h-big", px+half, py+half);
+}
+function place(id,x,y){ const b=document.getElementById(id); b.style.left=x+"px"; b.style.top=y+"px"; }
+
+// ── キャンバスの おおきさあわせ（くっきり・ないようほじ）──
+function fit(){
+  const r=stage.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=Math.max(1,Math.round(r.width*dpr)), h=Math.max(1,Math.round(r.height*dpr));
+  if(w===cv.width && h===cv.height){ render(); return; }
+  cv.width=w; cv.height=h; render();
+}
+if(window.ResizeObserver){ let rt=null; new ResizeObserver(()=>{ clearTimeout(rt); rt=setTimeout(fit,60); }).observe(stage); }
+window.addEventListener("orientationchange",()=>setTimeout(fit,200));
+
+// ── あたり判定（CSSpx）──
+function hitTest(x,y){
+  const r=cv.getBoundingClientRect();
+  const cw=r.width, ch=r.height, m=Math.min(cw,ch);
+  for(let i=stickers.length-1;i>=0;i--){
+    const s=stickers[i]; const px=s.fx*cw, py=s.fy*ch, half=s.fs*m*0.55;
+    if(Math.abs(x-px)<=half && Math.abs(y-py)<=half) return s;
+  }
+  return null;
+}
+function bringFront(s){ const i=stickers.indexOf(s); if(i>=0 && i<stickers.length-1){ stickers.splice(i,1); stickers.push(s); } }
+
+// ── シールを ついか ──
+function addSticker(ch){
+  const s={ ch, fx:0.5, fy:0.40, fs:0.18, rot:0 };
+  stickers.push(s); sel=s; pop(); render();
+}
+
+// ── ドラッグで うごかす ──
+let drag=null;
+cv.addEventListener("pointerdown",e=>{
+  const r=cv.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
+  const s=hitTest(x,y);
+  if(s){
+    sel=s; bringFront(s);
+    drag={ offfx:s.fx-x/r.width, offfy:s.fy-y/r.height, id:e.pointerId };
+    cv.setPointerCapture(e.pointerId);
+    beep(520,0.04,"sine",0.08);
+    render();
+  }else{
+    if(sel){ sel=null; render(); }
+  }
+});
+cv.addEventListener("pointermove",e=>{
+  if(!drag || e.pointerId!==drag.id) return;
+  const r=cv.getBoundingClientRect();
+  sel.fx=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width+drag.offfx));
+  sel.fy=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height+drag.offfy));
+  render();
+});
+function endDrag(e){ if(drag && e.pointerId===drag.id){ drag=null; } }
+cv.addEventListener("pointerup",endDrag);
+cv.addEventListener("pointercancel",endDrag);
+
+// ── まわりの ボタン ──
+document.getElementById("h-del").addEventListener("click",()=>{
+  if(!sel)return; const i=stickers.indexOf(sel); if(i>=0)stickers.splice(i,1);
+  sel=null; beep(300,0.08,"square",0.10); render();
+});
+document.getElementById("h-rot").addEventListener("click",()=>{
+  if(!sel)return; sel.rot+=Math.PI/6; beep(700,0.05,"triangle",0.10); render();
+});
+document.getElementById("h-big").addEventListener("click",()=>{
+  if(!sel)return; sel.fs=Math.min(0.6,sel.fs*1.18); beep(820,0.05,"sine",0.10); render();
+});
+document.getElementById("h-small").addEventListener("click",()=>{
+  if(!sel)return; sel.fs=Math.max(0.05,sel.fs*0.85); beep(440,0.05,"sine",0.10); render();
+});
+
+// ── はいけいバー ──
+const bgrow=document.getElementById("bgrow");
+BGS.forEach(b=>{
+  const el=document.createElement("button");
+  el.className="bgb"+(b.key===bgKey?" on":""); el.dataset.key=b.key;
+  el.innerHTML=`<span>${b.icon}</span><span class="t">${b.key}</span>`;
+  el.addEventListener("click",()=>{
+    bgKey=b.key; beep(600,0.05,"sine",0.10);
+    [...bgrow.children].forEach(c=>c.classList.toggle("on",c.dataset.key===bgKey));
+    render();
+  });
+  bgrow.appendChild(el);
+});
+
+// ── シールたな（タブ＋いちらん）──
+const tabs=document.getElementById("tabs"), items=document.getElementById("items");
+let curCat=0;
+function showCat(i){
+  curCat=i;
+  [...tabs.children].forEach((c,k)=>c.classList.toggle("on",k===i));
+  items.innerHTML="";
+  for(const ch of CATS[i].items){
+    const b=document.createElement("button"); b.className="item"; b.textContent=ch;
+    b.addEventListener("click",()=>addSticker(ch));
+    items.appendChild(b);
+  }
+  items.scrollTop=0;
+}
+CATS.forEach((c,i)=>{
+  const t=document.createElement("button"); t.className="tab"+(i===0?" on":"");
+  t.innerHTML=`<span>${c.icon}</span><span class="t">${c.key}</span>`;
+  t.addEventListener("click",()=>{ showCat(i); beep(560,0.04,"sine",0.08); });
+  tabs.appendChild(t);
+});
+showCat(0);
+
+// ── ぜんぶけす ──
+const clearov=document.getElementById("clearov");
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  if(stickers.length===0){ catReact("😺","まだ なにも ないよ"); return; }
+  clearov.classList.add("show");
+});
+document.getElementById("clearno").addEventListener("click",()=>clearov.classList.remove("show"));
+document.getElementById("clearyes").addEventListener("click",()=>{
+  stickers.length=0; sel=null; clearov.classList.remove("show");
+  beep(300,0.1,"square",0.10); render();
+});
+
+// ── ほぞん（iOS たいおう・3だんがまえ）──
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+function saveImage(){
+  if(stickers.length===0){ catReact("😺","シールを おいてから ほぞん してね"); return; }
+  sel=null; render();   // ハンドルはHTMLなので canvasには のらない
+  const done=(blob)=>{
+    if(!blob){ catReact("😿","ほぞん できなかった"); return; }
+    chime(); catReact("😻","できたね！");
+    // ① 共有シート（iOS など）→ しゃしんに ほぞん
+    try{
+      const file=new File([blob],"sekai.png",{type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(()=>{}); return; }
+    }catch(e){}
+    const url=URL.createObjectURL(blob);
+    // ② PC：ダウンロード
+    const a=document.createElement("a");
+    if(("download" in a) && !isIOS){ a.href=url; a.download="sekai.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),3000); return; }
+    // ③ それいがい：ながおしで ほぞん
+    document.getElementById("saveimg").src=url; document.getElementById("saveov").classList.add("show");
+  };
+  if(cv.toBlob) cv.toBlob(done,"image/png");
+  else fetch(cv.toDataURL("image/png")).then(r=>r.blob()).then(done);
+}
+document.getElementById("saveBtn").addEventListener("click",saveImage);
+document.getElementById("saveclose").addEventListener("click",()=>document.getElementById("saveov").classList.remove("show"));
+
+// ── ながおしメニュー よくせい ──
+window.addEventListener("contextmenu",e=>e.preventDefault());
+
+// ── さいしょの ひょうじ ──
+fit();
+setTimeout(()=>catReact("😺","シールを おいて せかいを つくろう！"),400);
+</script>
+</body>
+</html>

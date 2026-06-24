@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffd9a8" />
+<title>おりょうりやさん｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの、おきゃくさんの ちゅうもんどおりに ざいりょうを いれて りょうりを つくって だす レストランごっこ。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/cooking/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="おりょうりやさん｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの、ざいりょうを いれて りょうりを つくって だす レストランごっこ。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/cooking/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(#fff1dc,#ffe0c0); color:#6b4a2e;
+    height:100dvh; display:flex; flex-direction:column; overflow:hidden; touch-action:none;
+  }
+  /* ── うえのバー ── */
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ffd0a0;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#7a4a1e;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #e7a96e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#7a4a1e;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #e7a96e;}
+  #stars{font-size:18px;font-weight:900;color:#e8820a;background:#fff;border-radius:14px;padding:6px 12px;box-shadow:0 3px 0 #e7a96e;min-width:58px;text-align:center;}
+
+  /* ── おきゃくさん＋ちゅうもん ── */
+  #order{flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:8px 12px 4px;}
+  #cust{font-size:48px;line-height:1;transition:transform .15s;}
+  #cust.happy{animation:jump .5s ease;}
+  @keyframes jump{0%,100%{transform:translateY(0) scale(1);}40%{transform:translateY(-14px) scale(1.12);}}
+  #bubble{position:relative;background:#fff;border-radius:16px;padding:8px 11px;flex:1;display:flex;gap:10px;align-items:center;
+    box-shadow:0 3px 10px rgba(0,0,0,.10);}
+  #bubble::before{content:"";position:absolute;left:-9px;top:24px;border:8px solid transparent;border-right-color:#fff;}
+  .dishimg{width:54px;height:54px;object-fit:contain;border-radius:12px;background:#fff7ee;flex:0 0 auto;}
+  .dishemoji{font-size:44px;flex:0 0 auto;width:54px;text-align:center;}
+  #bubr{flex:1;min-width:0;}
+  #bubr .say{font-size:15px;font-weight:800;color:#7a4a1e;margin-bottom:4px;}
+  #need{display:flex;flex-wrap:wrap;gap:5px;}
+  .chip{display:flex;align-items:center;gap:2px;background:#fff4e6;border-radius:10px;padding:2px 7px 2px 5px;
+    font-size:12px;font-weight:800;color:#9a6a3e;border:2px solid #ffe0bd;}
+  .chip .e{font-size:18px;}
+  .chip.got{background:#d8f6cf;border-color:#8fd982;color:#3c7a2e;}
+  .chip.got .ck{color:#3aa12a;font-weight:900;}
+
+  /* ── おさら（ちょうりだい）── */
+  #stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;}
+  #plate{position:relative;width:min(72vw,290px);aspect-ratio:1/1;border-radius:50%;
+    background:radial-gradient(circle at 50% 42%,#ffffff 0 58%,#f3e6d4 60%,#e6d2ba 100%);
+    box-shadow:0 10px 22px rgba(120,80,40,.22), inset 0 -6px 14px rgba(150,110,70,.16);transition:transform .08s;}
+  #plate.cooking{animation:shake .12s linear 4;}
+  @keyframes shake{0%,100%{transform:translate(0,0) rotate(0);}25%{transform:translate(-4px,2px) rotate(-2deg);}75%{transform:translate(4px,-2px) rotate(2deg);}}
+  .food{position:absolute;font-size:40px;transform:translate(-50%,-50%) rotate(var(--r));transition:.3s;}
+  .food.raw{filter:grayscale(.7) brightness(1.05);opacity:.55;}
+  .food.cooked{animation:plop .3s cubic-bezier(.3,1.5,.6,1);}
+  @keyframes plop{0%{transform:translate(-50%,-50%) scale(.4) rotate(var(--r));}100%{transform:translate(-50%,-50%) scale(1) rotate(var(--r));}}
+  #plateHint{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:15px;font-weight:800;color:#b89a78;pointer-events:none;}
+  /* ちょうりの ほのお・ゆげ */
+  .fx{position:absolute;pointer-events:none;font-size:30px;animation:rise .8s ease-out forwards;}
+  @keyframes rise{0%{opacity:0;transform:translate(-50%,0) scale(.6);}30%{opacity:1;}100%{opacity:0;transform:translate(-50%,-70px) scale(1.2);}}
+
+  /* ── ボタン ── */
+  #acts{flex:0 0 auto;display:flex;gap:8px;padding:5px 12px;}
+  .abtn{font-size:16px;font-weight:800;border:none;border-radius:16px;padding:12px 14px;cursor:pointer;}
+  #redo{background:#ffe7cf;color:#9a6a3e;box-shadow:0 4px 0 #e7b98e;}
+  #redo:active{transform:translateY(2px);box-shadow:0 2px 0 #e7b98e;}
+  #cook{flex:1;color:#fff;background:#cdd3cc;box-shadow:0 5px 0 #aab0a8;transition:.12s;font-size:19px;font-weight:900;}
+  #cook.on{background:#ff8a3c;box-shadow:0 5px 0 #d96718;animation:pulse 1s infinite;}
+  #cook.on:active{transform:translateY(3px);box-shadow:0 2px 0 #d96718;}
+  #serve{flex:1;color:#fff;background:#cdd3cc;box-shadow:0 5px 0 #aab0a8;transition:.12s;font-size:19px;font-weight:900;}
+  #serve.ready{background:#5bc24a;box-shadow:0 5px 0 #3f9a31;animation:pulse 1s infinite;}
+  #serve.ready:active{transform:translateY(3px);box-shadow:0 2px 0 #3f9a31;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.035);}}
+
+  /* ── したの ざいりょうだな ── */
+  #shelf{flex:0 0 auto;background:#fff;border-top:3px solid #ffd9b0;padding:8px;
+    display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+  #shelf .label{flex:0 0 100%;text-align:center;font-size:12px;font-weight:800;color:#b98a5e;margin-bottom:1px;}
+  .ing{font-size:31px;width:52px;height:50px;border:none;border-radius:14px;background:#fff6ec;
+    box-shadow:0 3px 0 #f0d4b4;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .ing:active{transform:translateY(2px);box-shadow:0 1px 0 #f0d4b4;}
+
+  /* ── キラキラ／ありがとう ── */
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+  #thanks{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:25;pointer-events:none;}
+  #thanks.show{display:flex;}
+  #thanks .box{background:#fff;border-radius:24px;padding:18px 28px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.25);
+    animation:plop2 .35s cubic-bezier(.3,1.5,.6,1);}
+  @keyframes plop2{0%{transform:scale(.4);}100%{transform:scale(1);}}
+  #thanks .f{font-size:58px;}
+  #thanks .t{font-size:23px;font-weight:900;color:#e8820a;margin-top:4px;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">おりょうりやさん</div>
+    <div id="stars">⭐0</div>
+  </div>
+
+  <div id="order">
+    <div id="cust">🐰</div>
+    <div id="bubble">
+      <span id="dish"></span>
+      <div id="bubr">
+        <div class="say" id="say">「ハンバーガーセット」ください！</div>
+        <div id="need"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="plate"><div id="plateHint">ざいりょうを いれてね</div></div>
+  </div>
+
+  <div id="acts">
+    <button class="abtn" id="redo">🗑️</button>
+    <button class="abtn" id="cook">🔥 つくる！</button>
+    <button class="abtn" id="serve">できあがり！</button>
+  </div>
+
+  <div id="shelf"></div>
+
+  <div id="thanks"><div class="box"><div class="f" id="thf">😋</div><div class="t" id="tht">おいしい！ありがとう！</div></div></div>
+
+<script>
+"use strict";
+/* =========================================================
+   おりょうりやさん：ちゅうもんどおりに ざいりょうを おさらに いれて
+   「つくる！」で ちょうり（ジュージュー）→「できあがり！」で だす。
+   ・ざいりょうは なまの じょうたいで のる → つくると いろづく
+   ・りょうりの みためは assets/dish_<key>.png（なければ えもじ）
+   ========================================================= */
+
+// ── おと（Web Audio・ファイル不使用）──
+let actx=null;
+function tone(f,d=0.07,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function pop(){tone(620,0.06,"triangle",0.13);tone(930,0.05,"sine",0.10,0.03);}
+function nope(){tone(220,0.12,"square",0.10);}
+function sizzle(){ for(let i=0;i<8;i++){ tone(300+Math.random()*700,0.05,"sawtooth",0.05,i*0.05); } }
+function ding(){tone(700,0.08,"sine",0.12);tone(1050,0.10,"sine",0.11,0.08);}
+function coin(){tone(988,0.09,"square",0.12);tone(1319,0.12,"square",0.11,0.09);}
+function cheer(){[523,659,784,1047].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.09));}
+
+// ── おりょうり（key=がぞうファイル名／emoji=ふぉーるばっく／items=ひつような ざいりょう）──
+const DISHES=[
+  {key:"burger",   name:"ハンバーガーセット", emoji:"🍔", items:["🍔","🍟","🥤"]},
+  {key:"onigiri",  name:"おにぎりとおちゃ",   emoji:"🍙", items:["🍙","🍵"]},
+  {key:"ramen",    name:"ラーメン",           emoji:"🍜", items:["🍜","🥟"]},
+  {key:"curry",    name:"カレーライス",       emoji:"🍛", items:["🍛","🥗"]},
+  {key:"sushi",    name:"おすし",             emoji:"🍣", items:["🍣","🍵"]},
+  {key:"pancake",  name:"パンケーキ",         emoji:"🥞", items:["🥞","🍓","🍯"]},
+  {key:"pizza",    name:"ピザ",               emoji:"🍕", items:["🍕","🥤"]},
+  {key:"bento",    name:"おべんとう",         emoji:"🍱", items:["🍙","🍗","🥦","🍅"]},
+  {key:"icecream", name:"アイスクリーム",     emoji:"🍦", items:["🍦","🍓"]},
+  {key:"cake",     name:"ケーキ",             emoji:"🍰", items:["🍰","🍫","🍓"]},
+  {key:"spaghetti",name:"スパゲッティ",       emoji:"🍝", items:["🍝","🧀"]},
+  {key:"hotdog",   name:"ホットドッグ",       emoji:"🌭", items:["🌭","🥤"]},
+  {key:"sandwich", name:"サンドイッチ",       emoji:"🥪", items:["🥪","🍅","🥛"]},
+  {key:"chicken",  name:"フライドチキン",     emoji:"🍗", items:["🍗","🍟"]},
+  {key:"donut",    name:"ドーナツとミルク",   emoji:"🍩", items:["🍩","🥛"]},
+  {key:"tamago",   name:"たまごやきごはん",   emoji:"🍳", items:["🍚","🍳"]},
+];
+// だなに まぜる ダミーの ざいりょう（ちゅうもんに ない もの）
+const EXTRA=["🍌","🍎","🍇","🥚","🍞","🍪","🧁","🍮","🍫","🍓","🥦","🍅","🌽","🥕","🍗","🍟","🥤","🍵","🥛","🧀","🍯","🍩","🍰","🍣","🥞","🥟"];
+const CUSTS=["🐰","🐱","🐶","🐻","🐼","🦊","🐯","🐵","🐷","🐸","🦁","🐨","🐧","🐮","🐹","🦄"];
+const THANKS=["おいしい！ありがとう！","とっても おいしい！","また きます！","だいすき！","ごちそうさま！","にこにこ！"];
+const HAPPYFACE=["😋","😻","🤩","😆","🥰","😸"];
+
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ── じょうたい ──
+let order=null;       // {key,name,items[],cust}
+let plate=[];         // [{ch,x,y,r,cooked}]
+let stars=0, busy=false;
+try{ stars=parseInt(localStorage.getItem("cookingStars")||"0",10)||0; }catch(e){}
+
+const elNeed=document.getElementById("need"), elSay=document.getElementById("say");
+const elCust=document.getElementById("cust"), elDish=document.getElementById("dish");
+const elPlate=document.getElementById("plate"), elHint=document.getElementById("plateHint");
+const elShelf=document.getElementById("shelf"), elCook=document.getElementById("cook");
+const elServe=document.getElementById("serve"), elStars=document.getElementById("stars");
+
+function setStars(){ elStars.textContent="⭐"+stars; try{localStorage.setItem("cookingStars",stars);}catch(e){} }
+
+// ── あたらしい ちゅうもん ──
+function newOrder(){
+  const d=pick(DISHES);
+  order={ key:d.key, name:d.name, emoji:d.emoji, items:[...new Set(d.items)], cust:pick(CUSTS) };
+  plate=[];
+  elCust.textContent=order.cust;
+  elSay.textContent="「"+order.name+"」ください！";
+  // りょうりの みため（がぞう→なければ えもじ）
+  elDish.innerHTML=`<img class="dishimg" src="assets/dish_${order.key}.png" alt="" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'dishemoji',textContent:'${order.emoji}'}))">`;
+  // だな＝ひつようなもの ＋ ダミー を まぜて シャッフル
+  const need=order.items.slice();
+  const pool=shuffle(EXTRA.filter(x=>!order.items.includes(x)));
+  const dummies=pool.slice(0, Math.max(3,8-need.length));
+  renderShelf(shuffle(need.concat(dummies)));
+  renderOrder(); renderPlate(); updateButtons();
+}
+
+// ── ちゅうもんの チェックリスト ──
+function renderOrder(){
+  elNeed.innerHTML="";
+  const cooked=new Set(plate.filter(p=>p.cooked).map(p=>p.ch));
+  for(const ch of order.items){
+    const got=cooked.has(ch);
+    const c=document.createElement("div");
+    c.className="chip"+(got?" got":"");
+    c.innerHTML=`<span class="e">${ch}</span>`+(got?`<span class="ck">✓</span>`:"");
+    elNeed.appendChild(c);
+  }
+}
+
+// ── おさらの えがき ──
+function renderPlate(){
+  [...elPlate.querySelectorAll(".food")].forEach(n=>n.remove());
+  for(const p of plate){
+    const s=document.createElement("span");
+    s.className="food "+(p.cooked?"cooked":"raw"); s.textContent=p.ch;
+    s.style.left=p.x+"%"; s.style.top=p.y+"%"; s.style.setProperty("--r",p.r+"deg");
+    elPlate.appendChild(s);
+  }
+  elHint.style.display=plate.length?"none":"block";
+}
+
+// ── だなの えがき ──
+function renderShelf(list){
+  elShelf.innerHTML='<div class="label">ざいりょうを タップして おさらに いれてね</div>';
+  for(const ch of list){
+    const b=document.createElement("button"); b.className="ing"; b.textContent=ch;
+    b.addEventListener("click",()=>addFood(ch));
+    elShelf.appendChild(b);
+  }
+}
+
+// ── おさらに いれる（なまの じょうたい）──
+function addFood(ch){
+  if(busy) return;
+  const ang=Math.random()*6.283, rad=Math.random()*30;
+  const x=50+Math.cos(ang)*rad, y=46+Math.sin(ang)*rad*0.9;
+  plate.push({ch, x:Math.round(x), y:Math.round(y), r:Math.round(Math.random()*40-20), cooked:false});
+  pop(); renderPlate(); updateButtons();
+}
+
+// ── ボタンの じょうたい ──
+function hasRaw(){ return plate.some(p=>!p.cooked); }
+function isComplete(){ const cooked=new Set(plate.filter(p=>p.cooked).map(p=>p.ch)); return order.items.every(i=>cooked.has(i)); }
+function updateButtons(){
+  elCook.classList.toggle("on", hasRaw() && !busy);
+  elServe.classList.toggle("ready", !hasRaw() && isComplete() && !busy);
+}
+
+// ── つくる！（ちょうり）──
+elCook.addEventListener("click",()=>{
+  if(busy || !hasRaw()) { if(!hasRaw())nope(); return; }
+  busy=true;
+  elPlate.classList.add("cooking"); sizzle();
+  // ほのお・ゆげ の えんしゅつ
+  const r=elPlate.getBoundingClientRect();
+  for(let i=0;i<6;i++){
+    const f=document.createElement("div"); f.className="fx"; f.textContent=pick(["🔥","♨️","💨","✨"]);
+    f.style.left=(20+Math.random()*60)+"%"; f.style.top=(30+Math.random()*40)+"%";
+    f.style.animationDelay=(Math.random()*0.25)+"s";
+    elPlate.appendChild(f); setTimeout(()=>f.remove(),900);
+  }
+  setTimeout(()=>{
+    plate.forEach(p=>p.cooked=true);
+    elPlate.classList.remove("cooking");
+    ding(); renderPlate(); renderOrder(); busy=false; updateButtons();
+    if(isComplete()) elSay.textContent="できた！「できあがり！」を おしてね";
+  },650);
+});
+
+// ── やりなおし ──
+document.getElementById("redo").addEventListener("click",()=>{
+  if(busy) return;
+  plate=[]; renderPlate(); renderOrder(); updateButtons(); nope();
+});
+
+// ── だす（できあがり！）──
+const elThanks=document.getElementById("thanks"), elThf=document.getElementById("thf"), elTht=document.getElementById("tht");
+elServe.addEventListener("click",()=>{
+  if(busy) return;
+  if(hasRaw()){ nope(); elSay.textContent="まだ「つくる！」してないよ"; return; }
+  if(!isComplete()){ nope(); elSay.textContent="ちゅうもんの ざいりょうが たりないみたい？"; return; }
+  busy=true;
+  elCust.classList.add("happy"); cheer(); setTimeout(coin,250);
+  burstStars();
+  stars++; setStars();
+  elThf.textContent=pick(HAPPYFACE); elTht.textContent=pick(THANKS);
+  elThanks.classList.add("show");
+  setTimeout(()=>{
+    elThanks.classList.remove("show");
+    elCust.classList.remove("happy");
+    busy=false; newOrder();
+  },1400);
+});
+
+// ── キラキラ ──
+function burstStars(){
+  const r=elPlate.getBoundingClientRect();
+  for(let i=0;i<7;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=pick(["⭐","✨","🌟","💛"]);
+    s.style.left=(r.left+r.width*(0.2+Math.random()*0.6))+"px";
+    s.style.top =(r.top +r.height*(0.2+Math.random()*0.5))+"px";
+    s.style.animationDelay=(Math.random()*0.2)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1200);
+  }
+}
+
+// ── ながおしメニュー よくせい ──
+window.addEventListener("contextmenu",e=>e.preventDefault());
+
+// ── スタート ──
+setStars();
+newOrder();
+</script>
+</body>
+</html>
