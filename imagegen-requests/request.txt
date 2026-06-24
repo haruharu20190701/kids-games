@@ -1,4 +1,4 @@
-# menu icon: scene（せかいづくり・はいけい＋シールで絵づくり）
+# menu icon: cooking（おりょうりやさん・レストランごっこ）
 kind: icon
 ---
-scene | cute kawaii flat vector app icon of a tiny round planet world with a green grassy hill, one cute tree, a colorful rainbow and a smiling sun and a small cloud, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+cooking | cute kawaii flat vector app icon of a cheerful frying pan with a sunny side up egg and a little white chef toque hat above it, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
