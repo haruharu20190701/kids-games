@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffd9ec" />
+<title>きせかえ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの きせかえ。どうぶつに ぼうしや リボンを つけて かわいく へんしん。しゃしんに ほぞんできる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/dressup/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="きせかえ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの きせかえ。どうぶつに ぼうしや リボンを つけて へんしん。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/dressup/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#9a3b6e;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:linear-gradient(#ffeaf5,#ffd9ec);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ffc1e0;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#9a3b6e;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #e88bb8;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#9a3b6e;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #e88bb8;}
+  #save{font-size:15px;font-weight:900;border:none;border-radius:14px;padding:9px 13px;background:#fff;color:#9a3b6e;box-shadow:0 3px 0 #e88bb8;cursor:pointer;}
+  #save:active{transform:translateY(2px);box-shadow:0 1px 0 #e88bb8;}
+
+  /* ── きゃらくたー ── */
+  #stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px;transition:background .25s;}
+  #doll{position:relative;container-type:size;width:min(82vw, calc(100dvh - 250px));aspect-ratio:1/1;
+    border-radius:26px;background:rgba(255,255,255,.45);box-shadow:0 8px 22px rgba(154,59,110,.18);}
+  .layer{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
+  .layer img{width:100%;height:100%;object-fit:contain;}
+  #lbase{left:50%;top:54%;width:66cqw;height:66cqw;font-size:62cqw;display:flex;align-items:center;justify-content:center;}
+  #lhat {left:50%;top:16%;font-size:30cqw;}
+  #lbow {left:50%;top:73%;font-size:20cqw;}
+  #lheld{left:83%;top:74%;font-size:23cqw;}
+
+  /* ── カテゴリ タブ ── */
+  #tabs{flex:0 0 auto;display:flex;gap:6px;justify-content:center;padding:6px 8px 2px;}
+  .tab{font-size:13px;font-weight:900;border:none;border-radius:14px 14px 0 0;padding:8px 11px;background:#ffd7ea;color:#9a3b6e;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;}
+  .tab .ti{font-size:20px;}
+  .tab.on{background:#fff;box-shadow:0 -2px 6px rgba(154,59,110,.12);}
+
+  /* ── オプション ── */
+  #opts{flex:0 0 auto;background:#fff;display:flex;gap:8px;overflow-x:auto;padding:10px 12px;min-height:78px;align-items:center;}
+  .opt{flex:0 0 auto;width:60px;height:58px;border:3px solid #ffe0ef;border-radius:16px;background:#fff6fb;
+    display:flex;align-items:center;justify-content:center;font-size:34px;cursor:pointer;}
+  .opt img{width:46px;height:46px;object-fit:contain;}
+  .opt.on{border-color:#ff5fa8;background:#ffe6f3;box-shadow:0 0 0 3px #ffd0e6;}
+  .opt.none{font-size:14px;font-weight:900;color:#b97aa0;}
+  .opt.bg{font-size:0;}
+  .opt .sw{width:38px;height:38px;border-radius:10px;border:2px solid rgba(0,0,0,.08);}
+
+  /* ── ほぞん オーバーレイ ── */
+  #ov{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:40;padding:18px;}
+  #ov.show{display:flex;}
+  #ov img{max-width:88vw;max-height:64vh;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  #ov .msg{color:#fff;font-size:16px;font-weight:800;text-align:center;}
+  #ov .cl{background:#fff;color:#9a3b6e;border:none;border-radius:14px;padding:10px 22px;font-weight:900;font-size:16px;cursor:pointer;}
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:50;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">きせかえ</div>
+    <button id="save">📷 ほぞん</button>
+  </div>
+
+  <div id="stage">
+    <div id="doll">
+      <div class="layer" id="lbase"></div>
+      <div class="layer" id="lhat"></div>
+      <div class="layer" id="lbow"></div>
+      <div class="layer" id="lheld"></div>
+    </div>
+  </div>
+
+  <div id="tabs">
+    <button class="tab on" data-c="base"><span class="ti">🐻</span>どうぶつ</button>
+    <button class="tab" data-c="hat"><span class="ti">🎩</span>ぼうし</button>
+    <button class="tab" data-c="bow"><span class="ti">🎀</span>リボン</button>
+    <button class="tab" data-c="held"><span class="ti">🎈</span>もちもの</button>
+    <button class="tab" data-c="bg"><span class="ti">🎨</span>はいけい</button>
+  </div>
+  <div id="opts"></div>
+
+  <div id="ov"><div class="msg">ながおしで しゃしんに ほぞんできるよ</div><img id="ovimg" alt="" /><button class="cl" id="ovcl">とじる</button></div>
+
+<script>
+"use strict";
+/* =========================================================
+   きせかえ：どうぶつ（ベース）に ぼうし・リボン・もちもの・はいけいを
+   えらんで かさねる。📷で canvas に がっせい → しゃしんに ほぞん（iOS対応）。
+   ベースは assets/dressup_<key>.png（なければ えもじ）。
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.08,t="sine",v=0.12,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function blip(){tone(620,0.06,"triangle",0.11);tone(880,0.05,"sine",0.09,0.03);}
+function cheer(){[523,659,784,1047].forEach((f,i)=>tone(f,0.15,"sine",0.12,i*0.07));}
+
+const BASES=[{key:"bear",e:"🐻"},{key:"cat",e:"🐱"},{key:"rabbit",e:"🐰"},{key:"dog",e:"🐶"},{key:"panda",e:"🐼"},{key:"frog",e:"🐸"}];
+const HATS=[null,"👑","🎩","🧢","🎀","🎓","🪅","⛑️","🎃"];
+const BOWS=[null,"🎀","👔","🧣","🌸","📿","🦋"];
+const HELDS=[null,"🎈","🍭","🌷","⚽","🧸","🪀","🍦","🎁"];
+const BGS=["#ffd9ec","#cfe8ff","#fff2bf","#d8f6cf","#e9dcff","#ffe0c2"];
+const CATS={base:BASES,hat:HATS,bow:BOWS,held:HELDS,bg:BGS};
+
+const sel={base:BASES[0],hat:null,bow:null,held:null,bg:BGS[0]};
+let cat="base";
+
+const elStage=document.getElementById("stage"), elDoll=document.getElementById("doll");
+const L={base:document.getElementById("lbase"),hat:document.getElementById("lhat"),bow:document.getElementById("lbow"),held:document.getElementById("lheld")};
+const elOpts=document.getElementById("opts");
+
+// ベースは がぞう→なければ えもじ
+function baseHTML(b){
+  return `<img src="assets/dressup_${b.key}.png" alt="${b.e}" draggable="false" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:this.alt,style:'font-size:62cqw'}))">`;
+}
+function render(){
+  elStage.style.background=sel.bg;
+  L.base.innerHTML=baseHTML(sel.base);
+  L.hat.textContent=sel.hat||""; L.bow.textContent=sel.bow||""; L.held.textContent=sel.held||"";
+}
+
+function buildOpts(){
+  elOpts.innerHTML="";
+  const list=CATS[cat];
+  list.forEach(v=>{
+    const o=document.createElement("button"); o.className="opt";
+    if(cat==="bg"){ o.classList.add("bg"); o.innerHTML=`<span class="sw" style="background:${v}"></span>`; if(sel.bg===v)o.classList.add("on"); }
+    else if(cat==="base"){ o.innerHTML=baseThumb(v); if(sel.base.key===v.key)o.classList.add("on"); }
+    else if(v===null){ o.classList.add("none"); o.textContent="なし"; if(sel[cat]===null)o.classList.add("on"); }
+    else{ o.textContent=v; if(sel[cat]===v)o.classList.add("on"); }
+    o.addEventListener("click",()=>choose(v));
+    elOpts.appendChild(o);
+  });
+}
+function baseThumb(b){
+  return `<img src="assets/dressup_${b.key}.png" alt="${b.e}" draggable="false" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:this.alt,style:'font-size:34px'}))">`;
+}
+function choose(v){
+  if(cat==="bg") sel.bg=v; else if(cat==="base") sel.base=v; else sel[cat]=v;
+  blip(); render(); buildOpts();
+}
+
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  cat=t.dataset.c;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
+  buildOpts();
+}));
+
+// ── canvas に がっせい ──
+function compose(cb){
+  const S=720, c=document.createElement("canvas"); c.width=S; c.height=S;
+  const x=c.getContext("2d");
+  x.fillStyle=sel.bg; x.fillRect(0,0,S,S);
+  x.textAlign="center"; x.textBaseline="middle";
+  const EF='"Hiragino Maru Gothic ProN","Apple Color Emoji","Noto Color Emoji",sans-serif';
+  // ベース（がぞう or えもじ）
+  const node=L.base.firstChild;
+  function drawRest(){
+    if(sel.hat){ x.font=`${S*0.30}px ${EF}`; x.fillText(sel.hat, S*0.5, S*0.16); }
+    if(sel.bow){ x.font=`${S*0.20}px ${EF}`; x.fillText(sel.bow, S*0.5, S*0.73); }
+    if(sel.held){x.font=`${S*0.23}px ${EF}`; x.fillText(sel.held, S*0.83, S*0.74); }
+    cb(c);
+  }
+  if(node && node.tagName==="IMG" && node.complete && node.naturalWidth>0){
+    const w=S*0.78; x.drawImage(node, S*0.5-w/2, S*0.54-w/2, w, w); drawRest();
+  }else{
+    x.font=`${S*0.60}px ${EF}`; x.fillText(sel.base.e, S*0.5, S*0.55); drawRest();
+  }
+}
+
+// ── ほぞん（iOS対応 3だん）──
+function isIOS(){return /(iPhone|iPad|iPod)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+const elOv=document.getElementById("ov"), elOvImg=document.getElementById("ovimg");
+document.getElementById("save").addEventListener("click",()=>{
+  cheer(); sparkle();
+  compose(c=>{
+    c.toBlob(blob=>{
+      if(!blob){ fallbackShow(c.toDataURL("image/png")); return; }
+      const file=new File([blob],"kisekae.png",{type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).catch(()=>{});
+      }else if(!isIOS() && "download" in document.createElement("a")){
+        const u=URL.createObjectURL(blob), a=document.createElement("a");
+        a.href=u; a.download="kisekae.png"; a.click(); setTimeout(()=>URL.revokeObjectURL(u),3000);
+      }else{
+        fallbackShow(URL.createObjectURL(blob));
+      }
+    },"image/png");
+  });
+});
+function fallbackShow(src){elOvImg.src=src; elOv.classList.add("show");}
+document.getElementById("ovcl").addEventListener("click",()=>elOv.classList.remove("show"));
+
+function sparkle(){
+  const r=elDoll.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=["⭐","✨","🌟","💖","🎀"][i%5];
+    s.style.left=(r.left+r.width*Math.random())+"px"; s.style.top=(r.top+r.height*Math.random())+"px";
+    s.style.animationDelay=(Math.random()*0.2)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1100);
+  }
+}
+window.addEventListener("contextmenu",e=>e.preventDefault());
+render(); buildOpts();
+</script>
+</body>
+</html>

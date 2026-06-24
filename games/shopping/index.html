@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffd9b0" />
+<title>おかいものごっこ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの おかいものごっこ。リストの しなものを たなから かごに いれよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/shopping/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="おかいものごっこ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの おかいものごっこ。リストの しなものを かごに いれよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/shopping/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#7a4a1e;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:linear-gradient(#fff3e0,#ffe2c2);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ffd0a0;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#8a4a14;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #e7a96e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#8a4a14;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #e7a96e;}
+  #stars{font-size:18px;font-weight:900;color:#e8820a;background:#fff;border-radius:14px;padding:6px 12px;box-shadow:0 3px 0 #e7a96e;min-width:58px;text-align:center;}
+
+  /* ── おかいものリスト ── */
+  #listwrap{flex:0 0 auto;padding:8px 10px 4px;}
+  #listttl{text-align:center;font-size:15px;font-weight:900;color:#b9702e;margin-bottom:5px;}
+  #list{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .li{position:relative;background:#fff;border-radius:16px;padding:6px 8px 4px;display:flex;flex-direction:column;align-items:center;
+    min-width:78px;box-shadow:0 3px 8px rgba(0,0,0,.1);border:3px solid #ffe0bd;transition:.2s;}
+  .li.got{border-color:#7ed368;background:#e6fbdf;}
+  .li .lim{width:46px;height:46px;object-fit:contain;}
+  .li .lie{font-size:38px;line-height:1;}
+  .li .lin{font-size:12px;font-weight:800;color:#8a4a14;margin-top:1px;}
+  .li .chk{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#4caf50;color:#fff;
+    font-weight:900;display:none;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 5px rgba(0,0,0,.2);}
+  .li.got .chk{display:flex;}
+
+  /* ── たな ── */
+  #shelfttl{flex:0 0 auto;text-align:center;font-size:14px;font-weight:900;color:#b9702e;padding:6px 0 2px;}
+  #shelf{flex:1 1 auto;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:6px 12px 14px;align-content:start;}
+  .prod{position:relative;background:#fff;border-radius:18px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;
+    cursor:pointer;box-shadow:0 4px 0 #f0d4b4;border:3px solid #fff;}
+  .prod:active{transform:translateY(2px);box-shadow:0 2px 0 #f0d4b4;}
+  .prod.taken{opacity:.3;pointer-events:none;}
+  .prod .pm{width:46px;height:46px;object-fit:contain;}
+  .prod .pe{font-size:38px;line-height:1;}
+  .prod .pn{font-size:11px;font-weight:800;color:#8a4a14;}
+  .prod.bad{animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translate(0,0);}25%{transform:translate(-4px,0);}75%{transform:translate(4px,0);}}
+
+  /* ── おかいけい ── */
+  #pay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:25;background:rgba(122,74,30,.2);}
+  #pay.show{display:flex;}
+  #pay .box{background:#fff;border-radius:26px;padding:22px 30px;text-align:center;box-shadow:0 16px 44px rgba(0,0,0,.28);animation:bp .35s cubic-bezier(.3,1.5,.6,1);}
+  @keyframes bp{0%{transform:scale(.4);}100%{transform:scale(1);}}
+  #pay .f{font-size:58px;}
+  #pay .t{font-size:24px;font-weight:900;color:#e8820a;margin:2px 0;}
+  #pay .s{font-size:15px;font-weight:800;color:#7a4a1e;}
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">おかいものごっこ</div>
+    <div id="stars">⭐0</div>
+  </div>
+
+  <div id="listwrap">
+    <div id="listttl">🛒 おかいもの リスト</div>
+    <div id="list"></div>
+  </div>
+
+  <div id="shelfttl">たなから かごに いれてね</div>
+  <div id="shelf"></div>
+
+  <div id="pay"><div class="box"><div class="f" id="payf">🛍️</div><div class="t">おかいけい ピッ！</div><div class="s" id="pays"></div></div></div>
+
+<script>
+"use strict";
+/* =========================================================
+   おかいものごっこ：リストの しなものを たなから タップして かごへ。
+   ぜんぶ そろうと「おかいけい！」→ つぎの リスト。
+   しょうひんがぞうは りょうりやさんの ざいりょうを りゅうよう（なければ えもじ）。
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.09,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function beep(){tone(880,0.06,"square",0.12);}             // レジの ピッ
+function good(){tone(680,0.08,"triangle",0.12);tone(1020,0.10,"sine",0.10,0.05);}
+function bad(){tone(180,0.13,"square",0.10);}
+function cheer(){[523,659,784,1047].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
+
+// しょうひん（emoji→{key,name}）＝りょうりやさんの ざいりょうと おなじ key
+const FOODS=[
+  ["🍔","burger","ハンバーガー"],["🍟","fries","ポテト"],["🥤","soda","ジュース"],["🍙","onigiri","おにぎり"],
+  ["🍵","tea","おちゃ"],["🍜","ramen","ラーメン"],["🥟","gyoza","ぎょうざ"],["🍛","curryrice","カレー"],
+  ["🥗","salad","サラダ"],["🍣","sushi","おすし"],["🥞","pancake","パンケーキ"],["🍓","strawberry","いちご"],
+  ["🍯","honey","はちみつ"],["🍕","pizza","ピザ"],["🍗","chicken","からあげ"],["🥦","broccoli","ブロッコリー"],
+  ["🍅","tomato","トマト"],["🍦","icecream","アイス"],["🍰","cake","ケーキ"],["🍫","chocolate","チョコ"],
+  ["🍝","spaghetti","スパゲッティ"],["🧀","cheese","チーズ"],["🌭","hotdog","ホットドッグ"],["🥪","sandwich","サンドイッチ"],
+  ["🥛","milk","ぎゅうにゅう"],["🍚","rice","ごはん"],["🍳","friedegg","めだまやき"],["🍩","donut","ドーナツ"],
+].map(a=>({e:a[0],key:a[1],n:a[2]}));
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let stars=0, listItems=[], got=new Set(), busy=false, round=1;
+try{stars=parseInt(localStorage.getItem("shopStars")||"0",10)||0;}catch(e){}
+const elStars=document.getElementById("stars"), elList=document.getElementById("list"), elShelf=document.getElementById("shelf");
+function setStars(){elStars.textContent="⭐"+stars; try{localStorage.setItem("shopStars",stars);}catch(e){}}
+function prodImg(it,cls){
+  return `<img class="${cls}" src="../cooking/assets/ing_${it.key}.png" alt="${it.e}" draggable="false" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${cls==='lim'?'lie':'pe'}',textContent:this.alt}))">`;
+}
+
+function newList(){
+  busy=false; got=new Set();
+  const n=Math.min(2+Math.ceil(round/2),4);        // 2→4こ
+  listItems=shuffle(FOODS.slice()).slice(0,n);
+  // たな＝リスト＋ダミー（ぜんぶで 8〜12）
+  const extras=shuffle(FOODS.filter(f=>!listItems.includes(f))).slice(0, Math.max(4,10-n));
+  const shelf=shuffle(listItems.concat(extras));
+  // リスト ひょうじ
+  elList.innerHTML="";
+  for(const it of listItems){
+    const d=document.createElement("div"); d.className="li"; d.dataset.key=it.key;
+    d.innerHTML=prodImg(it,"lim")+`<span class="lin">${it.n}</span><span class="chk">✓</span>`;
+    elList.appendChild(d);
+  }
+  // たな ひょうじ
+  elShelf.innerHTML="";
+  for(const it of shelf){
+    const b=document.createElement("button"); b.className="prod"; b.dataset.key=it.key;
+    b.innerHTML=prodImg(it,"pm")+`<span class="pn">${it.n}</span>`;
+    b.addEventListener("click",()=>buy(it,b));
+    elShelf.appendChild(b);
+  }
+}
+function buy(it,b){
+  if(busy) return;
+  const need=listItems.some(l=>l.key===it.key);
+  if(need && !got.has(it.key)){
+    got.add(it.key); beep(); good();
+    b.classList.add("taken");
+    const li=elList.querySelector('.li[data-key="'+it.key+'"]'); if(li)li.classList.add("got");
+    flyStar(b);
+    if(got.size>=listItems.length) checkout();
+  }else{
+    bad(); b.classList.add("bad"); setTimeout(()=>b.classList.remove("bad"),300);
+  }
+}
+const elPay=document.getElementById("pay"), elPayF=document.getElementById("payf"), elPayS=document.getElementById("pays");
+function checkout(){
+  busy=true; cheer();
+  stars++; setStars();
+  for(let i=0;i<8;i++) setTimeout(()=>flyStarXY(innerWidth*(0.2+Math.random()*0.6),innerHeight*0.4),i*70);
+  elPayF.textContent=pick(["🛍️","🎉","🥳","💰"]);
+  elPayS.textContent="ぜんぶ かえたね！ ⭐"+stars;
+  elPay.classList.add("show");
+  setTimeout(()=>{elPay.classList.remove("show"); round++; newList();},1700);
+}
+function flyStar(el){const r=el.getBoundingClientRect(); flyStarXY(r.left+r.width/2,r.top);}
+function flyStarXY(x,y){
+  for(let i=0;i<5;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=pick(["⭐","✨","🌟","💛"]);
+    s.style.left=(x+(Math.random()*40-20))+"px"; s.style.top=(y+(Math.random()*20-10))+"px";
+    s.style.animationDelay=(Math.random()*0.15)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1100);
+  }
+}
+window.addEventListener("contextmenu",e=>e.preventDefault());
+setStars(); newList();
+</script>
+</body>
+</html>

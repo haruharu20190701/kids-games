@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffe1b3" />
+<title>ペットのおせわ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ペットのおせわごっこ。ごはん・おふろ・あそび・なでなでで ペットをにこにこに。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/pet/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ペットのおせわ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの ペットのおせわごっこ。ごはん・おふろ・あそび・なでなで。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/pet/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#7a4a1e;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;
+    background:linear-gradient(#fff3df,#ffe6c6);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ffd6a0;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#8a4a14;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #e7a96e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#8a4a14;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #e7a96e;}
+  #stars{font-size:18px;font-weight:900;color:#e8820a;background:#fff;border-radius:14px;padding:6px 12px;box-shadow:0 3px 0 #e7a96e;min-width:58px;text-align:center;}
+
+  /* ── したい こと バブル ── */
+  #wantwrap{flex:0 0 auto;display:flex;justify-content:center;padding:10px 10px 2px;}
+  #want{background:#fff;border-radius:20px;padding:9px 18px;font-size:19px;font-weight:900;color:#8a4a14;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:8px;position:relative;}
+  #want::after{content:"";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:#fff;}
+  #want .we{font-size:26px;}
+
+  /* ── ペット ── */
+  #stage{flex:1 1 auto;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  #stage::before{content:"";position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(#ffdca8,#f3c184);}
+  #pet{font-size:min(40vw,180px);line-height:1;position:relative;z-index:2;transition:transform .15s;cursor:pointer;}
+  #pet img{width:min(48vw,210px);height:min(48vw,210px);object-fit:contain;}
+  #pet.happy{animation:hop .5s ease;}
+  @keyframes hop{0%,100%{transform:translateY(0) scale(1);}40%{transform:translateY(-22px) scale(1.08);}}
+  #pet.eat{animation:munch .4s ease 2;}
+  @keyframes munch{0%,100%{transform:scale(1);}50%{transform:scale(.9,1.06);}}
+  #pet.wash{animation:wiggle .25s ease 4;}
+  @keyframes wiggle{0%,100%{transform:rotate(0);}25%{transform:rotate(-5deg);}75%{transform:rotate(5deg);}}
+  #mood{position:absolute;top:6%;z-index:3;font-size:34px;opacity:0;transition:.2s;}
+  /* えんしゅつ */
+  .fx{position:absolute;z-index:4;pointer-events:none;font-size:40px;animation:fxrise 1s ease-out forwards;}
+  @keyframes fxrise{0%{opacity:0;transform:translateY(0) scale(.5);}25%{opacity:1;}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+
+  /* ── おせわ ボタン ── */
+  #acts{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:rgba(255,255,255,.4);}
+  .act{display:flex;flex-direction:column;align-items:center;gap:3px;border:none;border-radius:18px;background:#fff;
+    padding:10px 4px;cursor:pointer;box-shadow:0 4px 0 #e7b98e;}
+  .act:active{transform:translateY(2px);box-shadow:0 2px 0 #e7b98e;}
+  .act .ai{font-size:32px;}
+  .act .an{font-size:13px;font-weight:900;color:#8a4a14;}
+  .act.want{animation:glow 1s infinite;}
+  @keyframes glow{0%,100%{box-shadow:0 4px 0 #e7b98e;}50%{box-shadow:0 4px 0 #e7b98e,0 0 0 4px #ffd34d;}}
+
+  /* ── ペットえらび ── */
+  #pick{position:fixed;inset:0;background:rgba(122,74,30,.35);display:flex;align-items:center;justify-content:center;z-index:20;}
+  #pick.hide{display:none;}
+  #pick .box{background:#fff;border-radius:26px;padding:20px 24px;text-align:center;box-shadow:0 16px 44px rgba(0,0,0,.3);}
+  #pick .ttl{font-size:20px;font-weight:900;color:#8a4a14;margin-bottom:14px;}
+  #pick .row{display:flex;gap:14px;}
+  .pk{font-size:64px;background:#fff4e6;border:3px solid #ffd9b0;border-radius:20px;padding:8px 14px;cursor:pointer;}
+  .pk:active{transform:scale(.94);}
+
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">ペットのおせわ</div>
+    <div id="stars">⭐0</div>
+  </div>
+
+  <div id="wantwrap"><div id="want"><span class="we">🍖</span><span id="wantt">おなか すいたよ！</span></div></div>
+
+  <div id="stage">
+    <div id="mood">😊</div>
+    <div id="pet">🐶</div>
+  </div>
+
+  <div id="acts">
+    <button class="act" data-k="food"><span class="ai">🍖</span><span class="an">ごはん</span></button>
+    <button class="act" data-k="bath"><span class="ai">🛁</span><span class="an">おふろ</span></button>
+    <button class="act" data-k="play"><span class="ai">🎾</span><span class="an">あそぶ</span></button>
+    <button class="act" data-k="pet"><span class="ai">🤚</span><span class="an">なでなで</span></button>
+  </div>
+
+  <div id="pick"><div class="box"><div class="ttl">どの ペットに する？</div><div class="row">
+    <button class="pk" data-p="dog">🐶</button>
+    <button class="pk" data-p="cat">🐱</button>
+    <button class="pk" data-p="rabbit">🐰</button>
+  </div></div></div>
+
+<script>
+"use strict";
+/* =========================================================
+   ペットのおせわ：ペットが「したいこと」を バブルで しめす →
+   あう おせわボタンを おすと だいせいこう（⭐）→ つぎの したいこと。
+   どのボタンも かわいい リアクション。しっぱいなし・やさしい。
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.09,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function happy(){[660,880,1100].forEach((f,i)=>tone(f,0.1,"sine",0.12,i*0.06));}
+function blip(){tone(560,0.07,"triangle",0.11);}
+function cheer(){[523,659,784,1047].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
+
+const PETS={dog:"🐶",cat:"🐱",rabbit:"🐰"};
+const WANTS={
+  food:{e:"🍖",t:"おなか すいたよ！"},
+  bath:{e:"🛁",t:"おふろに はいりたい！"},
+  play:{e:"🎾",t:"ボールで あそびたい！"},
+  pet :{e:"🤚",t:"なでなで して！"},
+};
+const FX={food:["🍖","🦴","😋"],bath:["🫧","🛁","✨"],play:["🎾","⚽","🤸"],pet:["💕","💖","🥰"]};
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+let petKind="dog", stars=0, want="food", busy=false;
+try{stars=parseInt(localStorage.getItem("petStars")||"0",10)||0;}catch(e){}
+
+const elPet=document.getElementById("pet"), elMood=document.getElementById("mood");
+const elStars=document.getElementById("stars"), elWantE=document.querySelector("#want .we"), elWantT=document.getElementById("wantt");
+const elStage=document.getElementById("stage");
+
+function setStars(){elStars.textContent="⭐"+stars; try{localStorage.setItem("petStars",stars);}catch(e){}}
+function showPet(){
+  // がぞうが あれば つかう（なければ えもじ）
+  const src="assets/pet_"+petKind+".png";
+  elPet.innerHTML=`<img src="${src}" alt="${PETS[petKind]}" draggable="false" `+
+    `onerror="this.replaceWith(document.createTextNode('${PETS[petKind]}'))">`;
+}
+function newWant(){
+  const ks=Object.keys(WANTS); want=pick(ks);
+  elWantE.textContent=WANTS[want].e; elWantT.textContent=WANTS[want].t;
+  // あう ボタンを ひからせる
+  document.querySelectorAll(".act").forEach(b=>b.classList.toggle("want", b.dataset.k===want));
+}
+function fxBurst(kind){
+  for(let i=0;i<5;i++){
+    const f=document.createElement("div"); f.className="fx"; f.textContent=pick(FX[kind]);
+    const r=elStage.getBoundingClientRect();
+    f.style.left=(r.width*(0.3+Math.random()*0.4))+"px";
+    f.style.top=(r.height*(0.35+Math.random()*0.25))+"px";
+    f.style.animationDelay=(Math.random()*0.2)+"s";
+    elStage.appendChild(f); setTimeout(()=>f.remove(),1000);
+  }
+}
+function moodShow(face){elMood.textContent=face;elMood.style.opacity="1";setTimeout(()=>elMood.style.opacity="0",900);}
+
+function doAction(k){
+  if(busy) return;
+  // ペットの アニメ
+  elPet.classList.remove("happy","eat","wash");
+  void elPet.offsetWidth;
+  if(k==="food")elPet.classList.add("eat");
+  else if(k==="bath")elPet.classList.add("wash");
+  else elPet.classList.add("happy");
+  fxBurst(k);
+  if(k===want){
+    busy=true; happy(); moodShow(pick(["😻","🥰","🤩","😆"]));
+    stars++; setStars(); sparkle();
+    setTimeout(()=>{busy=false; newWant();},900);
+  }else{
+    blip(); moodShow("🙂");
+  }
+}
+document.querySelectorAll(".act").forEach(b=>b.addEventListener("click",()=>doAction(b.dataset.k)));
+elPet.addEventListener("click",()=>doAction("pet"));
+
+function sparkle(){
+  const r=elPet.getBoundingClientRect();
+  for(let i=0;i<8;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=pick(["⭐","✨","🌟","💛","💕"]);
+    s.style.left=(r.left+r.width*(0.1+Math.random()*0.8))+"px";
+    s.style.top=(r.top+r.height*(0.1+Math.random()*0.6))+"px";
+    s.style.animationDelay=(Math.random()*0.2)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1100);
+  }
+}
+
+// ── ペットえらび ──
+const elPick=document.getElementById("pick");
+document.querySelectorAll(".pk").forEach(b=>b.addEventListener("click",()=>{
+  petKind=b.dataset.p; try{localStorage.setItem("petKind",petKind);}catch(e){}
+  showPet(); elPick.classList.add("hide"); cheer(); newWant();
+}));
+
+window.addEventListener("contextmenu",e=>e.preventDefault());
+// スタート
+setStars();
+let saved=null; try{saved=localStorage.getItem("petKind");}catch(e){}
+if(saved&&PETS[saved]){petKind=saved; showPet(); elPick.classList.add("hide"); newWant();}
+else{ showPet(); }
+</script>
+</body>
+</html>

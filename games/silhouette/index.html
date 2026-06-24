@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#cde8ff" />
+<title>シルエットクイズ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの シルエットクイズ。くろい かげを みて なにかを あてる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/silhouette/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="シルエットクイズ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの シルエットクイズ。くろい かげを みて なにかを あてよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/silhouette/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#1f5b8f;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:linear-gradient(#e3f2ff,#cfe6ff);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#aed8ff;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#1f5b8f;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #7fb6e6;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#1f5b8f;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #7fb6e6;}
+  #stars{font-size:18px;font-weight:900;color:#e8820a;background:#fff;border-radius:14px;padding:6px 12px;box-shadow:0 3px 0 #7fb6e6;min-width:58px;text-align:center;}
+
+  #q{flex:0 0 auto;text-align:center;font-size:21px;font-weight:900;color:#1f5b8f;padding:10px 10px 2px;}
+  /* ── かげ カード ── */
+  #cardwrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px;}
+  #card{width:min(70vw,300px);aspect-ratio:1/1;background:#fff;border-radius:26px;border:6px solid #fff;
+    box-shadow:0 10px 26px rgba(40,90,140,.2);display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 45%,#fbfdff 0 60%,#e9f3ff 100%);}
+  #shape{font-size:min(46vw,200px);line-height:1;filter:brightness(0) drop-shadow(0 4px 6px rgba(0,0,0,.15));transition:filter .5s, transform .3s;}
+  #shape img{width:min(52vw,230px);height:min(52vw,230px);object-fit:contain;filter:brightness(0);transition:filter .5s;}
+  #card.reveal #shape{filter:none;transform:scale(1.05);}
+  #card.reveal #shape img{filter:none;}
+  #card.show .nm{opacity:1;}
+  .nm{position:absolute;bottom:8px;font-size:18px;font-weight:900;color:#1f5b8f;background:#fff;padding:2px 12px;border-radius:12px;opacity:0;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+
+  /* ── こたえ ボタン ── */
+  #ans{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 12px 16px;}
+  .a{display:flex;flex-direction:column;align-items:center;gap:2px;border:none;border-radius:20px;background:#fff;
+    padding:12px 4px;cursor:pointer;box-shadow:0 5px 0 #7fb6e6;}
+  .a:active{transform:translateY(2px);box-shadow:0 2px 0 #7fb6e6;}
+  .a .ae{font-size:46px;line-height:1;}
+  .a .ae img{width:54px;height:54px;object-fit:contain;}
+  .a.bad{animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translate(0,0);}25%{transform:translate(-5px,0);}75%{transform:translate(5px,0);}}
+  .a.good{background:#d8f6cf;box-shadow:0 5px 0 #5fae47;}
+  .a.dim{opacity:.35;}
+
+  #ok{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:25;pointer-events:none;}
+  #ok.show{display:flex;}
+  #ok .box{background:#fff;border-radius:24px;padding:16px 30px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.25);animation:bp .35s cubic-bezier(.3,1.5,.6,1);}
+  @keyframes bp{0%{transform:scale(.4);}100%{transform:scale(1);}}
+  #ok .f{font-size:54px;}
+  #ok .t{font-size:24px;font-weight:900;color:#ff7a00;}
+  .spark{position:fixed;font-size:30px;pointer-events:none;z-index:30;animation:up 1s ease-out forwards;}
+  @keyframes up{0%{opacity:1;transform:translateY(0) scale(.6);}100%{opacity:0;transform:translateY(-90px) scale(1.3);}}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">シルエットクイズ</div>
+    <div id="stars">⭐0</div>
+  </div>
+
+  <div id="q">これ なーに？</div>
+  <div id="cardwrap"><div id="card"><div id="shape"></div><div class="nm" id="nm"></div></div></div>
+  <div id="ans"></div>
+
+  <div id="ok"><div class="box"><div class="f" id="okf">🎉</div><div class="t" id="okt">せいかい！</div></div></div>
+
+<script>
+"use strict";
+/* =========================================================
+   シルエットクイズ：くろい かげ（brightness(0)）を みて、3つから あてる。
+   せいかい→ いろが でて なまえ ひょうじ。まちがい→ やさしく ✗。
+   かげは えもじ／がぞう どちらでも（assets/sil_<key>.png があれば つかう）。
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.09,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function good(){tone(680,0.08,"triangle",0.13);tone(1020,0.10,"sine",0.11,0.05);}
+function bad(){tone(180,0.14,"square",0.10);}
+function cheer(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.15,"sine",0.13,i*0.07));}
+
+// もんだいの プール（key=がぞう名／e=えもじ／n=なまえ）
+const POOL=[
+  {key:"elephant",e:"🐘",n:"ぞう"},{key:"giraffe",e:"🦒",n:"きりん"},{key:"turtle",e:"🐢",n:"かめ"},
+  {key:"fish",e:"🐠",n:"さかな"},{key:"butterfly",e:"🦋",n:"ちょうちょ"},{key:"car",e:"🚗",n:"くるま"},
+  {key:"train",e:"🚂",n:"でんしゃ"},{key:"plane",e:"✈️",n:"ひこうき"},{key:"bike",e:"🚲",n:"じてんしゃ"},
+  {key:"tree",e:"🌳",n:"き"},{key:"apple",e:"🍎",n:"りんご"},{key:"banana",e:"🍌",n:"バナナ"},
+  {key:"dog",e:"🐶",n:"いぬ"},{key:"cat",e:"🐱",n:"ねこ"},{key:"rabbit",e:"🐰",n:"うさぎ"},
+  {key:"duck",e:"🦆",n:"あひる"},{key:"octopus",e:"🐙",n:"たこ"},{key:"crab",e:"🦀",n:"かに"},
+  {key:"mushroom",e:"🍄",n:"きのこ"},{key:"umbrella",e:"☂️",n:"かさ"},{key:"balloon",e:"🎈",n:"ふうせん"},
+  {key:"star",e:"⭐",n:"ほし"},{key:"dino",e:"🦖",n:"きょうりゅう"},{key:"snail",e:"🐌",n:"かたつむり"},
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let stars=0, answer=null, busy=false;
+try{stars=parseInt(localStorage.getItem("silStars")||"0",10)||0;}catch(e){}
+const elStars=document.getElementById("stars"), elShape=document.getElementById("shape");
+const elCard=document.getElementById("card"), elAns=document.getElementById("ans"), elNm=document.getElementById("nm");
+
+function setStars(){elStars.textContent="⭐"+stars; try{localStorage.setItem("silStars",stars);}catch(e){}}
+function itemHTML(it){            // がぞう（なければ えもじ）
+  return `<img src="assets/sil_${it.key}.png" alt="${it.e}" draggable="false" `+
+    `onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:this.alt}))">`;
+}
+
+function nextQ(){
+  busy=false; elCard.classList.remove("reveal","show");
+  const opts=shuffle(POOL.slice()).slice(0,3);
+  answer=pick(opts);
+  elShape.innerHTML=itemHTML(answer); elNm.textContent=answer.n;
+  elAns.innerHTML="";
+  for(const o of shuffle(opts.slice())){
+    const b=document.createElement("button"); b.className="a";
+    b.innerHTML=`<span class="ae">${itemHTML(o)}</span>`;
+    b.addEventListener("click",()=>choose(o,b));
+    elAns.appendChild(b);
+  }
+}
+function choose(o,b){
+  if(busy) return;
+  if(o.key===answer.key){
+    busy=true; good(); cheer();
+    b.classList.add("good");
+    document.querySelectorAll(".a").forEach(x=>{if(x!==b)x.classList.add("dim");});
+    elCard.classList.add("reveal","show");
+    stars++; setStars(); sparkle();
+    showOk();
+    setTimeout(nextQ,1600);
+  }else{
+    bad(); b.classList.add("bad"); setTimeout(()=>b.classList.remove("bad"),300);
+  }
+}
+const elOk=document.getElementById("ok"), elOkF=document.getElementById("okf"), elOkT=document.getElementById("okt");
+function showOk(){elOkF.textContent=pick(["🎉","🌟","🥳","😻"]);elOkT.textContent="せいかい！";elOk.classList.add("show");setTimeout(()=>elOk.classList.remove("show"),1300);}
+function sparkle(){
+  const r=elCard.getBoundingClientRect();
+  for(let i=0;i<9;i++){
+    const s=document.createElement("div"); s.className="spark"; s.textContent=pick(["⭐","✨","🌟","💛"]);
+    s.style.left=(r.left+r.width*(0.1+Math.random()*0.8))+"px";
+    s.style.top=(r.top+r.height*(0.1+Math.random()*0.7))+"px";
+    s.style.animationDelay=(Math.random()*0.2)+"s";
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1100);
+  }
+}
+window.addEventListener("contextmenu",e=>e.preventDefault());
+setStars(); nextQ();
+</script>
+</body>
+</html>
