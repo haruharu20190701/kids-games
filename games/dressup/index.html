@@ -37,9 +37,9 @@
   .layer{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
   .layer img{width:100%;height:100%;object-fit:contain;}
   #lbase{left:50%;top:54%;width:66cqw;height:66cqw;font-size:62cqw;display:flex;align-items:center;justify-content:center;}
-  #lhat {left:50%;top:16%;font-size:30cqw;}
-  #lbow {left:50%;top:73%;font-size:20cqw;}
-  #lheld{left:83%;top:74%;font-size:23cqw;}
+  #lhat {left:50%;top:27%;font-size:26cqw;}
+  #lbow {left:50%;top:58%;font-size:18cqw;}
+  #lheld{left:82%;top:78%;font-size:22cqw;}
 
   /* ── カテゴリ タブ ── */
   #tabs{flex:0 0 auto;display:flex;gap:6px;justify-content:center;padding:6px 8px 2px;}
@@ -175,13 +175,13 @@ function compose(cb){
   // ベース（がぞう or えもじ）
   const node=L.base.firstChild;
   function drawRest(){
-    if(sel.hat){ x.font=`${S*0.30}px ${EF}`; x.fillText(sel.hat, S*0.5, S*0.16); }
-    if(sel.bow){ x.font=`${S*0.20}px ${EF}`; x.fillText(sel.bow, S*0.5, S*0.73); }
-    if(sel.held){x.font=`${S*0.23}px ${EF}`; x.fillText(sel.held, S*0.83, S*0.74); }
+    if(sel.hat){ x.font=`${S*0.26}px ${EF}`; x.fillText(sel.hat, S*0.5, S*0.27); }
+    if(sel.bow){ x.font=`${S*0.18}px ${EF}`; x.fillText(sel.bow, S*0.5, S*0.58); }
+    if(sel.held){x.font=`${S*0.22}px ${EF}`; x.fillText(sel.held, S*0.82, S*0.78); }
     cb(c);
   }
   if(node && node.tagName==="IMG" && node.complete && node.naturalWidth>0){
-    const w=S*0.78; x.drawImage(node, S*0.5-w/2, S*0.54-w/2, w, w); drawRest();
+    const w=S*0.66; x.drawImage(node, S*0.5-w/2, S*0.54-w/2, w, w); drawRest();
   }else{
     x.font=`${S*0.60}px ${EF}`; x.fillText(sel.base.e, S*0.5, S*0.55); drawRest();
   }
