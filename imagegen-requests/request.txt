@@ -1,6 +1,3 @@
-kind: custom
-dest: games/candle/assets
-size: 512
-transparent: true
+kind: icon
 ---
-cake | cute kawaii flat illustration of a round birthday cake with white and pink frosting and colorful sprinkles, NO candles on top, front view, flat frosted top surface, the cake fills the lower three quarters of the image with a clear flat top, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered, plain pure white background, no text, no watermark, kids birthday, high quality
+orb | cute kawaii flat vector app icon of colorful round glossy puzzle orbs in red blue green and yellow with a tiny cute monster peeking, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
