@@ -1,3 +1,7 @@
-kind: icon
+kind: custom
+dest: games/voice/assets
+size: 640
+transparent: true
 ---
-voice | cute kawaii flat vector app icon of a microphone with colorful sound waves and a little yellow bird, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+bird | cute kawaii flat illustration of a happy little yellow bird flying, side view facing right, wings spread, chubby and round, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids game character, high quality
+bg | cute kawaii flat illustration of a bright blue sky with a few fluffy white clouds in the center and a soft rainbow, solid sky-blue color filling all four edges and corners, no white at the borders, pastel cheerful, simple game background, full frame, no text, no watermark, high quality
