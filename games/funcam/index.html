@@ -161,8 +161,9 @@ function fxKale(t){
   ctx.restore();
 }
 function fxEcho(){
-  ctx.fillStyle="rgba(0,0,0,0.16)";ctx.fillRect(0,0,PW,PH);   // ふるい えを すこし けす
-  ctx.globalAlpha=0.85;ctx.drawImage(liveCv,0,0);ctx.globalAlpha=1;
+  // ふるい えを ゆっくり フェード → いまの えを うすく かさねる＝うごくと ゴーストが ながく のこる
+  ctx.fillStyle="rgba(0,0,0,0.08)";ctx.fillRect(0,0,PW,PH);
+  ctx.globalAlpha=0.5;ctx.drawImage(liveCv,0,0);ctx.globalAlpha=1;
 }
 function fxTile(){
   const n=3,cw=PW/n,ch=PH/n;
@@ -179,8 +180,15 @@ function fxMosa(){
   ctx.imageSmoothingEnabled=false;ctx.drawImage(smallCv,0,0,cols,rows,0,0,PW,PH);ctx.imageSmoothingEnabled=true;
 }
 function fxNiji(t){
-  if(FILT){ctx.filter=`hue-rotate(${Math.floor(t*70)%360}deg) saturate(1.8)`;ctx.drawImage(liveCv,0,0);ctx.filter="none";}
-  else{ctx.drawImage(liveCv,0,0);ctx.save();ctx.globalCompositeOperation="hue";ctx.fillStyle=`hsl(${Math.floor(t*70)%360},100%,50%)`;ctx.fillRect(0,0,PW,PH);ctx.restore();}
+  // ctx.filter にたよらず multiply合成で いろを じゅんかん（どの たんまつでも うごく）
+  ctx.drawImage(liveCv,0,0);
+  const hue=Math.floor(t*80)%360;
+  ctx.save();
+  ctx.globalCompositeOperation="multiply";
+  ctx.fillStyle=`hsl(${hue},100%,60%)`; ctx.fillRect(0,0,PW,PH);
+  ctx.globalCompositeOperation="screen";                       // すこし あかるさを もどす
+  ctx.fillStyle=`hsl(${(hue+180)%360},90%,20%)`; ctx.fillRect(0,0,PW,PH);
+  ctx.restore();
 }
 
 // ── ループ ──
@@ -190,6 +198,7 @@ function loop(ts){
   if(running){
     const ok=drawLive();
     if(ok){
+      ctx.globalCompositeOperation="source-over"; ctx.globalAlpha=1; ctx.imageSmoothingEnabled=true; // じょうたい リセット
       if(current){ current.fn(T); }
       else { ctx.drawImage(liveCv,0,0); }   // えらぶ がめんの うしろ＝ライブ
     }
