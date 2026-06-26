@@ -1,3 +1,9 @@
-kind: icon
+kind: custom
+dest: games/orb/assets
+size: 360
+transparent: true
 ---
-orb | cute kawaii flat vector app icon of colorful round glossy puzzle orbs in red blue green and yellow with a tiny cute monster peeking, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+mon_slime | cute kawaii flat illustration of a friendly green slime monster with big eyes, front facing, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids game monster, high quality
+mon_bat | cute kawaii flat illustration of a friendly purple bat monster with big eyes and little wings, front facing, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids game monster, high quality
+mon_ghost | cute kawaii flat illustration of a friendly white ghost monster with big eyes, front facing, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids game monster, high quality
+mon_dragon | cute kawaii flat illustration of a friendly chubby dragon monster with big eyes and little wings, front facing, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single character, plain pure white background, no text, no watermark, kids game monster, high quality
