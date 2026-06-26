@@ -160,7 +160,7 @@ function draw(){
   }
   // ろうそく（ケーキの うえ）
   const n=candles.length, span=cakeW*0.74, x0=cx-span/2;
-  const cw=Math.max(6,cakeW*0.035), ch=cakeW*0.22, baseY=cakeTop+ (cakeOK? (cakeW/(imgCake.naturalWidth/imgCake.naturalHeight))*0.18 : H*0.02);
+  const cw=Math.max(6,cakeW*0.035), ch=cakeW*0.22, baseY=cakeTop+ (cakeOK? (cakeW/(imgCake.naturalWidth/imgCake.naturalHeight))*0.30 : H*0.02);
   for(let i=0;i<n;i++){
     const x = n===1? cx : x0 + span*i/(n-1);
     const c=candles[i];
