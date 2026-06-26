@@ -161,9 +161,13 @@ function fxKale(t){
   ctx.restore();
 }
 function fxEcho(){
-  // ふるい えを ゆっくり フェード → いまの えを うすく かさねる＝うごくと ゴーストが ながく のこる
-  ctx.fillStyle="rgba(0,0,0,0.08)";ctx.fillRect(0,0,PW,PH);
-  ctx.globalAlpha=0.5;ctx.drawImage(liveCv,0,0);ctx.globalAlpha=1;
+  // ① まえの えを ゆっくり フェード（くらく）
+  ctx.globalCompositeOperation="source-over";
+  ctx.fillStyle="rgba(0,0,0,0.05)"; ctx.fillRect(0,0,PW,PH);
+  // ② lighten＝あかるい ほうを のこす → うごいた きせきが くっきり ながく のこる
+  ctx.globalCompositeOperation="lighten";
+  ctx.drawImage(liveCv,0,0);
+  ctx.globalCompositeOperation="source-over";
 }
 function fxTile(){
   const n=3,cw=PW/n,ch=PH/n;
