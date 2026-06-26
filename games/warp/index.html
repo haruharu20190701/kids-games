@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#1d2b3a" />
+<title>ぐにゃぐにゃカメラ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ふしぎカメラ（タイムワープスキャン）。せんが とおると かおが ぐにゃぐにゃに！カメラを つかいます（えいぞうは そとに おくりません）。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/warp/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ぐにゃぐにゃカメラ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの ふしぎカメラ。せんが とおると かおが ぐにゃぐにゃに！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/warp/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#fff;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#10171f;}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#28384a;flex:0 0 auto;z-index:3;}
+  #bar #title{font-weight:900;font-size:18px;color:#fff;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #14202c;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#28384a;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #14202c;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;background:#000;}
+  #vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;}   /* デコード用・表示はcanvas */
+  #cv{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;}
+
+  /* したの ボタン */
+  #ctrls{flex:0 0 auto;display:flex;gap:8px;padding:9px 12px;justify-content:center;background:#28384a;}
+  .ab{font-size:17px;font-weight:900;border:none;border-radius:16px;padding:12px 18px;cursor:pointer;color:#fff;}
+  .ab:active{transform:translateY(2px);}
+  #go{background:#ff7aa8;box-shadow:0 5px 0 #c84d7e;}
+  #go:active{box-shadow:0 2px 0 #c84d7e;}
+  #dir{background:#3f6f9f;box-shadow:0 5px 0 #2a4d70;}
+  #dir:active{box-shadow:0 2px 0 #2a4d70;}
+  #save{background:#5bc24a;box-shadow:0 5px 0 #3f9a31;}
+  #save:active{box-shadow:0 2px 0 #3f9a31;}
+  .ab.hide{display:none;}
+
+  .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;
+    background:rgba(10,16,24,.72);z-index:2;padding:20px;text-align:center;}
+  .ov.hide{display:none;}
+  .ov .ttl{font-size:24px;font-weight:900;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  .ov .sub{font-size:15px;font-weight:800;color:#dCEAf7;max-width:300px;line-height:1.6;}
+  .ov .big{font-size:20px;font-weight:900;border:none;border-radius:20px;padding:15px 28px;cursor:pointer;
+    color:#fff;background:#ff7aa8;box-shadow:0 6px 0 #c84d7e;}
+  .ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #c84d7e;}
+  .ov .note{font-size:12px;color:#bcd0e2;}
+  #saveov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(0,0,0,.85);z-index:5;padding:18px;}
+  #saveov.show{display:flex;}
+  #saveov img{max-width:90vw;max-height:64vh;border-radius:12px;}
+  #saveov .m{font-size:15px;font-weight:800;}
+  #saveov button{background:#fff;color:#28384a;border:none;border-radius:14px;padding:10px 22px;font-weight:900;font-size:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">ぐにゃぐにゃカメラ</div>
+    <div style="width:42px"></div>
+  </div>
+
+  <div id="stage">
+    <video id="vid" playsinline muted autoplay></video>
+    <canvas id="cv"></canvas>
+
+    <div class="ov" id="ovStart">
+      <div class="ttl">🌀 ぐにゃぐにゃカメラ</div>
+      <div class="sub">せんが とおると、とおった ところが <b>とまって</b> のこるよ。<br>せんが すぎる あいだに かおを うごかすと…<br><b>かおが ぐにゃぐにゃ！</b></div>
+      <button class="big" id="btnStart">📷 カメラを ゆるして はじめる</button>
+      <div class="note">えいぞうは この たんまつの なかだけ。どこにも おくりません。</div>
+    </div>
+    <div class="ov hide" id="ovErr">
+      <div class="ttl">カメラが つかえないみたい</div>
+      <div class="sub">カメラを「ゆるす」と あそべるよ。ブラウザの せっていを かくにんしてね。</div>
+      <button class="big" id="btnErr">もういちど ためす</button>
+    </div>
+
+    <div id="saveov"><div class="m">ながおしで しゃしんに ほぞんできるよ</div><img id="saveimg" alt=""><button id="saveclose">とじる</button></div>
+  </div>
+
+  <div id="ctrls">
+    <button class="ab" id="dir">🔁 むき</button>
+    <button class="ab" id="go">▶ スタート</button>
+    <button class="ab hide" id="save">📷 ほぞん</button>
+  </div>
+
+<script>
+"use strict";
+/* =========================================================
+   ぐにゃぐにゃカメラ（タイムワープスキャン / スリットスキャン）：
+   スキャンラインが とおった ところは、その しゅんかんの えいぞうを「こおらせる」。
+   とおる あいだに うごくと かおが ゆがむ。さいごに しゃしん ほぞん。
+   ・えいぞうは ローカルしょりのみ（そとに おくらない）
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.08,t="sine",v=0.12,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function ding(){tone(740,0.08,"triangle",0.12);tone(1100,0.1,"sine",0.10,0.05);}
+
+const vid=document.getElementById("vid"), cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const liveCv=document.createElement("canvas"), liveCtx=liveCv.getContext("2d");
+const frzCv=document.createElement("canvas"), frzCtx=frzCv.getContext("2d");
+let PW=0,PH=0,S=1;
+function resize(){
+  const r=cv.getBoundingClientRect(); S=Math.min(devicePixelRatio||1,2);
+  PW=Math.round(r.width*S); PH=Math.round(r.height*S);
+  for(const c of [cv,liveCv,frzCv]){c.width=PW;c.height=PH;}
+}
+addEventListener("resize",()=>{const wasDone=done; resize(); if(!scanning&&!wasDone){/* idle */}});
+
+// ── じょうたい ──
+let mode="h";              // h=たて線が よこに / v=よこ線が たてに
+let scanning=false, done=false, prog=0, prevPx=0, running=false;
+const DUR=4.5;             // すすむ びょうすう
+
+function coverRect(){
+  const iw=vid.videoWidth, ih=vid.videoHeight; if(!iw) return null;
+  const ir=iw/ih, cr=PW/PH; let w,h;
+  if(ir>cr){h=PH;w=PH*ir;}else{w=PW;h=PW/ir;}
+  return {x:(PW-w)/2,y:(PH-h)/2,w,h};
+}
+function drawLive(){
+  const r=coverRect(); if(!r) return false;
+  liveCtx.setTransform(-1,0,0,1,PW,0);          // ミラー（じどり）
+  liveCtx.drawImage(vid,r.x,r.y,r.w,r.h);
+  liveCtx.setTransform(1,0,0,1,0,0);
+  return true;
+}
+
+function startScan(){
+  if(!drawLive()){ return; }       // まだ えいぞうが こない
+  frzCtx.clearRect(0,0,PW,PH);
+  scanning=true; done=false; prog=0; prevPx=0;
+  document.getElementById("save").classList.add("hide");
+  document.getElementById("go").textContent="… スキャンちゅう";
+  tone(500,0.1,"sine",0.1);
+}
+function finishScan(){
+  scanning=false; done=true;
+  document.getElementById("go").textContent="🔁 もういちど";
+  document.getElementById("save").classList.remove("hide");
+  ding();
+}
+
+function frame(dt){
+  const ok=drawLive(); if(!ok) return;
+  if(scanning){
+    prog=Math.min(1, prog + dt/DUR);
+    const px = mode==="h" ? prog*PW : prog*PH;
+    // とおった ぶんの「ほそい おび」を いまの えいぞうから こおらせる
+    if(mode==="h"){
+      const w=px-prevPx; if(w>0.5) frzCtx.drawImage(liveCv, prevPx,0,w,PH, prevPx,0,w,PH);
+    }else{
+      const h=px-prevPx; if(h>0.5) frzCtx.drawImage(liveCv, 0,prevPx,PW,h, 0,prevPx,PW,h);
+    }
+    prevPx=px;
+    if(prog>=1) finishScan();
+  }
+}
+function render(){
+  if(done){
+    ctx.drawImage(frzCv,0,0);                    // ぜんぶ こおった え
+  }else if(scanning){
+    const px = mode==="h" ? prog*PW : prog*PH;
+    if(mode==="h"){
+      if(px>0) ctx.drawImage(frzCv, 0,0,px,PH, 0,0,px,PH);     // とおった＝こおり
+      if(px<PW) ctx.drawImage(liveCv, px,0,PW-px,PH, px,0,PW-px,PH); // これから＝ライブ
+      line(px,0,px,PH);
+    }else{
+      if(px>0) ctx.drawImage(frzCv, 0,0,PW,px, 0,0,PW,px);
+      if(px<PH) ctx.drawImage(liveCv, 0,px,PW,PH-px, 0,px,PW,PH-px);
+      line(0,px,PW,px);
+    }
+  }else{
+    ctx.drawImage(liveCv,0,0);                    // まちうけ＝ライブ
+  }
+}
+function line(x1,y1,x2,y2){
+  ctx.save();
+  ctx.strokeStyle="#aef1ff"; ctx.lineWidth=4*S; ctx.shadowColor="#7fe3ff"; ctx.shadowBlur=14*S;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.restore();
+}
+
+let last=0;
+function loop(t){
+  if(!last)last=t; let dt=(t-last)/1000; last=t; if(dt>0.05)dt=0.05;
+  if(running){ frame(dt); render(); }
+  requestAnimationFrame(loop);
+}
+
+// ── ボタン ──
+const ovStart=document.getElementById("ovStart"), ovErr=document.getElementById("ovErr");
+async function begin(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
+    vid.srcObject=stream; await vid.play().catch(()=>{});
+    resize(); running=true; scanning=false; done=false;
+    ovStart.classList.add("hide"); ovErr.classList.add("hide");
+  }catch(e){ ovStart.classList.add("hide"); ovErr.classList.remove("hide"); }
+}
+document.getElementById("btnStart").addEventListener("click",begin);
+document.getElementById("btnErr").addEventListener("click",begin);
+document.getElementById("go").addEventListener("click",()=>{ if(!running)return; startScan(); });
+document.getElementById("dir").addEventListener("click",()=>{ mode = mode==="h"?"v":"h"; tone(640,0.06); if(!scanning){done=false;document.getElementById("save").classList.add("hide");document.getElementById("go").textContent="▶ スタート";} });
+
+// ── しゃしん ほぞん（iOS対応）──
+function isIOS(){return /(iPhone|iPad|iPod)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+const saveov=document.getElementById("saveov"), saveimg=document.getElementById("saveimg");
+document.getElementById("save").addEventListener("click",()=>{
+  cv.toBlob(blob=>{
+    if(!blob)return;
+    const file=new File([blob],"gunyagunya.png",{type:"image/png"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(()=>{}); }
+    else if(!isIOS() && "download" in document.createElement("a")){
+      const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="gunyagunya.png";a.click();setTimeout(()=>URL.revokeObjectURL(u),3000);
+    }else{ saveimg.src=URL.createObjectURL(blob); saveov.classList.add("show"); }
+  },"image/png");
+});
+document.getElementById("saveclose").addEventListener("click",()=>saveov.classList.remove("show"));
+addEventListener("contextmenu",e=>e.preventDefault());
+resize(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
