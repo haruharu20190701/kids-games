@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#bfe3ff" />
 <title>こえであそぼ｜こどもあそびば</title>
-<meta name="description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの たかさで とりが あがって、あなを とおそう。マイクを つかいます（こえは そとに おくりません）。むりょう・とうろくふよう・スマホ対応。" />
+<meta name="description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの おおきさで とりが あがって、あなを とおそう。マイクを つかいます（こえは そとに おくりません）。むりょう・とうろくふよう・スマホ対応。" />
 <link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/voice/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="こどもあそびば" />
 <meta property="og:title" content="こえであそぼ｜こどもあそびば" />
-<meta property="og:description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの たかさで とりを とばして あなを とおそう。" />
+<meta property="og:description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの おおきさで とりを とばして あなを とおそう。" />
 <meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/voice/" />
 <meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
 <meta property="og:locale" content="ja_JP" />
@@ -58,7 +58,7 @@
 
     <div class="ov" id="ovStart">
       <div class="ttl">🎤 こえで とばそう！</div>
-      <div class="sub"><b>たかい こえ</b>（キーン）で とりが <b>あがる</b>。<br><b>ひくい こえ</b>（ぼー）で <b>さがる</b>。<br>こえの たかさで あなを とおそう！🎵</div>
+      <div class="sub"><b>おおきな こえ</b>で とりが <b>あがる</b>。<br><b>しずか</b>にすると <b>さがる</b>。<br>こえの おおきさで あなを とおそう！🔊</div>
       <button class="big go" id="btnStart">🎤 マイクを ゆるして はじめる</button>
       <div class="note">こえは この たんまつの なかだけ。どこにも おくりません。</div>
     </div>
@@ -108,43 +108,29 @@ function resize(){
 }
 window.addEventListener("resize",resize);
 
-// ── マイク（こえの たかさ＝ピッチを けんしゅつ）──
-let analyser=null, fbuf=null, micOn=false;
+// ── マイク（こえの おおきさ＝おんりょうを けいそく）──
+let analyser=null, micData=null, micOn=false;
 async function startMic(){
   actx=actx||new(window.AudioContext||window.webkitAudioContext)();
   if(actx.state==="suspended") await actx.resume();
   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
   const src=actx.createMediaStreamSource(stream);
-  analyser=actx.createAnalyser(); analyser.fftSize=2048; analyser.smoothingTimeConstant=0;
-  fbuf=new Float32Array(analyser.fftSize);
+  analyser=actx.createAnalyser(); analyser.fftSize=1024; analyser.smoothingTimeConstant=0.3;
+  micData=new Uint8Array(analyser.fftSize);
   src.connect(analyser); micOn=true;
 }
-// じこそうかんで きほんしゅうはすう(Hz)を けんしゅつ（こえなし=-1）
-function corrAt(buf,lag){let c=0;for(let i=0;i<buf.length-lag;i++)c+=buf[i]*buf[i+lag];return c;}
-function detectPitch(buf,sr){
-  const SIZE=buf.length; let e0=0;
-  for(let i=0;i<SIZE;i++)e0+=buf[i]*buf[i];
-  if(e0/SIZE < 0.0003) return -1;                       // しずか
-  const minLag=Math.max(2,Math.floor(sr/1100)), maxLag=Math.min(SIZE-1,Math.ceil(sr/80));
-  let best=-1,bestC=0;
-  for(let lag=minLag;lag<=maxLag;lag++){
-    let c=0; for(let i=0;i<SIZE-lag;i++)c+=buf[i]*buf[i+lag];
-    if(c>bestC){bestC=c;best=lag;}
-  }
-  if(best<1 || bestC < e0*0.3) return -1;               // しゅうきせい よわい→むし
-  const cm=corrAt(buf,best-1), cc=bestC, cp=corrAt(buf,best+1);  // ほうぶつせん ほかん
-  const a=(cm+cp-2*cc)/2, b=(cp-cm)/2; let lag=best; if(a) lag=best - b/(2*a);
-  return sr/lag;
-}
-// こえの たかさ → 0..1（ひくい→0, たかい→1）。こえなし=-1
-const PLO=160, PHI=520;   // こどもの こえの はんい(Hz)・log で わりつけ
-function readPitch(){
-  if(!analyser) return -1;
-  analyser.getFloatTimeDomainData(fbuf);
-  const f=detectPitch(fbuf, actx.sampleRate);
-  if(f<90 || f>1100) return -1;
-  let v=(Math.log(f)-Math.log(PLO))/(Math.log(PHI)-Math.log(PLO));
-  return v<0?0:v>1?1:v;
+// こえの おおきさ → 0..1（じどうこうせい：ノイズフロアと ピークで その子の こえに あわせる）
+let noise=0.02, peak=0.10;
+function readLoud(){
+  if(!analyser) return 0;
+  analyser.getByteTimeDomainData(micData);
+  let s=0; for(let i=0;i<micData.length;i++){const v=(micData[i]-128)/128; s+=v*v;}
+  const rms=Math.sqrt(s/micData.length);
+  noise += (rms-noise)*(rms<noise?0.05:0.0006);   // しずかさは すばやく、上げは ゆっくり
+  peak  += (rms-peak )*(rms>peak ?0.5 :0.0025);   // ピークは すばやく上げ、ゆっくり下げ
+  if(peak < noise+0.03) peak=noise+0.03;
+  let L=(rms-noise)/(peak-noise);
+  return L<0?0:L>1?1:L;
 }
 
 // ── じょうたい ──
@@ -165,8 +151,9 @@ function drawCover(img){
 }
 
 function reset(){
-  ballY=H*0.5; smoothL=0.5; score=0; walls=[]; hitCool=0;
+  ballY=H*0.5; smoothL=0; score=0; walls=[]; hitCool=0;
   spawnX=W+W*0.2;
+  noise=0.02; peak=0.10;
 }
 function spawnWall(x){
   const gapH=H*0.42;
@@ -175,12 +162,10 @@ function spawnWall(x){
 }
 
 function update(dt){
-  const p=readPitch();                                    // -1=こえなし→いまの たかさを キープ
-  if(p>=0) smoothL += (p-smoothL)*Math.min(1,dt*7);       // たかさに なめらかに ついていく
-  // めひょうの たかさ：こえ たかい→うえ
+  const L=readLoud(); smoothL += (L-smoothL)*Math.min(1,dt*12);   // こえ おおきい→うえ・しずか→した
   const top=H*0.10, bot=H*0.90;
   const target=bot - smoothL*(bot-top);
-  ballY += (target-ballY)*Math.min(1,dt*8);
+  ballY += (target-ballY)*Math.min(1,dt*9);
   if(ballY<top*0.6)ballY=top*0.6; if(ballY>H*0.97)ballY=H*0.97;
 
   const spd=Math.max(90, W*0.32);   // よこ移動 px/s
@@ -256,11 +241,11 @@ function meter(){
   const g=ctx.createLinearGradient(0,my+mh,0,my); g.addColorStop(0,"#7ed957");g.addColorStop(.6,"#ffd34d");g.addColorStop(1,"#ff6b6b");
   ctx.fillStyle=g; roundRect(mx,my+mh-lvl,mw,lvl,mw/2); ctx.fill();
   ctx.font=`${W*0.05}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="bottom";
-  ctx.fillText("🎵", mx+mw/2, my-2);
-  // たかい/ひくい の めやす
+  ctx.fillText("🔊", mx+mw/2, my-2);
+  // おおきい/ちいさい の めやす
   ctx.fillStyle="rgba(31,91,143,.85)"; ctx.font=`900 ${W*0.03}px sans-serif`; ctx.textAlign="left"; ctx.textBaseline="middle";
-  ctx.fillText("たかい", mx+mw+3, my+W*0.03);
-  ctx.fillText("ひくい", mx+mw+3, my+mh-W*0.03);
+  ctx.fillText("おおきい", mx+mw+3, my+W*0.03);
+  ctx.fillText("ちいさい", mx+mw+3, my+mh-W*0.03);
 }
 
 // ── ループ ──
