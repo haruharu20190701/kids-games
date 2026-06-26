@@ -205,29 +205,20 @@ let shakeT=0, shakeP=0;
 function draw(){
   ctx.clearRect(0,0,W,H);
   if(shakeT>0)shakeT-=0.016; if(shakeP>0)shakeP-=0.016;
-  // てき エリア
-  const ex=W*0.5 + (shakeT>0?(Math.random()*2-1)*8:0), ey=H*0.19;
-  const es=Math.min(W,H)*0.20;
+  // てき（HPバーは てきの うえに オーバーレイ）
+  const ex=W*0.5 + (shakeT>0?(Math.random()*2-1)*8:0), ey=H*0.205;
+  const es=Math.min(W,H)*0.19;
   if(enemy){
     const im=monImg[enemy.key];
     if(im){ctx.drawImage(im,ex-es/2,ey-es/2,es,es);}
     else{ctx.font=`${es}px "Apple Color Emoji","Noto Color Emoji",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(enemy.e,ex,ey);}
-    // HPバー
-    const bw2=W*0.6,bh2=H*0.018,bx2=W*0.5-bw2/2,by2=H*0.32;
-    ctx.fillStyle="rgba(0,0,0,.4)";rr(bx2,by2,bw2,bh2,bh2/2);ctx.fill();
-    ctx.fillStyle="#ff5a6e";rr(bx2,by2,bw2*Math.max(0,ehp/enemy.max),bh2,bh2/2);ctx.fill();
-    ctx.fillStyle="#fff";ctx.font=`900 ${H*0.022}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(enemy.n+"  ❤"+ehp,W*0.5,by2-H*0.018);
-    // ターン
-    ctx.fillStyle="#ffd23f";ctx.font=`900 ${H*0.02}px sans-serif`;
-    ctx.fillText("あと "+eturn+" かいで こうげき！",W*0.5,by2+H*0.04);
+    bar(W*0.2,H*0.045,W*0.6,H*0.034, ehp/enemy.max, "#ff5a6e", enemy.n+" ❤"+ehp);   // ← てきの うえ
+    ctx.fillStyle="#ffd23f";ctx.font=`900 ${H*0.024}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("あと "+eturn+" かいで こうげき！",W*0.5,H*0.325);
   }
-  // じぶんHP
-  const pw=W*0.6,ph2=H*0.02,pxx=W*0.5-pw/2,pyy=boardTop-H*0.03+(shakeP>0?(Math.random()*2-1)*5:0);
-  ctx.fillStyle="rgba(0,0,0,.4)";rr(pxx,pyy,pw,ph2,ph2/2);ctx.fill();
-  ctx.fillStyle="#5bd36a";rr(pxx,pyy,pw*Math.max(0,php/pmax),ph2,ph2/2);ctx.fill();
-  ctx.fillStyle="#fff";ctx.font=`900 ${H*0.022}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillText("じぶん ❤"+php,W*0.5,pyy-H*0.016);
+  // じぶんHP（ばんの すぐ うえ・てきHPとは はなす）
+  const pyy=boardTop-H*0.05+(shakeP>0?(Math.random()*2-1)*5:0);
+  bar(W*0.2,pyy,W*0.6,H*0.034, php/pmax, "#5bd36a", "じぶん ❤"+php);
   // ばん
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     if(held&&held.r===r&&held.c===c)continue;       // もってる たまは あとで ゆびの ところに
@@ -254,6 +245,14 @@ function orb(x,y,ci,sc){
 }
 function shade(h){const n=parseInt(h.slice(1),16);const r=(n>>16)*0.6|0,g=((n>>8)&255)*0.6|0,b=(n&255)*0.6|0;return`rgb(${r},${g},${b})`;}
 function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+// HPバー＋もじ（もじは バーの うえに のせる＝かさならない）
+function bar(x,y,w,h,frac,col,label){
+  ctx.fillStyle="rgba(0,0,0,.45)"; rr(x,y,w,h,h/2); ctx.fill();
+  ctx.fillStyle=col; rr(x,y,w*Math.max(0,Math.min(1,frac)),h,h/2); ctx.fill();
+  ctx.font=`900 ${h*0.72}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.lineWidth=Math.max(2,h*0.12); ctx.strokeStyle="rgba(0,0,0,.55)";
+  ctx.strokeText(label,x+w/2,y+h/2+0.5); ctx.fillStyle="#fff"; ctx.fillText(label,x+w/2,y+h/2+0.5);
+}
 
 // ── スタート/おわり ──
 const ovStart=document.getElementById("ovStart"), ovOver=document.getElementById("ovOver");
