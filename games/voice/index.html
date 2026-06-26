@@ -209,7 +209,7 @@ function onHit(){
 // ── えがく ──
 function draw(){
   // はいけい（がぞう→なければ そらグラデ＋くも）
-  if(bgOK){ drawCover(imgBg); }
+  if(bgOK){ ctx.fillStyle="#cfe8ff"; ctx.fillRect(0,0,W,H); drawCover(imgBg); }
   else{
     const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#bfe9ff"); g.addColorStop(1,"#e8f7ff");
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
