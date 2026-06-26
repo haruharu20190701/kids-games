@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#2a2350" />
+<title>パズルバトル｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの パズルバトル。たまを なぞって 3つ そろえて けして、モンスターを やっつけよう。じかんせいげん なし。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/orb/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="パズルバトル｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの パズルバトル。たまを そろえて モンスターを やっつけよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/orb/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#fff;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;
+    background:linear-gradient(#3a2d6e,#241a45);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#4a3a86;flex:0 0 auto;z-index:3;}
+  #bar #title{font-weight:900;font-size:19px;color:#fff;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #2c2152;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#4a3a86;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #2c2152;}
+  #stg{font-size:15px;font-weight:900;color:#ffe06b;background:#2c2152;border-radius:14px;padding:8px 12px;white-space:nowrap;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+  .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;
+    background:rgba(20,15,40,.66);z-index:2;padding:20px;text-align:center;}
+  .ov.hide{display:none;}
+  .ov .ttl{font-size:27px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .ov .sub{font-size:15px;font-weight:800;color:#e8e0ff;max-width:300px;line-height:1.6;}
+  .ov .big{font-size:20px;font-weight:900;border:none;border-radius:20px;padding:15px 30px;cursor:pointer;
+    color:#fff;background:#ff7aa8;box-shadow:0 6px 0 #c84d7e;}
+  .ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #c84d7e;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">パズルバトル</div>
+    <div id="stg">⚔️1</div>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="ov" id="ovStart">
+      <div class="ttl">🔮 パズルバトル</div>
+      <div class="sub">たまを ゆびで <b>なぞって うごかす</b>と、とおった たまと いれかわるよ。<br><b>おなじ いろ 3こ</b> ならべて けして、モンスターを やっつけよう！<br>❤️は じぶんの たいりょく かいふく。</div>
+      <button class="big" id="btnStart">▶ はじめる</button>
+    </div>
+    <div class="ov hide" id="ovOver">
+      <div class="ttl" id="ovT">🎉</div>
+      <div class="sub" id="ovS"></div>
+      <button class="big" id="btnAgain">もういちど</button>
+    </div>
+  </div>
+<script>
+"use strict";
+/* =========================================================
+   パズルバトル（パズドラ風）：たまを なぞって いれかえ → 3つ そろえて けす →
+   けした かずで モンスターに ダメージ。❤️は じぶん かいふく。れんさ（コンボ）あり。
+   ・じかんせいげん なし・おおきめ・まけても リトライ（5さい〜）
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.08,t="sine",v=0.13,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function pip(n){tone(520+n*70,0.07,"triangle",0.12);}         // コンボ おん（だんだん たかく）
+function hitS(){tone(200,0.12,"square",0.12);}
+function healS(){tone(700,0.1,"sine",0.12);tone(1000,0.1,"sine",0.10,0.06);}
+function hurtS(){tone(160,0.18,"sawtooth",0.12);}
+function winS(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let W=0,H=0,DPR=1;
+function resize(){const r=cv.getBoundingClientRect();W=r.width;H=r.height;DPR=Math.min(devicePixelRatio||1,2);
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);layout();}
+addEventListener("resize",resize);
+
+// ── たま・てき ──
+const ORBS=[
+  {c:"#ff5a4d",e:"🔥"},{c:"#4aa8ff",e:"💧"},{c:"#5fd35a",e:"🍃"},
+  {c:"#ffd23f",e:"⭐"},{c:"#b06bff",e:"🌙"},{c:"#ff7ab0",e:"❤️"},
+];
+const HEART=5;
+const ENEMIES=[
+  {n:"スライム",key:"slime", e:"👾",hp:30,atk:7, t:1},
+  {n:"こうもり",key:"bat",   e:"🦇",hp:45,atk:9, t:1},
+  {n:"おばけ",  key:"ghost", e:"👻",hp:60,atk:11,t:1},
+  {n:"ドラゴン",key:"dragon",e:"🐉",hp:90,atk:15,t:2},
+];
+const monImg={};
+for(const en of ENEMIES){const im=new Image();im.dataset_ok=false;im.onload=()=>{monImg[en.key]=im;};im.src="assets/mon_"+en.key+".png";}
+
+const COLS=6, ROWS=5;
+let board=[], busy=false, held=null, ptr={x:0,y:0}, running=false;
+let stageIdx=0, loop=0, enemy=null, ehp=0, eturn=0, php=100, pmax=100, flashes=[], floats=[];
+const elStg=document.getElementById("stg");
+
+function randC(){return Math.floor(Math.random()*ORBS.length);}
+function newBoard(){
+  do{ board=[]; for(let r=0;r<ROWS;r++){const row=[];for(let c=0;c<COLS;c++)row.push(randC());board.push(row);} }
+  while(findClear().clear.size>0);   // さいしょは そろってない ばんめんに
+}
+function newEnemy(){
+  const base=ENEMIES[stageIdx%ENEMIES.length];
+  const mul=1+loop*0.6;
+  enemy={...base}; ehp=Math.round(base.hp*mul); enemy.max=ehp; eturn=base.t;
+  elStg.textContent="⚔️"+(stageIdx+1+loop*ENEMIES.length);
+}
+
+// ── レイアウト ──
+let bx=0,by=0,cell=0,boardTop=0;
+function layout(){
+  boardTop=H*0.40;
+  const bw=W*0.96, bh=H-boardTop-8;
+  cell=Math.min(bw/COLS, bh/ROWS);
+  bx=(W-cell*COLS)/2; by=boardTop+(bh-cell*ROWS)/2;
+}
+
+// ── マッチ さがし ──
+function findClear(){
+  const clear=new Set(); let runs=0;
+  for(let r=0;r<ROWS;r++){let c=0;while(c<COLS){let c2=c;while(c2<COLS&&board[r][c2]===board[r][c])c2++;if(c2-c>=3){runs++;for(let k=c;k<c2;k++)clear.add(r+","+k);}c=c2;}}
+  for(let c=0;c<COLS;c++){let r=0;while(r<ROWS){let r2=r;while(r2<ROWS&&board[r2][c]===board[r][c])r2++;if(r2-r>=3){runs++;for(let k=r;k<r2;k++)clear.add(k+","+c);}r=r2;}}
+  let heart=0,non=0; for(const k of clear){const[r,c]=k.split(",").map(Number);if(board[r][c]===HEART)heart++;else non++;}
+  return {clear,runs,heart,non};
+}
+function dropRefill(clear){
+  for(const k of clear){const[r,c]=k.split(",").map(Number);board[r][c]=-1;}
+  for(let c=0;c<COLS;c++){
+    const col=[]; for(let r=ROWS-1;r>=0;r--) if(board[r][c]>=0) col.push(board[r][c]);
+    for(let r=ROWS-1,i=0;r>=0;r--,i++) board[r][c]= i<col.length? col[i] : randC();
+  }
+}
+
+// ── 1ターン かいけつ ──
+async function resolve(){
+  busy=true;
+  let dmg=0, heal=0, combo=0;
+  while(true){
+    const m=findClear(); if(m.clear.size===0) break;
+    // フラッシュ えんしゅつ
+    for(const k of m.clear){const[r,c]=k.split(",").map(Number);flashes.push({r,c,t:0});}
+    combo+=m.runs;
+    for(let i=0;i<m.runs;i++)pip(combo-m.runs+i);
+    dmg += m.non*5; heal += m.heart*5;
+    await sleep(300);
+    dropRefill(m.clear); flashes=[];
+    await sleep(170);
+  }
+  // コンボ ボーナス
+  const total=Math.round(dmg*(1+0.3*Math.max(0,combo-1)));
+  if(heal>0){ php=Math.min(pmax,php+heal); healS(); floats.push({x:W*0.25,y:H*0.34,txt:"+"+heal,col:"#7dff9a",t:0}); }
+  if(total>0){ ehp=Math.max(0,ehp-total); hitS(); floats.push({x:W*0.72,y:H*0.2,txt:"-"+total,col:"#ffd23f",t:0}); shakeT=0.35; }
+  await sleep(250);
+  if(ehp<=0){ await victory(); busy=false; return; }
+  // てきの ターン
+  eturn--;
+  if(eturn<=0){
+    await sleep(200); php=Math.max(0,php-enemy.atk); hurtS(); shakeP=0.4;
+    floats.push({x:W*0.3,y:H*0.34,txt:"-"+enemy.atk,col:"#ff6b6b",t:0}); eturn=enemy.t;
+    if(php<=0){ await sleep(400); gameOver(); busy=false; return; }
+  }
+  busy=false;
+}
+async function victory(){
+  winS(); for(let i=0;i<18;i++)floats.push({x:W*(0.2+Math.random()*0.6),y:H*0.15+Math.random()*H*0.1,txt:["⭐","✨","💥","🎉"][i%4],col:"#fff",t:-Math.random()*0.4});
+  await sleep(900);
+  stageIdx++; if(stageIdx>=ENEMIES.length){stageIdx=0;loop++;}
+  newEnemy();
+}
+
+// ── にゅうりょく（ドロップ なぞり）──
+function cellAt(x,y){const c=Math.floor((x-bx)/cell),r=Math.floor((y-by)/cell);if(r<0||c<0||r>=ROWS||c>=COLS)return null;return{r,c};}
+function down(e){
+  if(busy||!running)return;
+  const p=pos(e); ptr=p; const cl=cellAt(p.x,p.y); if(!cl)return;
+  held={r:cl.r,c:cl.c};
+}
+function move(e){
+  if(!held)return; const p=pos(e); ptr=p; const cl=cellAt(p.x,p.y); if(!cl)return;
+  if((Math.abs(cl.r-held.r)+Math.abs(cl.c-held.c))===1){
+    const tmp=board[cl.r][cl.c]; board[cl.r][cl.c]=board[held.r][held.c]; board[held.r][held.c]=tmp;
+    held={r:cl.r,c:cl.c}; tone(880,0.03,"sine",0.05);
+  }
+}
+function up(){ if(!held)return; held=null; resolve(); }
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+cv.addEventListener("pointerdown",down); cv.addEventListener("pointermove",move); addEventListener("pointerup",up);
+
+// ── えがく ──
+let shakeT=0, shakeP=0;
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  if(shakeT>0)shakeT-=0.016; if(shakeP>0)shakeP-=0.016;
+  // てき エリア
+  const ex=W*0.5 + (shakeT>0?(Math.random()*2-1)*8:0), ey=H*0.19;
+  const es=Math.min(W,H)*0.20;
+  if(enemy){
+    const im=monImg[enemy.key];
+    if(im){ctx.drawImage(im,ex-es/2,ey-es/2,es,es);}
+    else{ctx.font=`${es}px "Apple Color Emoji","Noto Color Emoji",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(enemy.e,ex,ey);}
+    // HPバー
+    const bw2=W*0.6,bh2=H*0.018,bx2=W*0.5-bw2/2,by2=H*0.32;
+    ctx.fillStyle="rgba(0,0,0,.4)";rr(bx2,by2,bw2,bh2,bh2/2);ctx.fill();
+    ctx.fillStyle="#ff5a6e";rr(bx2,by2,bw2*Math.max(0,ehp/enemy.max),bh2,bh2/2);ctx.fill();
+    ctx.fillStyle="#fff";ctx.font=`900 ${H*0.022}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(enemy.n+"  ❤"+ehp,W*0.5,by2-H*0.018);
+    // ターン
+    ctx.fillStyle="#ffd23f";ctx.font=`900 ${H*0.02}px sans-serif`;
+    ctx.fillText("あと "+eturn+" かいで こうげき！",W*0.5,by2+H*0.04);
+  }
+  // じぶんHP
+  const pw=W*0.6,ph2=H*0.02,pxx=W*0.5-pw/2,pyy=boardTop-H*0.03+(shakeP>0?(Math.random()*2-1)*5:0);
+  ctx.fillStyle="rgba(0,0,0,.4)";rr(pxx,pyy,pw,ph2,ph2/2);ctx.fill();
+  ctx.fillStyle="#5bd36a";rr(pxx,pyy,pw*Math.max(0,php/pmax),ph2,ph2/2);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font=`900 ${H*0.022}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("じぶん ❤"+php,W*0.5,pyy-H*0.016);
+  // ばん
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(held&&held.r===r&&held.c===c)continue;       // もってる たまは あとで ゆびの ところに
+    orb(bx+c*cell+cell/2, by+r*cell+cell/2, board[r][c], 1);
+  }
+  for(const f of flashes){ // けえる たま フラッシュ
+    ctx.save();ctx.globalAlpha=0.6+0.4*Math.sin(f.t*30);ctx.fillStyle="#fff";
+    ctx.beginPath();ctx.arc(bx+f.c*cell+cell/2,by+f.r*cell+cell/2,cell*0.46,0,7);ctx.fill();ctx.restore();f.t+=0.016;
+  }
+  if(held){ orb(ptr.x,ptr.y,board[held.r][held.c],1.18); }   // ゆびの たま
+  // フロート
+  for(const f of floats){ f.t+=0.016; ctx.globalAlpha=Math.max(0,1-f.t/1.1);
+    ctx.fillStyle=f.col;ctx.font=`900 ${H*0.04}px sans-serif`;ctx.textAlign="center";ctx.fillText(f.txt,f.x,f.y-f.t*40);ctx.globalAlpha=1;}
+  floats=floats.filter(f=>f.t<1.1);
+  requestAnimationFrame(draw);
+}
+function orb(x,y,ci,sc){
+  if(ci<0)return; const o=ORBS[ci], r=cell*0.43*sc;
+  const g=ctx.createRadialGradient(x-r*0.3,y-r*0.3,r*0.2,x,y,r);
+  g.addColorStop(0,"#ffffff");g.addColorStop(0.25,o.c);g.addColorStop(1,shade(o.c));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.font=`${r*1.0}px "Apple Color Emoji","Noto Color Emoji",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText(o.e,x,y+r*0.05);
+}
+function shade(h){const n=parseInt(h.slice(1),16);const r=(n>>16)*0.6|0,g=((n>>8)&255)*0.6|0,b=(n&255)*0.6|0;return`rgb(${r},${g},${b})`;}
+function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+// ── スタート/おわり ──
+const ovStart=document.getElementById("ovStart"), ovOver=document.getElementById("ovOver");
+function start(){ stageIdx=0;loop=0;php=pmax=100; newBoard(); newEnemy(); running=true; busy=false; flashes=[];floats=[];
+  ovStart.classList.add("hide");ovOver.classList.add("hide"); }
+function gameOver(){ running=false; document.getElementById("ovT").textContent="😢 まけちゃった";
+  document.getElementById("ovS").textContent="もういちど ちょうせん しよう！"; ovOver.classList.remove("hide"); }
+document.getElementById("btnStart").addEventListener("click",()=>{tone(600,0.08);start();});
+document.getElementById("btnAgain").addEventListener("click",()=>{tone(600,0.08);start();});
+addEventListener("contextmenu",e=>e.preventDefault());
+resize(); newBoard(); newEnemy(); requestAnimationFrame(draw);
+</script>
+</body>
+</html>
