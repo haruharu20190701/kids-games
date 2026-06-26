@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#bfe3ff" />
 <title>こえであそぼ｜こどもあそびば</title>
-<meta name="description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの おおきさで とりが あがって、あなを とおそう。マイクを つかいます（こえは そとに おくりません）。むりょう・とうろくふよう・スマホ対応。" />
+<meta name="description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの たかさで とりが あがって、あなを とおそう。マイクを つかいます（こえは そとに おくりません）。むりょう・とうろくふよう・スマホ対応。" />
 <link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/voice/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="こどもあそびば" />
 <meta property="og:title" content="こえであそぼ｜こどもあそびば" />
-<meta property="og:description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの おおきさで とりを とばして あなを とおそう。" />
+<meta property="og:description" content="5さいくらいの こども向けの こえで あそぶ ゲーム。こえの たかさで とりを とばして あなを とおそう。" />
 <meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/voice/" />
 <meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
 <meta property="og:locale" content="ja_JP" />
@@ -58,7 +58,7 @@
 
     <div class="ov" id="ovStart">
       <div class="ttl">🎤 こえで とばそう！</div>
-      <div class="sub">おおきな こえを だすと とりが <b>あがる</b>よ。<br>しずかにすると <b>さがる</b>。<br>こえで たかさを かえて あなを とおそう！</div>
+      <div class="sub"><b>たかい こえ</b>（キーン）で とりが <b>あがる</b>。<br><b>ひくい こえ</b>（ぼー）で <b>さがる</b>。<br>こえの たかさで あなを とおそう！🎵</div>
       <button class="big go" id="btnStart">🎤 マイクを ゆるして はじめる</button>
       <div class="note">こえは この たんまつの なかだけ。どこにも おくりません。</div>
     </div>
@@ -108,30 +108,44 @@ function resize(){
 }
 window.addEventListener("resize",resize);
 
-// ── マイク ──
-let analyser=null, micData=null, micOn=false;
+// ── マイク（こえの たかさ＝ピッチを けんしゅつ）──
+let analyser=null, fbuf=null, micOn=false;
 async function startMic(){
   actx=actx||new(window.AudioContext||window.webkitAudioContext)();
   if(actx.state==="suspended") await actx.resume();
   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
   const src=actx.createMediaStreamSource(stream);
-  analyser=actx.createAnalyser(); analyser.fftSize=1024; analyser.smoothingTimeConstant=0.3;
-  micData=new Uint8Array(analyser.fftSize);
+  analyser=actx.createAnalyser(); analyser.fftSize=2048; analyser.smoothingTimeConstant=0;
+  fbuf=new Float32Array(analyser.fftSize);
   src.connect(analyser); micOn=true;
 }
-function readLoud(){            // 0..1 の こえの おおきさ（じどうこうせい）
-  if(!analyser) return 0;
-  analyser.getByteTimeDomainData(micData);
-  let s=0; for(let i=0;i<micData.length;i++){const v=(micData[i]-128)/128; s+=v*v;}
-  const rms=Math.sqrt(s/micData.length);
-  // ノイズフロアは ゆっくり下げ、ピークは すばやく上げて ゆっくり下げる
-  noise += (rms-noise)*(rms<noise?0.05:0.0006);
-  peak  += (rms-peak )*(rms>peak ?0.5 :0.0025);
-  if(peak < noise+0.03) peak=noise+0.03;
-  let L=(rms-noise)/(peak-noise);
-  return L<0?0:L>1?1:L;
+// じこそうかんで きほんしゅうはすう(Hz)を けんしゅつ（こえなし=-1）
+function corrAt(buf,lag){let c=0;for(let i=0;i<buf.length-lag;i++)c+=buf[i]*buf[i+lag];return c;}
+function detectPitch(buf,sr){
+  const SIZE=buf.length; let e0=0;
+  for(let i=0;i<SIZE;i++)e0+=buf[i]*buf[i];
+  if(e0/SIZE < 0.0003) return -1;                       // しずか
+  const minLag=Math.max(2,Math.floor(sr/1100)), maxLag=Math.min(SIZE-1,Math.ceil(sr/80));
+  let best=-1,bestC=0;
+  for(let lag=minLag;lag<=maxLag;lag++){
+    let c=0; for(let i=0;i<SIZE-lag;i++)c+=buf[i]*buf[i+lag];
+    if(c>bestC){bestC=c;best=lag;}
+  }
+  if(best<1 || bestC < e0*0.3) return -1;               // しゅうきせい よわい→むし
+  const cm=corrAt(buf,best-1), cc=bestC, cp=corrAt(buf,best+1);  // ほうぶつせん ほかん
+  const a=(cm+cp-2*cc)/2, b=(cp-cm)/2; let lag=best; if(a) lag=best - b/(2*a);
+  return sr/lag;
 }
-let noise=0.02, peak=0.10;
+// こえの たかさ → 0..1（ひくい→0, たかい→1）。こえなし=-1
+const PLO=160, PHI=520;   // こどもの こえの はんい(Hz)・log で わりつけ
+function readPitch(){
+  if(!analyser) return -1;
+  analyser.getFloatTimeDomainData(fbuf);
+  const f=detectPitch(fbuf, actx.sampleRate);
+  if(f<90 || f>1100) return -1;
+  let v=(Math.log(f)-Math.log(PLO))/(Math.log(PHI)-Math.log(PLO));
+  return v<0?0:v>1?1:v;
+}
 
 // ── じょうたい ──
 let best=0; try{best=parseInt(localStorage.getItem("voiceBest")||"0",10)||0;}catch(e){}
@@ -141,11 +155,18 @@ function setBest(){elBest.textContent="⭐"+best; try{localStorage.setItem("voic
 let state="idle";   // idle / play / dead
 let ballY=0, smoothL=0, score=0, walls=[], spawnX=0, last=0, hitCool=0;
 const BIRD="🐤";
+// がぞう（あれば つかう・なければ えもじ/グラデにフォールバック）
+const imgBird=new Image(); let birdOK=false; imgBird.onload=()=>{birdOK=imgBird.naturalWidth>0;}; imgBird.src="assets/bird.png";
+const imgBg=new Image();   let bgOK=false;   imgBg.onload=()=>{bgOK=imgBg.naturalWidth>0;};     imgBg.src="assets/bg.png";
+function drawCover(img){
+  const ir=img.naturalWidth/img.naturalHeight, cr=W/H; let w,h;
+  if(ir>cr){h=H;w=H*ir;}else{w=W;h=W/ir;}
+  ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+}
 
 function reset(){
-  ballY=H*0.5; smoothL=0; score=0; walls=[]; hitCool=0;
+  ballY=H*0.5; smoothL=0.5; score=0; walls=[]; hitCool=0;
   spawnX=W+W*0.2;
-  noise=0.02; peak=0.10;
 }
 function spawnWall(x){
   const gapH=H*0.42;
@@ -154,11 +175,12 @@ function spawnWall(x){
 }
 
 function update(dt){
-  const L=readLoud(); smoothL += (L-smoothL)*Math.min(1,dt*12);
-  // めひょうの たかさ：こえ おおきい→うえ
+  const p=readPitch();                                    // -1=こえなし→いまの たかさを キープ
+  if(p>=0) smoothL += (p-smoothL)*Math.min(1,dt*7);       // たかさに なめらかに ついていく
+  // めひょうの たかさ：こえ たかい→うえ
   const top=H*0.10, bot=H*0.90;
   const target=bot - smoothL*(bot-top);
-  ballY += (target-ballY)*Math.min(1,dt*9);
+  ballY += (target-ballY)*Math.min(1,dt*8);
   if(ballY<top*0.6)ballY=top*0.6; if(ballY>H*0.97)ballY=H*0.97;
 
   const spd=Math.max(90, W*0.32);   // よこ移動 px/s
@@ -186,25 +208,32 @@ function onHit(){
 
 // ── えがく ──
 function draw(){
-  // そら
-  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#bfe9ff"); g.addColorStop(1,"#e8f7ff");
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  // くも（うっすら）
-  ctx.fillStyle="rgba(255,255,255,.55)";
-  for(let i=0;i<3;i++){const cx=((i*W/3)+ (last*0.01)%(W))%W; cloud(cx, H*(0.18+0.2*i), H*0.05);}
+  // はいけい（がぞう→なければ そらグラデ＋くも）
+  if(bgOK){ drawCover(imgBg); }
+  else{
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#bfe9ff"); g.addColorStop(1,"#e8f7ff");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="rgba(255,255,255,.55)";
+    for(let i=0;i<3;i++){const cx=((i*W/3)+ (last*0.01)%(W))%W; cloud(cx, H*(0.18+0.2*i), H*0.05);}
+  }
   // かべ
   const ww=W*0.15;
   for(const w of walls){
     drawPipe(w.x, 0, ww, w.gapTop);                 // うえ
     drawPipe(w.x, w.gapTop+w.gapH, ww, H-(w.gapTop+w.gapH)); // した
   }
-  // とり
+  // とり（がぞう→なければ えもじ）
   const bx=W*0.28;
   ctx.save();
   if(state==="dead"||hitCool>0) ctx.globalAlpha=0.6;
-  ctx.font=`${Math.min(W,H)*0.11}px "Apple Color Emoji","Noto Color Emoji",sans-serif`;
-  ctx.textAlign="center"; ctx.textBaseline="middle";
-  ctx.fillText(BIRD, bx, ballY);
+  if(birdOK){
+    const s=Math.min(W,H)*0.15, ar=imgBird.naturalWidth/imgBird.naturalHeight, bw=s*ar, bh=s;
+    ctx.drawImage(imgBird, bx-bw/2, ballY-bh/2, bw, bh);
+  }else{
+    ctx.font=`${Math.min(W,H)*0.11}px "Apple Color Emoji","Noto Color Emoji",sans-serif`;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(BIRD, bx, ballY);
+  }
   ctx.restore();
   // こえメーター（ひだり）
   meter();
@@ -227,7 +256,11 @@ function meter(){
   const g=ctx.createLinearGradient(0,my+mh,0,my); g.addColorStop(0,"#7ed957");g.addColorStop(.6,"#ffd34d");g.addColorStop(1,"#ff6b6b");
   ctx.fillStyle=g; roundRect(mx,my+mh-lvl,mw,lvl,mw/2); ctx.fill();
   ctx.font=`${W*0.05}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="bottom";
-  ctx.fillText("🔊", mx+mw/2, my-2);
+  ctx.fillText("🎵", mx+mw/2, my-2);
+  // たかい/ひくい の めやす
+  ctx.fillStyle="rgba(31,91,143,.85)"; ctx.font=`900 ${W*0.03}px sans-serif`; ctx.textAlign="left"; ctx.textBaseline="middle";
+  ctx.fillText("たかい", mx+mw+3, my+W*0.03);
+  ctx.fillText("ひくい", mx+mw+3, my+mh-W*0.03);
 }
 
 // ── ループ ──
