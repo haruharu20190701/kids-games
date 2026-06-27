@@ -179,7 +179,7 @@ function draw(){
   }
   // よこ棒
   ctx.strokeStyle="#9a6a2e"; ctx.lineWidth=Math.max(4,W*0.012);
-  for(let r=0;r<R;r++)for(let c=0;c<C-1;c++) if(rung[r][c]){
+  for(let r=0;r<R;r++)for(let c=0;c<C-1;c++) if(rung[r] && rung[r][c]){
     const y=rungY(r);ctx.beginPath();ctx.moveTo(colX(c),y);ctx.lineTo(colX(c+1),y);ctx.stroke();
   }
   // せいかいの みち（まちがえた とき・あか）
