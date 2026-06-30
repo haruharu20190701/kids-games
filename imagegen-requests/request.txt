@@ -1,3 +1,3 @@
 kind: icon
 ---
-dino | cute kawaii flat vector app icon of a cute green dinosaur next to a fossil bone and a small digging shovel, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+tetris | cute kawaii flat vector app icon of colorful falling tetromino blocks (cyan, yellow, purple, green, red, blue, orange) stacking up, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
