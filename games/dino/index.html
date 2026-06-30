@@ -27,7 +27,21 @@
   .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
     box-shadow:0 3px 0 #b08a4e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#5a4326;}
   .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #b08a4e;}
-  #zukan{font-size:14px;font-weight:900;color:#9a6a1a;background:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 3px 0 #b08a4e;white-space:nowrap;}
+  #zukan{font-size:14px;font-weight:900;color:#9a6a1a;background:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 3px 0 #b08a4e;white-space:nowrap;cursor:pointer;}
+  #zukan:active{transform:translateY(2px);box-shadow:0 1px 0 #b08a4e;}
+  /* ── ずかん いちらん ── */
+  #zukanOv{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;background:rgba(40,25,10,.94);padding:12px;}
+  #zukanOv.show{display:flex;}
+  #zukanOv .zh{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex:0 0 auto;}
+  #zukanOv .zt{flex:1;text-align:center;font-size:18px;font-weight:900;color:#ffe6c0;}
+  #zukanOv .zc{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;color:#5a4326;font-weight:900;cursor:pointer;box-shadow:0 3px 0 #b08a4e;}
+  #zukanOv .zc:active{transform:translateY(2px);box-shadow:0 1px 0 #b08a4e;}
+  #zgrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:10px;}
+  .zitem{background:#f3e3c4;border-radius:14px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:104px;justify-content:center;}
+  .zitem img{width:74px;height:74px;object-fit:contain;}
+  .zitem .zn{font-size:10px;font-weight:800;color:#5a4326;text-align:center;line-height:1.15;}
+  .zitem.locked{background:#6f5d42;}
+  .zitem.locked .q{font-size:42px;font-weight:900;color:#b6a585;}
 
   #info{flex:0 0 auto;background:#c8a468;padding:6px 10px 8px;}
   #counts{display:flex;justify-content:center;gap:14px;font-size:14px;font-weight:900;color:#4a3318;margin-bottom:5px;}
@@ -74,6 +88,11 @@
   <div id="ctrls">
     <button class="tool on" id="tPick"><canvas width="60" height="60"></canvas><span class="tn">ピッケル</span><span class="td">1マス</span></button>
     <button class="tool" id="tHammer"><canvas width="60" height="60"></canvas><span class="tn">ハンマー</span><span class="td">まわりも</span></button>
+  </div>
+
+  <div id="zukanOv">
+    <div class="zh"><div class="zt" id="zukanTitle">きょうりゅう ずかん</div><button class="zc" id="zukanClose">×</button></div>
+    <div id="zgrid"></div>
   </div>
 <script>
 "use strict";
@@ -311,6 +330,22 @@ function toolIcons(){
   h.beginPath();h.moveTo(30,54);h.lineTo(30,26);h.stroke();
   h.fillStyle="#9aa0a6";h.fillRect(14,12,32,16);                  // ハンマー頭
 }
+
+// ── ずかん いちらん（タップで ひらく）──
+const elZgrid=document.getElementById("zgrid"), elZukanOv=document.getElementById("zukanOv");
+function openZukan(){
+  elZgrid.innerHTML="";
+  for(const d of DINOS){
+    const it=document.createElement("div");
+    if(foundSet.has(d.s)){ it.className="zitem"; it.innerHTML=`<img src="assets/${d.s}.png" alt="" draggable="false"><span class="zn">${d.n}</span>`; }
+    else { it.className="zitem locked"; it.innerHTML=`<span class="q">？</span>`; }
+    elZgrid.appendChild(it);
+  }
+  document.getElementById("zukanTitle").textContent="きょうりゅう ずかん "+foundSet.size+"/"+DINOS.length;
+  elZukanOv.classList.add("show"); tone(700,0.08);
+}
+document.getElementById("zukan").addEventListener("click",openZukan);
+document.getElementById("zukanClose").addEventListener("click",()=>{elZukanOv.classList.remove("show");tone(520,0.07);});
 
 addEventListener("contextmenu",e=>e.preventDefault());
 setZukan(); resize(); toolIcons(); newRound(); requestAnimationFrame(loop);
