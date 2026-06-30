@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#10131c" />
+<title>テトリス｜こどもあそびば</title>
+<meta name="description" content="ブラウザで あそべる テトリス。タップで かいてん、ドラッグで いどう。NEXT ひょうじ・どんどん はやくなる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/tetris/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="テトリス｜こどもあそびば" />
+<meta property="og:description" content="ブラウザで あそべる テトリス。タップで かいてん、ドラッグで いどう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/tetris/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#dfe6f5;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#0c0f17;}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2336;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#cfe0ff;flex:1;text-align:center;letter-spacing:3px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#2b3654;
+    box-shadow:0 3px 0 #131a2b;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#cfe0ff;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #131a2b;}
+
+  #hud{flex:0 0 auto;display:flex;align-items:stretch;gap:10px;padding:8px 12px;background:#141a29;}
+  #next{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  #next .lab{font-size:11px;font-weight:900;color:#8fa6d6;letter-spacing:1px;}
+  #ncv{width:74px;height:60px;background:#0a0d15;border-radius:8px;border:1px solid #2a3450;}
+  #stats{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-content:center;}
+  .stat{background:#0a0d15;border-radius:8px;padding:4px 6px;text-align:center;border:1px solid #2a3450;}
+  .stat .l{font-size:10px;font-weight:900;color:#8fa6d6;letter-spacing:1px;}
+  .stat .v{font-size:17px;font-weight:900;color:#fff;}
+
+  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+
+  #ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    background:rgba(8,10,18,.82);z-index:5;padding:20px;text-align:center;}
+  #ov.show{display:flex;}
+  #ov .t{font-size:28px;font-weight:900;color:#fff;letter-spacing:2px;}
+  #ov .s{font-size:16px;font-weight:800;color:#bcd0ff;}
+  #ov .big{font-size:19px;font-weight:900;border:none;border-radius:16px;padding:14px 30px;cursor:pointer;color:#fff;background:#4a7bff;box-shadow:0 6px 0 #2b4ea8;}
+  #ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #2b4ea8;}
+  #help{flex:0 0 auto;text-align:center;font-size:11px;color:#6b7da6;padding:4px 0 7px;background:#141a29;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">ＴＥＴＲＩＳ</div>
+    <div style="width:42px"></div>
+  </div>
+  <div id="hud">
+    <div id="next"><div class="lab">NEXT</div><canvas id="ncv" width="148" height="120"></canvas></div>
+    <div id="stats">
+      <div class="stat"><div class="l">SCORE</div><div class="v" id="sScore">0</div></div>
+      <div class="stat"><div class="l">LINES</div><div class="v" id="sLines">0</div></div>
+      <div class="stat"><div class="l">LEVEL</div><div class="v" id="sLevel">1</div></div>
+    </div>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="ov"><div class="t" id="ovT">GAME OVER</div><div class="s" id="ovS"></div><button class="big" id="ovB">もういちど</button></div>
+  </div>
+  <div id="help">タップ＝かいてん／よこドラッグ＝いどう／したドラッグ＝はやく おとす</div>
+<script>
+"use strict";
+/* =========================================================
+   テトリス（公式準拠）：7種ミノ(形・色)・SRS回転＋ウォールキック・7bag・
+   ガイドライン重力・ロックディレイ・NEXT/ゴースト。
+   操作：タップ＝回転 / 左右ドラッグ＝移動 / 下ドラッグ＝ソフトドロップ（上は無効）。
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.06,t="sine",v=0.1,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+function sMove(){tone(330,0.03,"square",0.05);}
+function sRot(){tone(520,0.05,"triangle",0.07);}
+function sLock(){tone(160,0.07,"square",0.08);}
+function sLine(){[523,659,784].forEach((f,i)=>tone(f,0.12,"sine",0.12,i*0.05));}
+function sTetris(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,"triangle",0.13,i*0.07));}
+function sOver(){[440,330,247,165].forEach((f,i)=>tone(f,0.2,"sawtooth",0.12,i*0.12));}
+
+const COLS=10, ROWS=20;
+// 公式の色
+const COLORS={I:"#00f0f0",O:"#f0f000",T:"#a000f0",S:"#00f000",Z:"#f00000",J:"#0000f0",L:"#f0a000"};
+// SRS 4状態の セル（[x,y]）
+const SHAPES={
+  I:[[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]],[[0,2],[1,2],[2,2],[3,2]],[[1,0],[1,1],[1,2],[1,3]]],
+  O:[[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]],[[1,0],[2,0],[1,1],[2,1]]],
+  T:[[[1,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[2,1],[1,2]],[[1,0],[0,1],[1,1],[1,2]]],
+  S:[[[1,0],[2,0],[0,1],[1,1]],[[1,0],[1,1],[2,1],[2,2]],[[1,1],[2,1],[0,2],[1,2]],[[0,0],[0,1],[1,1],[1,2]]],
+  Z:[[[0,0],[1,0],[1,1],[2,1]],[[2,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[1,2],[2,2]],[[1,0],[0,1],[1,1],[0,2]]],
+  J:[[[0,0],[0,1],[1,1],[2,1]],[[1,0],[2,0],[1,1],[1,2]],[[0,1],[1,1],[2,1],[2,2]],[[1,0],[1,1],[0,2],[1,2]]],
+  L:[[[2,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,1],[0,2]],[[0,0],[1,0],[1,1],[1,2]]],
+};
+// ウォールキック（時計回り・数学座標y上 → 適用時 py-ky）
+const KICK={
+  JLSTZ:[[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[1,0],[1,1],[0,-2],[1,-2]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+  I:[[[0,0],[-2,0],[1,0],[-2,-1],[1,2]],[[0,0],[-1,0],[2,0],[-1,2],[2,-1]],[[0,0],[2,0],[-1,0],[2,1],[-1,-2]],[[0,0],[1,0],[-2,0],[1,-2],[-2,1]]],
+};
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ── canvas ──
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const ncv=document.getElementById("ncv"), nctx=ncv.getContext("2d");
+let PW=0,PH=0,S=1, cell=0, ox=0, oy=0, cssCell=20;
+function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);
+  PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;
+  cell=Math.floor(Math.min(PW/COLS,PH/ROWS)); ox=Math.floor((PW-cell*COLS)/2); oy=Math.floor((PH-cell*ROWS)/2);
+  cssCell=(cell/S);
+  const nr=ncv.getBoundingClientRect();ncv.width=Math.round(nr.width*S);ncv.height=Math.round(nr.height*S);
+}
+addEventListener("resize",resize);
+
+// ── じょうたい ──
+let board=[], px=0, py=0, rot=0, type="T", nextT="I", bag=[];
+let score=0, lines=0, level=1, state="play", dropAcc=0, lockTimer=0, lockResets=0;
+const LOCKDELAY=0.5;
+let hi=0; try{hi=parseInt(localStorage.getItem("tetrisHi")||"0",10)||0;}catch(e){}
+
+function emptyBoard(){board=[];for(let r=0;r<ROWS;r++)board.push(new Array(COLS).fill(null));}
+function bagNext(){if(bag.length===0)bag=shuffle(["I","O","T","S","Z","J","L"]);return bag.pop();}
+function gravSec(){return Math.pow(0.8-(level-1)*0.007, level-1);}   // 1行あたり秒
+
+function collide(tx,ty,tr){
+  const cells=SHAPES[type][tr];
+  for(const [cx,cy] of cells){const bx=tx+cx,by=ty+cy;
+    if(bx<0||bx>=COLS||by>=ROWS)return true;
+    if(by>=0 && board[by][bx])return true;}
+  return false;
+}
+function spawn(){
+  type=nextT; nextT=bagNext(); rot=0; px=3; py=0;
+  dropAcc=0; lockTimer=0; lockResets=0;
+  drawNext();
+  if(collide(px,py,rot)){ gameOver(); }
+}
+function move(dx){ if(collide(px+dx,py,rot))return false; px+=dx; if(!collide(px,py+1,rot)){}else resetLock(); sMove(); return true; }
+function softDrop(){ if(!collide(px,py+1,rot)){py++; score++; updateHud(); dropAcc=0; return true;} return false; }
+function rotateCW(){
+  if(type==="O"){return;}
+  const nr=(rot+1)%4; const tbl=(type==="I"?KICK.I:KICK.JLSTZ)[rot];
+  for(const [kx,ky] of tbl){ if(!collide(px+kx,py-ky,nr)){ px+=kx; py-=ky; rot=nr; if(collide(px,py+1,rot)){}else{} resetLock(); sRot(); return; } }
+}
+function resetLock(){ if(!collide(px,py+1,rot))return; if(lockResets<15){lockTimer=0;lockResets++;} }
+function lockPiece(){
+  for(const [cx,cy] of SHAPES[type][rot]){const bx=px+cx,by=py+cy; if(by>=0&&by<ROWS&&bx>=0&&bx<COLS)board[by][bx]=COLORS[type];}
+  sLock(); clearLines(); spawn();
+}
+function clearLines(){
+  let full=[];
+  for(let r=0;r<ROWS;r++) if(board[r].every(c=>c)) full.push(r);
+  if(full.length===0)return;
+  flash=full.slice(); flashT=0;
+  for(const r of full){ board.splice(r,1); board.unshift(new Array(COLS).fill(null)); }
+  lines+=full.length;
+  const pts=[0,100,300,500,800][full.length]*level; score+=pts;
+  const newLevel=1+Math.floor(lines/10); if(newLevel>level)level=newLevel;
+  (full.length>=4?sTetris():sLine());
+  updateHud();
+}
+function gameOver(){ state="over"; sOver(); if(score>hi){hi=score;try{localStorage.setItem("tetrisHi",hi);}catch(e){}}
+  document.getElementById("ovS").textContent="SCORE "+score+"　／　HI "+hi;
+  document.getElementById("ov").classList.add("show"); }
+function restart(){ emptyBoard(); score=0;lines=0;level=1;state="play";dropAcc=0; bag=[]; nextT=bagNext(); spawn(); updateHud(); document.getElementById("ov").classList.remove("show"); }
+document.getElementById("ovB").addEventListener("click",()=>{tone(660,0.08);restart();});
+
+function updateHud(){document.getElementById("sScore").textContent=score;document.getElementById("sLines").textContent=lines;document.getElementById("sLevel").textContent=level;}
+
+// ── にゅうりょく（ジェスチャー）──
+let down=false, ax=0, ay=0, sx=0, sy=0, t0=0, stepped=false;
+function pxy(e){const t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+cv.addEventListener("pointerdown",e=>{ if(state!=="play")return; down=true; const p=pxy(e); ax=sx=p.x; ay=sy=p.y; t0=performance.now?performance.now():Date.now(); stepped=false; try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+cv.addEventListener("pointermove",e=>{ if(!down||state!=="play")return; const p=pxy(e);
+  let dx=p.x-ax; while(dx>=cssCell){move(1);ax+=cssCell;dx-=cssCell;stepped=true;} while(dx<=-cssCell){move(-1);ax-=cssCell;dx+=cssCell;stepped=true;}
+  let dy=p.y-ay; while(dy>=cssCell){softDrop();ay+=cssCell;dy-=cssCell;stepped=true;} if(dy<0)ay=p.y; // 上は無視
+});
+addEventListener("pointerup",e=>{ if(!down)return; down=false; if(state!=="play")return;
+  const p=pxy(e); const dist=Math.hypot(p.x-sx,p.y-sy); const dt=(performance.now?performance.now():Date.now())-t0;
+  if(!stepped && dist<14 && dt<350) rotateCW();
+});
+
+// ── ループ ──
+let flash=[], flashT=0, last=0;
+function tick(dt){
+  if(state!=="play")return;
+  dropAcc+=dt; const iv=Math.max(0.03,gravSec());
+  let guard=0;
+  while(dropAcc>=iv && guard++<4){ dropAcc-=iv; if(!collide(px,py+1,rot)){py++;} else break; }
+  if(collide(px,py+1,rot)){ lockTimer+=dt; if(lockTimer>=LOCKDELAY) lockPiece(); }
+  else lockTimer=0;
+}
+function cellRect(c,r){return {x:ox+c*cell,y:oy+r*cell};}
+function drawBlock(c,r,color,alpha){
+  if(r<0)return; const R=cellRect(c,r), s=cell;
+  ctx.globalAlpha=alpha||1;
+  ctx.fillStyle=color; ctx.fillRect(R.x+1,R.y+1,s-2,s-2);
+  ctx.fillStyle="rgba(255,255,255,.30)"; ctx.fillRect(R.x+1,R.y+1,s-2,Math.max(2,s*0.16));
+  ctx.fillStyle="rgba(0,0,0,.28)"; ctx.fillRect(R.x+1,R.y+s-Math.max(2,s*0.16)-1,s-2,Math.max(2,s*0.16));
+  ctx.globalAlpha=1;
+}
+function ghostY(){let g=py;while(!collide(px,g+1,rot))g++;return g;}
+function draw(){
+  ctx.clearRect(0,0,PW,PH);
+  // ばん
+  ctx.fillStyle="#0a0d15"; ctx.fillRect(ox,oy,cell*COLS,cell*ROWS);
+  ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=1;
+  for(let c=1;c<COLS;c++){ctx.beginPath();ctx.moveTo(ox+c*cell+0.5,oy);ctx.lineTo(ox+c*cell+0.5,oy+cell*ROWS);ctx.stroke();}
+  for(let r=1;r<ROWS;r++){ctx.beginPath();ctx.moveTo(ox,oy+r*cell+0.5);ctx.lineTo(ox+cell*COLS,oy+r*cell+0.5);ctx.stroke();}
+  // つんだ ブロック
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(board[r][c]) drawBlock(c,r,board[r][c]);
+  // ライン点滅
+  if(flash.length){ ctx.fillStyle="rgba(255,255,255,"+(0.6*Math.max(0,1-flashT*4))+")"; for(const r of flash)ctx.fillRect(ox,oy+r*cell,cell*COLS,cell); }
+  if(state==="play"){
+    // ゴースト
+    const gy=ghostY();
+    for(const [cx,cy] of SHAPES[type][rot]) drawBlock(px+cx,gy+cy,COLORS[type],0.22);
+    // げんざい
+    for(const [cx,cy] of SHAPES[type][rot]) drawBlock(px+cx,py+cy,COLORS[type]);
+  }
+  // わく
+  ctx.strokeStyle="#39456b"; ctx.lineWidth=Math.max(2,3*S); ctx.strokeRect(ox,oy,cell*COLS,cell*ROWS);
+}
+function drawNext(){
+  const W=ncv.width,H=ncv.height; nctx.clearRect(0,0,W,H);
+  const cells=SHAPES[nextT][0]; let minx=9,maxx=0,miny=9,maxy=0;
+  for(const [x,y] of cells){minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);}
+  const bw=maxx-minx+1, bh=maxy-miny+1; const cs=Math.min(W/(bw+1),H/(bh+1));
+  const offx=(W-bw*cs)/2-minx*cs, offy=(H-bh*cs)/2-miny*cs;
+  for(const [x,y] of cells){const X=offx+x*cs,Y=offy+y*cs;
+    nctx.fillStyle=COLORS[nextT];nctx.fillRect(X+1,Y+1,cs-2,cs-2);
+    nctx.fillStyle="rgba(255,255,255,.3)";nctx.fillRect(X+1,Y+1,cs-2,cs*0.16);
+    nctx.fillStyle="rgba(0,0,0,.28)";nctx.fillRect(X+1,Y+cs-cs*0.16-1,cs-2,cs*0.16);
+  }
+}
+function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.1)dt=0.1;
+  tick(dt); if(flash.length){flashT+=dt;if(flashT>0.25)flash=[];}
+  draw(); requestAnimationFrame(loop);
+}
+addEventListener("contextmenu",e=>e.preventDefault());
+emptyBoard(); resize(); nextT=bagNext(); spawn(); updateHud(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
