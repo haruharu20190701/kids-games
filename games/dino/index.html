@@ -251,6 +251,7 @@ document.getElementById("tHammer").addEventListener("click",()=>setTool("hammer"
 function setTool(t){tool=t;tone(600,0.05);document.getElementById("tPick").classList.toggle("on",t==="pick");document.getElementById("tHammer").classList.toggle("on",t==="hammer");}
 
 // ── えがく ──
+function rrFill(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fill();}
 function cellRect(r,c){return {x:gx+c*cell,y:gy+r*cell,w:cell,h:cell};}
 function itemRect(it){return {x:gx+it.c0*cell,y:gy+it.r0*cell,w:(it.c1-it.c0+1)*cell,h:(it.r1-it.r0+1)*cell};}
 function drawGem(R,color){
@@ -306,10 +307,16 @@ function draw(){
   for(const p of parts){ctx.globalAlpha=Math.max(0,1-p.t/0.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
   for(const s of sparks){ctx.globalAlpha=Math.max(0,1-s.t/1.1);ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();}
   ctx.globalAlpha=1;
-  // バナー
-  if(banner && bannerT<2.2){ctx.globalAlpha=Math.min(1,(2.2-bannerT)*2);
-    ctx.fillStyle="#fff";ctx.font=`900 ${Math.min(PW*0.06,PH*0.04)}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.lineWidth=6*S;ctx.strokeStyle="#5a3a1a";ctx.strokeText(banner,PW/2,gy+cell*ROWS+ (PH-(gy+cell*ROWS))/2);ctx.fillText(banner,PW/2,gy+cell*ROWS+(PH-(gy+cell*ROWS))/2);ctx.globalAlpha=1;}
+  // バナー（うえに ひょうじ＝たて/よこ どちらでも きれない）
+  if(banner && bannerT<2.2){
+    const a=Math.min(1,(2.2-bannerT)*2); ctx.globalAlpha=a;
+    const fs=Math.min(PW*0.05,PH*0.07); ctx.font=`900 ${fs}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    const by=fs*0.95+8*S, bh=fs*1.7;
+    const tw=ctx.measureText(banner).width, pw=Math.min(PW-12*S, tw+fs*1.6);
+    ctx.fillStyle="rgba(40,25,10,.82)"; rrFill((PW-pw)/2, by-bh/2, pw, bh, bh/2);
+    ctx.fillStyle="#ffe6a0"; ctx.fillText(banner,PW/2,by);
+    ctx.globalAlpha=1;
+  }
 }
 let last=0;
 function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;
