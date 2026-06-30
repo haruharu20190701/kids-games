@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#e9d3a8" />
+<title>きょうりゅうはっくつ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの きょうりゅう はっくつ ゲーム。つちを ゆびで けずって、かくれた きょうりゅうを みつけて ずかんに あつめよう。30しゅるい。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/dino/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="きょうりゅうはっくつ｜こどもあそびば" />
+<meta property="og:description" content="5さいくらいの こども向けの きょうりゅう はっくつ。つちを けずって きょうりゅうを みつけよう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/dino/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#5a4326;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:linear-gradient(#f6ecd4,#e8d3a6);}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#d8b87e;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:18px;color:#5a4326;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
+    box-shadow:0 3px 0 #b08a4e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#5a4326;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #b08a4e;}
+  #zukan{font-size:15px;font-weight:900;color:#9a6a1a;background:#fff;border-radius:14px;padding:7px 11px;box-shadow:0 3px 0 #b08a4e;white-space:nowrap;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+  #ctrls{flex:0 0 auto;display:flex;justify-content:center;gap:10px;padding:9px;background:#d8b87e;}
+  .ab{font-size:17px;font-weight:900;border:none;border-radius:16px;padding:12px 22px;cursor:pointer;color:#fff;}
+  .ab:active{transform:translateY(2px);}
+  #next{background:#5bc24a;box-shadow:0 5px 0 #3f9a31;}
+  #next:active{box-shadow:0 2px 0 #3f9a31;}
+  #next.hide{display:none;}
+  #hint{font-size:14px;font-weight:900;color:#5a4326;align-self:center;}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a>
+    <div id="title">きょうりゅうはっくつ</div>
+    <div id="zukan">ずかん 0/30</div>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="ctrls">
+    <span id="hint">ゆびで つちを けずってね</span>
+    <button class="ab hide" id="next">▶ つぎを ほる</button>
+  </div>
+<script>
+"use strict";
+/* =========================================================
+   きょうりゅうはっくつ：つちレイヤーを destination-out で けずると、したの
+   きょうりゅう画像が あらわれる。だいたい ほれたら はっけん→ずかんに あつめる。
+   ・ゲーム内は ぜんぶ がぞう／えんしゅつも canvas（えもじ なし）
+   ・じかんせいげん なし・しっぱいなし（5さい〜）
+   ========================================================= */
+let actx=null;
+function tone(f,d=0.06,t="sine",v=0.1,delay=0){try{
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;
+  o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
+  o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
+}catch(e){}}
+let lastScr=0;
+function scratchSound(){const now=performance.now? performance.now():0; if(now-lastScr<45)return; lastScr=now;
+  tone(180+Math.random()*120,0.04,"sawtooth",0.05);}
+function found(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
+function allS(){[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,0.18,"triangle",0.13,i*0.09));}
+
+// ── きょうりゅう 30しゅるい ──
+const DINOS=[
+  {s:"tyranno",n:"ティラノサウルス"},{s:"triceratops",n:"トリケラトプス"},{s:"stegosaurus",n:"ステゴサウルス"},
+  {s:"brachiosaurus",n:"ブラキオサウルス"},{s:"spinosaurus",n:"スピノサウルス"},{s:"pteranodon",n:"プテラノドン"},
+  {s:"velociraptor",n:"ヴェロキラプトル"},{s:"ankylosaurus",n:"アンキロサウルス"},{s:"parasaurolophus",n:"パラサウロロフス"},
+  {s:"allosaurus",n:"アロサウルス"},{s:"apatosaurus",n:"アパトサウルス"},{s:"diplodocus",n:"ディプロドクス"},
+  {s:"iguanodon",n:"イグアノドン"},{s:"pachycephalo",n:"パキケファロサウルス"},{s:"dilophosaurus",n:"ディロフォサウルス"},
+  {s:"carnotaurus",n:"カルノタウルス"},{s:"gallimimus",n:"ガリミムス"},{s:"mosasaurus",n:"モササウルス"},
+  {s:"plesiosaurus",n:"プレシオサウルス"},{s:"elasmosaurus",n:"エラスモサウルス"},{s:"therizinosaurus",n:"テリジノサウルス"},
+  {s:"giganotosaurus",n:"ギガノトサウルス"},{s:"styracosaurus",n:"スティラコサウルス"},{s:"kentrosaurus",n:"ケントロサウルス"},
+  {s:"baryonyx",n:"バリオニクス"},{s:"oviraptor",n:"オヴィラプトル"},{s:"protoceratops",n:"プロトケラトプス"},
+  {s:"archaeopteryx",n:"しそちょう"},{s:"deinonychus",n:"デイノニクス"},{s:"dimorphodon",n:"ディモルフォドン"},
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+// ── canvas ──
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const dirtCv=document.createElement("canvas"), dirtCtx=dirtCv.getContext("2d",{willReadFrequently:true});
+let PW=0,PH=0,S=1, pit={x:0,y:0,w:0,h:0};
+function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);
+  PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;dirtCv.width=PW;dirtCv.height=PH;
+  const pw=Math.min(PW*0.9, PH*1.1), ph=Math.min(PH*0.86, pw*0.78);
+  pit={x:(PW-pw)/2, y:(PH-ph)/2, w:pw, h:ph};
+  if(curImg!==undefined) fillDirt();   // さいレイアウト時は つちを ひきなおす（ほり なおし）
+}
+addEventListener("resize",resize);
+
+// ── じょうたい ──
+let foundSet=new Set(); try{foundSet=new Set(JSON.parse(localStorage.getItem("dinoFound")||"[]"));}catch(e){}
+let cur=null, curImg=undefined, state="dig", revealed=0, dust=[], sparks=[], bannerT=0, lastPt=null;
+const elZukan=document.getElementById("zukan"), elNext=document.getElementById("next"), elHint=document.getElementById("hint");
+function setZukan(){elZukan.textContent="ずかん "+foundSet.size+"/"+DINOS.length;}
+
+const imgCache={};
+function getImg(s){ if(!imgCache[s]){const im=new Image();im.src="assets/"+s+".png";imgCache[s]=im;} return imgCache[s]; }
+function ready(im){return im&&im.complete&&im.naturalWidth>0;}
+
+function pitPath(c){const r=Math.min(pit.w,pit.h)*0.10;const x=pit.x,y=pit.y,w=pit.w,h=pit.h;
+  c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+
+function fillDirt(){
+  dirtCtx.setTransform(1,0,0,1,0,0); dirtCtx.globalCompositeOperation="source-over";
+  dirtCtx.clearRect(0,0,PW,PH);
+  dirtCtx.save(); pitPath(dirtCtx); dirtCtx.clip();
+  const g=dirtCtx.createLinearGradient(0,pit.y,0,pit.y+pit.h);
+  g.addColorStop(0,"#9a6736");g.addColorStop(1,"#7a4f29"); dirtCtx.fillStyle=g; dirtCtx.fillRect(pit.x,pit.y,pit.w,pit.h);
+  const cols=["#6e4626","#a4713e","#7a4f2c","#5e3c20","#8a5a32"];
+  const n=Math.floor(pit.w*pit.h/90);
+  for(let i=0;i<n;i++){const x=pit.x+Math.random()*pit.w,y=pit.y+Math.random()*pit.h,rr=1+Math.random()*3.2;
+    dirtCtx.fillStyle=cols[(Math.random()*cols.length)|0];dirtCtx.beginPath();dirtCtx.arc(x,y,rr,0,7);dirtCtx.fill();}
+  for(let i=0;i<16;i++){const x=pit.x+Math.random()*pit.w,y=pit.y+Math.random()*pit.h,rr=5+Math.random()*10;
+    dirtCtx.fillStyle="rgba(150,150,160,"+(0.25+Math.random()*0.25)+")";dirtCtx.beginPath();dirtCtx.ellipse(x,y,rr,rr*0.7,Math.random()*3,0,7);dirtCtx.fill();}
+  dirtCtx.restore();
+}
+
+function newDig(){
+  const un=DINOS.filter(d=>!foundSet.has(d.s));
+  cur = un.length? pick(un) : pick(DINOS);
+  curImg=getImg(cur.s);
+  state="dig"; revealed=0; dust=[]; sparks=[]; bannerT=0; lastPt=null;
+  fillDirt();
+  elNext.classList.add("hide"); elHint.textContent="ゆびで つちを けずってね";
+}
+
+// ── ほる ──
+function inPit(x,y){return x>=pit.x&&x<=pit.x+pit.w&&y>=pit.y&&y<=pit.y+pit.h;}
+function digCircle(x,y){
+  dirtCtx.globalCompositeOperation="destination-out";
+  dirtCtx.beginPath();dirtCtx.arc(x,y,brushR(),0,7);dirtCtx.fill();
+  dirtCtx.globalCompositeOperation="source-over";
+}
+function brushR(){return Math.min(PW,PH)*0.055;}
+function digAt(x,y){
+  if(state!=="dig") return;
+  if(!inPit(x,y)){lastPt=null;return;}
+  if(lastPt){ const dx=x-lastPt.x,dy=y-lastPt.y,dist=Math.hypot(dx,dy),steps=Math.max(1,Math.floor(dist/(brushR()*0.5)));
+    for(let i=1;i<=steps;i++) digCircle(lastPt.x+dx*i/steps, lastPt.y+dy*i/steps);
+  } else digCircle(x,y);
+  lastPt={x,y};
+  for(let i=0;i<3;i++)dust.push({x,y,vx:(Math.random()*2-1)*130,vy:-Math.random()*140-20,t:0,r:2+Math.random()*3,c:["#7a4f2c","#9a6736","#a4713e"][(Math.random()*3)|0]});
+  scratchSound();
+}
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*S,y:(t.clientY-r.top)*S};}
+cv.addEventListener("pointerdown",e=>{const p=pos(e);lastPt=null;digAt(p.x,p.y);});
+cv.addEventListener("pointermove",e=>{if(e.buttons===0&&!e.touches)return;const p=pos(e);digAt(p.x,p.y);});
+addEventListener("pointerup",()=>{lastPt=null;});
+
+// ── ほれた わりあい ──
+let checkAcc=0;
+function checkProgress(dt){
+  if(state!=="dig")return;
+  checkAcc+=dt; if(checkAcc<0.25)return; checkAcc=0;
+  const x=Math.floor(pit.x),y=Math.floor(pit.y),w=Math.floor(pit.w),h=Math.floor(pit.h);
+  let data; try{data=dirtCtx.getImageData(x,y,w,h).data;}catch(e){return;}
+  let clear=0,total=0; const step=6;
+  for(let yy=0;yy<h;yy+=step)for(let xx=0;xx<w;xx+=step){total++; if(data[(yy*w+xx)*4+3]<12)clear++;}
+  revealed=total?clear/total:0;
+  if(revealed>=0.6) reveal();
+}
+function reveal(){
+  state="found"; bannerT=0;
+  dirtCtx.setTransform(1,0,0,1,0,0);dirtCtx.globalCompositeOperation="source-over";dirtCtx.clearRect(0,0,PW,PH); // のこり土を はらう
+  const wasNew=!foundSet.has(cur.s);
+  foundSet.add(cur.s); try{localStorage.setItem("dinoFound",JSON.stringify([...foundSet]));}catch(e){} setZukan();
+  found(); burst();
+  elHint.textContent= wasNew? "あたらしい きょうりゅう！" : "みつけた！";
+  elNext.classList.remove("hide");
+  if(foundSet.size>=DINOS.length){ setTimeout(allS,500); elHint.textContent="ぜんぶ みつけた！すごい！"; }
+}
+function burst(){const cx=pit.x+pit.w/2,cy=pit.y+pit.h*0.35;
+  for(let i=0;i<22;i++){const a=Math.random()*6.28,sp=120+Math.random()*260;
+    sparks.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-60,t:0,r:3+Math.random()*4,c:["#ffd23f","#fff","#ffe98a","#ffb24a"][(Math.random()*4)|0]});}}
+
+elNext.addEventListener("click",()=>{tone(660,0.08);newDig();});
+
+// ── えがく ──
+function drawDino(){
+  ctx.save(); pitPath(ctx); ctx.clip();
+  ctx.fillStyle="#e9d3a8"; ctx.fillRect(pit.x,pit.y,pit.w,pit.h);     // すなの したじ
+  const pad=Math.min(pit.w,pit.h)*0.12;
+  const bx=pit.x+pad,by=pit.y+pad,bw=pit.w-pad*2,bh=pit.h-pad*2;
+  if(ready(curImg)){
+    const ar=curImg.naturalWidth/curImg.naturalHeight, br2=bw/bh; let w,h;
+    if(ar>br2){w=bw;h=bw/ar;}else{h=bh;w=bh*ar;}
+    ctx.drawImage(curImg, bx+(bw-w)/2, by+(bh-h)/2, w, h);
+  }else{
+    ctx.fillStyle="#c9b48a"; ctx.font=`900 ${Math.min(PW,PH)*0.06}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("なにか いるよ…", pit.x+pit.w/2, pit.y+pit.h/2);
+  }
+  ctx.restore();
+}
+function draw(){
+  ctx.clearRect(0,0,PW,PH);
+  ctx.fillStyle="#f2e3c6"; ctx.fillRect(0,0,PW,PH);
+  // あなの かげ
+  ctx.save();pitPath(ctx);ctx.fillStyle="#000";ctx.shadowColor="rgba(80,50,20,.4)";ctx.shadowBlur=18*S;ctx.shadowOffsetY=4*S;ctx.fill();ctx.restore();
+  drawDino();
+  ctx.drawImage(dirtCv,0,0);                       // つち（けずられた じょうたい）
+  // あなの ふち
+  pitPath(ctx);ctx.lineWidth=Math.max(4,6*S);ctx.strokeStyle="#b58a52";ctx.stroke();
+  // つちぼこり
+  for(const p of dust){ctx.globalAlpha=Math.max(0,1-p.t/0.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
+  ctx.globalAlpha=1;
+  // キラキラ（はっけん）
+  for(const s of sparks){ctx.globalAlpha=Math.max(0,1-s.t/1.1);ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();}
+  ctx.globalAlpha=1;
+  // なまえ バナー
+  if(state==="found"){
+    const a=Math.min(1,bannerT*4);
+    ctx.globalAlpha=a;
+    const by=pit.y+pit.h+ (PH-(pit.y+pit.h))*0.4;
+    ctx.fillStyle="#fff";ctx.font=`900 ${Math.min(PW*0.07,PH*0.05)}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.lineWidth=6*S;ctx.strokeStyle="#7a4f29";ctx.strokeText(cur.n,PW/2,Math.min(by,PH-20*S));
+    ctx.fillText(cur.n,PW/2,Math.min(by,PH-20*S));
+    ctx.globalAlpha=1;
+  }
+}
+let last=0;
+function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;
+  checkProgress(dt);
+  for(const p of dust){p.t+=dt;p.x+=p.vx*dt;p.vy+=700*dt;p.y+=p.vy*dt;}
+  dust=dust.filter(p=>p.t<0.6);
+  for(const s of sparks){s.t+=dt;s.x+=s.vx*dt;s.vy+=500*dt;s.y+=s.vy*dt;}
+  sparks=sparks.filter(s=>s.t<1.1);
+  if(state==="found")bannerT+=dt;
+  draw(); requestAnimationFrame(loop);
+}
+addEventListener("contextmenu",e=>e.preventDefault());
+setZukan(); resize(); newDig(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
