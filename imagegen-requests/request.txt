@@ -1,11 +1,3 @@
-kind: custom
-dest: games/shooter/assets
-size: 320
-transparent: true
+kind: icon
 ---
-ship | cute kawaii flat top-down view of a hero spaceship fighter pointing straight up, blue and white, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
-enemy_a | cute kawaii flat top-down view of a small red enemy spaceship fighter pointing straight down, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
-enemy_b | cute kawaii flat top-down view of a purple alien insect enemy ship pointing straight down, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
-enemy_c | cute kawaii flat top-down view of an orange armored enemy battle ship pointing straight down, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
-boss | cute kawaii flat top-down view of a big menacing boss mothership pointing down, dark red and metal, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
-power | cute kawaii flat illustration of a glowing green power-up capsule orb with a star, FULLY COLORED with bright flat colors, this is a COLORED illustration NOT a line drawing NOT black and white, soft rounded shapes, thick clean outlines, centered single object, plain pure white background, no text, no watermark, high quality
+shooter | cute kawaii flat vector app icon of a blue hero spaceship shooting laser beams in space with stars, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
