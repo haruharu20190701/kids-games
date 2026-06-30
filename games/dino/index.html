@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#e9d3a8" />
 <title>きょうりゅうはっくつ｜こどもあそびば</title>
-<meta name="description" content="5さいくらいの こども向けの きょうりゅう はっくつ ゲーム。つちを ゆびで けずって、かくれた きょうりゅうを みつけて ずかんに あつめよう。30しゅるい。むりょう・とうろくふよう・スマホ対応。" />
+<meta name="description" content="5さいくらいの こども向けの きょうりゅう はっくつ ゲーム。ピッケルと ハンマーで つちを ほって、うまった かせきや ほうせきを ほりだそう。ゲージが いっぱいに なるまえに ほりきろう。むりょう・とうろくふよう・スマホ対応。" />
 <link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/dino/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="こどもあそびば" />
 <meta property="og:title" content="きょうりゅうはっくつ｜こどもあそびば" />
-<meta property="og:description" content="5さいくらいの こども向けの きょうりゅう はっくつ。つちを けずって きょうりゅうを みつけよう。" />
+<meta property="og:description" content="5さいくらいの こども向けの きょうりゅう はっくつ。ピッケルと ハンマーで かせき・ほうせきを ほりだそう。" />
 <meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/dino/" />
 <meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
 <meta property="og:locale" content="ja_JP" />
@@ -21,22 +21,40 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
   html,body{margin:0;height:100%;}
   body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#5a4326;
-    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:linear-gradient(#f6ecd4,#e8d3a6);}
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#6b4a2a;}
   #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#d8b87e;flex:0 0 auto;}
-  #bar #title{font-weight:900;font-size:18px;color:#5a4326;flex:1;text-align:center;letter-spacing:1px;}
+  #bar #title{font-weight:900;font-size:17px;color:#5a4326;flex:1;text-align:center;letter-spacing:.5px;}
   .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#fff;
     box-shadow:0 3px 0 #b08a4e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#5a4326;}
   .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #b08a4e;}
-  #zukan{font-size:15px;font-weight:900;color:#9a6a1a;background:#fff;border-radius:14px;padding:7px 11px;box-shadow:0 3px 0 #b08a4e;white-space:nowrap;}
-  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #zukan{font-size:14px;font-weight:900;color:#9a6a1a;background:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 3px 0 #b08a4e;white-space:nowrap;}
+
+  #info{flex:0 0 auto;background:#c8a468;padding:6px 10px 8px;}
+  #counts{display:flex;justify-content:center;gap:14px;font-size:14px;font-weight:900;color:#4a3318;margin-bottom:5px;}
+  #counts b{color:#8a3f14;}
+  #gwrap{height:16px;background:#7a5d34;border-radius:9px;overflow:hidden;box-shadow:inset 0 2px 3px rgba(0,0,0,.3);position:relative;}
+  #gfill{height:100%;width:0%;background:linear-gradient(90deg,#7ed957,#ffd23f,#ff6b6b);transition:width .12s;}
+  #glabel{position:absolute;inset:0;font-size:11px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+
+  #stage{flex:1 1 auto;min-height:0;position:relative;background:#5e3f22;}
   #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
-  #ctrls{flex:0 0 auto;display:flex;justify-content:center;gap:10px;padding:9px;background:#d8b87e;}
-  .ab{font-size:17px;font-weight:900;border:none;border-radius:16px;padding:12px 22px;cursor:pointer;color:#fff;}
-  .ab:active{transform:translateY(2px);}
-  #next{background:#5bc24a;box-shadow:0 5px 0 #3f9a31;}
-  #next:active{box-shadow:0 2px 0 #3f9a31;}
-  #next.hide{display:none;}
-  #hint{font-size:14px;font-weight:900;color:#5a4326;align-self:center;}
+
+  #ctrls{flex:0 0 auto;display:flex;gap:10px;justify-content:center;padding:8px;background:#d8b87e;}
+  .tool{display:flex;flex-direction:column;align-items:center;gap:1px;border:none;border-radius:16px;background:#fff;
+    padding:8px 18px;cursor:pointer;box-shadow:0 4px 0 #b08a4e;color:#5a4326;}
+  .tool:active{transform:translateY(2px);box-shadow:0 2px 0 #b08a4e;}
+  .tool.on{background:#ffe6b0;box-shadow:0 4px 0 #b08a4e,0 0 0 3px #ff9d3c;}
+  .tool .tn{font-size:15px;font-weight:900;}
+  .tool .td{font-size:10px;font-weight:800;color:#9a6a3e;}
+  .tool canvas{width:30px;height:30px;}
+
+  #ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    background:rgba(40,25,10,.7);z-index:5;padding:20px;text-align:center;}
+  #ov.show{display:flex;}
+  #ov .t{font-size:24px;font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  #ov .s{font-size:15px;font-weight:800;color:#ffe6c0;max-width:300px;line-height:1.6;}
+  #ov .big{font-size:19px;font-weight:900;border:none;border-radius:18px;padding:14px 28px;cursor:pointer;color:#fff;background:#5bc24a;box-shadow:0 6px 0 #3f9a31;}
+  #ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #3f9a31;}
 </style>
 </head>
 <body>
@@ -45,18 +63,26 @@
     <div id="title">きょうりゅうはっくつ</div>
     <div id="zukan">ずかん 0/30</div>
   </div>
-  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="info">
+    <div id="counts"><span>かせき <b id="cF">0</b></span><span>ほうせき <b id="cG">0</b></span></div>
+    <div id="gwrap"><div id="gfill"></div><div id="glabel">つぶれるまで</div></div>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="ov"><div class="t" id="ovT"></div><div class="s" id="ovS"></div><button class="big" id="ovB">▶ つぎを ほる</button></div>
+  </div>
   <div id="ctrls">
-    <span id="hint">ゆびで つちを けずってね</span>
-    <button class="ab hide" id="next">▶ つぎを ほる</button>
+    <button class="tool on" id="tPick"><canvas width="60" height="60"></canvas><span class="tn">ピッケル</span><span class="td">1マス</span></button>
+    <button class="tool" id="tHammer"><canvas width="60" height="60"></canvas><span class="tn">ハンマー</span><span class="td">まわりも</span></button>
   </div>
 <script>
 "use strict";
 /* =========================================================
-   きょうりゅうはっくつ：つちレイヤーを destination-out で けずると、したの
-   きょうりゅう画像が あらわれる。だいたい ほれたら はっけん→ずかんに あつめる。
-   ・ゲーム内は ぜんぶ がぞう／えんしゅつも canvas（えもじ なし）
-   ・じかんせいげん なし・しっぱいなし（5さい〜）
+   きょうりゅうはっくつ（ポケモンDP「地下の発掘」システム）：
+   ・マス＝石(1回)/岩(3回)/岩盤(ほれない)。道具＝ピッケル(1マス)/ハンマー(3x3)。
+   ・ほるたび ゲージが たまり、まんたんで 崩落＝しゅうりょう（ハンマーは たまりやすい）。
+   ・うまった かせき(恐竜画像)・ほうせき(canvas) を ぜんぶ ほりだそう。こすうは さいしょから ひょうじ。
+   ・ゲーム内は がぞう/canvas（えもじ なし）・5さい向け・やさしい。
    ========================================================= */
 let actx=null;
 function tone(f,d=0.06,t="sine",v=0.1,delay=0){try{
@@ -66,13 +92,13 @@ function tone(f,d=0.06,t="sine",v=0.1,delay=0){try{
   o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);
   o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);
 }catch(e){}}
-let lastScr=0;
-function scratchSound(){const now=performance.now? performance.now():0; if(now-lastScr<45)return; lastScr=now;
-  tone(180+Math.random()*120,0.04,"sawtooth",0.05);}
-function found(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,"sine",0.13,i*0.08));}
-function allS(){[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,0.18,"triangle",0.13,i*0.09));}
+function digS(){tone(150+Math.random()*60,0.05,"square",0.07);}
+function rockS(){tone(110,0.08,"sawtooth",0.08);}
+function getS(){[660,880,1100,1320].forEach((f,i)=>tone(f,0.13,"sine",0.13,i*0.06));}
+function clearS(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.17,"triangle",0.13,i*0.08));}
+function caveS(){[300,240,180,120].forEach((f,i)=>tone(f,0.18,"sawtooth",0.12,i*0.1));}
 
-// ── きょうりゅう 30しゅるい ──
+// ── きょうりゅう（かせき）30しゅるい ──
 const DINOS=[
   {s:"tyranno",n:"ティラノサウルス"},{s:"triceratops",n:"トリケラトプス"},{s:"stegosaurus",n:"ステゴサウルス"},
   {s:"brachiosaurus",n:"ブラキオサウルス"},{s:"spinosaurus",n:"スピノサウルス"},{s:"pteranodon",n:"プテラノドン"},
@@ -85,162 +111,209 @@ const DINOS=[
   {s:"baryonyx",n:"バリオニクス"},{s:"oviraptor",n:"オヴィラプトル"},{s:"protoceratops",n:"プロトケラトプス"},
   {s:"archaeopteryx",n:"しそちょう"},{s:"deinonychus",n:"デイノニクス"},{s:"dimorphodon",n:"ディモルフォドン"},
 ];
+const GEMS=[{n:"ルビー",c:"#ff5a6e"},{n:"サファイア",c:"#4a9bff"},{n:"エメラルド",c:"#43d17a"},
+  {n:"トパーズ",c:"#ffd23f"},{n:"アメジスト",c:"#b06bff"},{n:"ダイヤ",c:"#9fe9ff"}];
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 // ── canvas ──
 const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
-const dirtCv=document.createElement("canvas"), dirtCtx=dirtCv.getContext("2d",{willReadFrequently:true});
-let PW=0,PH=0,S=1, pit={x:0,y:0,w:0,h:0};
+let PW=0,PH=0,S=1, COLS=8, ROWS=9, cell=0, gx=0, gy=0;
 function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);
-  PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;dirtCv.width=PW;dirtCv.height=PH;
-  const pw=Math.min(PW*0.9, PH*1.1), ph=Math.min(PH*0.86, pw*0.78);
-  pit={x:(PW-pw)/2, y:(PH-ph)/2, w:pw, h:ph};
-  if(curImg!==undefined) fillDirt();   // さいレイアウト時は つちを ひきなおす（ほり なおし）
+  PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;
+  cell=Math.floor(Math.min(PW/COLS,PH/ROWS));
+  gx=Math.floor((PW-cell*COLS)/2); gy=Math.floor((PH-cell*ROWS)/2);
 }
 addEventListener("resize",resize);
 
 // ── じょうたい ──
 let foundSet=new Set(); try{foundSet=new Set(JSON.parse(localStorage.getItem("dinoFound")||"[]"));}catch(e){}
-let cur=null, curImg=undefined, state="dig", revealed=0, dust=[], sparks=[], bannerT=0, lastPt=null;
-const elZukan=document.getElementById("zukan"), elNext=document.getElementById("next"), elHint=document.getElementById("hint");
+let grid=[], items=[], tool="pick", gauge=0, GMAX=60, state="dig", parts=[], sparks=[], banner=null, bannerT=0;
+const elZukan=document.getElementById("zukan"), elcF=document.getElementById("cF"), elcG=document.getElementById("cG");
+const elGfill=document.getElementById("gfill"), elGlabel=document.getElementById("glabel");
 function setZukan(){elZukan.textContent="ずかん "+foundSet.size+"/"+DINOS.length;}
+function setGauge(){const p=Math.min(100,gauge/GMAX*100);elGfill.style.width=p+"%";elGlabel.textContent= p<99?"つぶれるまで":"あぶない！";}
 
 const imgCache={};
-function getImg(s){ if(!imgCache[s]){const im=new Image();im.src="assets/"+s+".png";imgCache[s]=im;} return imgCache[s]; }
+function getImg(s){if(!imgCache[s]){const im=new Image();im.src="assets/"+s+".png";imgCache[s]=im;}return imgCache[s];}
 function ready(im){return im&&im.complete&&im.naturalWidth>0;}
 
-function pitPath(c){const r=Math.min(pit.w,pit.h)*0.10;const x=pit.x,y=pit.y,w=pit.w,h=pit.h;
-  c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
-
-function fillDirt(){
-  dirtCtx.setTransform(1,0,0,1,0,0); dirtCtx.globalCompositeOperation="source-over";
-  dirtCtx.clearRect(0,0,PW,PH);
-  dirtCtx.save(); pitPath(dirtCtx); dirtCtx.clip();
-  const g=dirtCtx.createLinearGradient(0,pit.y,0,pit.y+pit.h);
-  g.addColorStop(0,"#9a6736");g.addColorStop(1,"#7a4f29"); dirtCtx.fillStyle=g; dirtCtx.fillRect(pit.x,pit.y,pit.w,pit.h);
-  const cols=["#6e4626","#a4713e","#7a4f2c","#5e3c20","#8a5a32"];
-  const n=Math.floor(pit.w*pit.h/90);
-  for(let i=0;i<n;i++){const x=pit.x+Math.random()*pit.w,y=pit.y+Math.random()*pit.h,rr=1+Math.random()*3.2;
-    dirtCtx.fillStyle=cols[(Math.random()*cols.length)|0];dirtCtx.beginPath();dirtCtx.arc(x,y,rr,0,7);dirtCtx.fill();}
-  for(let i=0;i<16;i++){const x=pit.x+Math.random()*pit.w,y=pit.y+Math.random()*pit.h,rr=5+Math.random()*10;
-    dirtCtx.fillStyle="rgba(150,150,160,"+(0.25+Math.random()*0.25)+")";dirtCtx.beginPath();dirtCtx.ellipse(x,y,rr,rr*0.7,Math.random()*3,0,7);dirtCtx.fill();}
-  dirtCtx.restore();
+// ── もんだい せいせい ──
+function place(item,wCells,hCells){
+  for(let tries=0;tries<200;tries++){
+    const c0=Math.floor(Math.random()*(COLS-wCells+1)), r0=Math.floor(Math.random()*(ROWS-hCells+1));
+    let okp=true;
+    for(let r=r0;r<r0+hCells&&okp;r++)for(let c=c0;c<c0+wCells;c++) if(grid[r][c].item!==null){okp=false;break;}
+    if(!okp)continue;
+    item.cells=[]; item.r0=r0;item.c0=c0;item.r1=r0+hCells-1;item.c1=c0+wCells-1;
+    for(let r=r0;r<r0+hCells;r++)for(let c=c0;c<c0+wCells;c++){grid[r][c].item=item.id;item.cells.push({r,c});}
+    return true;
+  }
+  return false;
 }
-
-function newDig(){
-  const un=DINOS.filter(d=>!foundSet.has(d.s));
-  cur = un.length? pick(un) : pick(DINOS);
-  curImg=getImg(cur.s);
-  state="dig"; revealed=0; dust=[]; sparks=[]; bannerT=0; lastPt=null;
-  fillDirt();
-  elNext.classList.add("hide"); elHint.textContent="ゆびで つちを けずってね";
+function newRound(){
+  grid=[]; for(let r=0;r<ROWS;r++){const row=[];for(let c=0;c<COLS;c++)row.push({cover:0,max:0,terr:0,bedrock:false,item:null});grid.push(row);}
+  items=[]; let id=0;
+  // かせき（恐竜）2〜3こ・未発見ゆうせん
+  const un=shuffle(DINOS.filter(d=>!foundSet.has(d.s))); const pool=un.length>=3?un:shuffle(DINOS.slice());
+  const nF=2+Math.floor(Math.random()*2);
+  for(let i=0;i<nF;i++){const d=pool[i%pool.length];
+    const sizes=[[3,2],[3,3],[2,3],[4,2],[2,2]]; const sz=pick(sizes);
+    const it={id:id++,type:"dino",slug:d.s,name:d.n,dug:false};
+    if(place(it,sz[0],sz[1])) items.push(it);
+  }
+  // ほうせき 1〜2こ
+  const nG=1+Math.floor(Math.random()*2);
+  for(let i=0;i<nG;i++){const g=pick(GEMS);
+    const sz=pick([[1,1],[2,1],[1,2],[2,2]]);
+    const it={id:id++,type:"gem",color:g.c,name:g.n,dug:false};
+    if(place(it,sz[0],sz[1])) items.push(it);
+  }
+  // 岩盤（ほれない）を あいてるマスに すこし
+  let empties=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c].item===null) empties.push([r,c]);
+  shuffle(empties); const nBed=Math.floor(empties.length*0.10);
+  for(let i=0;i<nBed;i++){const[r,c]=empties[i];grid[r][c].bedrock=true;}
+  // じめん＝石(cover1)/岩(cover3)。アイテムの うえは 石おおめ で やさしく
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const g=grid[r][c]; if(g.bedrock)continue;
+    const rock = g.item!==null ? Math.random()<0.30 : Math.random()<0.45;
+    g.terr= rock?1:0; g.max=g.cover= rock?3:1;
+  }
+  gauge=0; state="dig"; parts=[];sparks=[];banner=null;
+  const nf=items.filter(i=>i.type==="dino").length, ng=items.filter(i=>i.type==="gem").length;
+  elcF.textContent=nf; elcG.textContent=ng;
+  setGauge(); document.getElementById("ov").classList.remove("show");
 }
 
 // ── ほる ──
-function inPit(x,y){return x>=pit.x&&x<=pit.x+pit.w&&y>=pit.y&&y<=pit.y+pit.h;}
-function digCircle(x,y){
-  dirtCtx.globalCompositeOperation="destination-out";
-  dirtCtx.beginPath();dirtCtx.arc(x,y,brushR(),0,7);dirtCtx.fill();
-  dirtCtx.globalCompositeOperation="source-over";
-}
-function brushR(){return Math.min(PW,PH)*0.055;}
-function digAt(x,y){
-  if(state!=="dig") return;
-  if(!inPit(x,y)){lastPt=null;return;}
-  if(lastPt){ const dx=x-lastPt.x,dy=y-lastPt.y,dist=Math.hypot(dx,dy),steps=Math.max(1,Math.floor(dist/(brushR()*0.5)));
-    for(let i=1;i<=steps;i++) digCircle(lastPt.x+dx*i/steps, lastPt.y+dy*i/steps);
-  } else digCircle(x,y);
-  lastPt={x,y};
-  for(let i=0;i<3;i++)dust.push({x,y,vx:(Math.random()*2-1)*130,vy:-Math.random()*140-20,t:0,r:2+Math.random()*3,c:["#7a4f2c","#9a6736","#a4713e"][(Math.random()*3)|0]});
-  scratchSound();
-}
-function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*S,y:(t.clientY-r.top)*S};}
-cv.addEventListener("pointerdown",e=>{const p=pos(e);lastPt=null;digAt(p.x,p.y);});
-cv.addEventListener("pointermove",e=>{if(e.buttons===0&&!e.touches)return;const p=pos(e);digAt(p.x,p.y);});
-addEventListener("pointerup",()=>{lastPt=null;});
-
-// ── ほれた わりあい ──
-let checkAcc=0;
-function checkProgress(dt){
+function openCell(g){return !g.bedrock && g.cover<=0;}
+function applyTool(r,c){
   if(state!=="dig")return;
-  checkAcc+=dt; if(checkAcc<0.25)return; checkAcc=0;
-  const x=Math.floor(pit.x),y=Math.floor(pit.y),w=Math.floor(pit.w),h=Math.floor(pit.h);
-  let data; try{data=dirtCtx.getImageData(x,y,w,h).data;}catch(e){return;}
-  let clear=0,total=0; const step=6;
-  for(let yy=0;yy<h;yy+=step)for(let xx=0;xx<w;xx+=step){total++; if(data[(yy*w+xx)*4+3]<12)clear++;}
-  revealed=total?clear/total:0;
-  if(revealed>=0.6) reveal();
+  const aff = tool==="pick"? [[r,c]] : [];
+  if(tool==="hammer"){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)aff.push([r+dr,c+dc]);}
+  let hitRock=false, hit=false;
+  for(const [rr,cc] of aff){ if(rr<0||cc<0||rr>=ROWS||cc>=COLS)continue; const g=grid[rr][cc];
+    if(g.bedrock || g.cover<=0)continue;
+    g.cover--; hit=true; if(g.terr===1)hitRock=true;
+    const R=cellRect(rr,cc); for(let k=0;k<3;k++)parts.push({x:R.x+R.w/2+(Math.random()*R.w-R.w/2),y:R.y+R.h/2,vx:(Math.random()*2-1)*120,vy:-Math.random()*140-30,t:0,r:2+Math.random()*3,c:g.terr===1?"#9a9aa6":"#9a6736"});
+  }
+  gauge += tool==="pick"? 1 : 3;        // ハンマーは たまりやすい
+  if(hit){ hitRock?rockS():digS(); } else { tone(90,0.06,"square",0.05); }
+  checkCollect();
+  setGauge();
+  if(gauge>=GMAX){ caveIn(); }
+  else if(items.every(i=>i.dug)){ roundClear(); }
 }
-function reveal(){
-  state="found"; bannerT=0;
-  dirtCtx.setTransform(1,0,0,1,0,0);dirtCtx.globalCompositeOperation="source-over";dirtCtx.clearRect(0,0,PW,PH); // のこり土を はらう
-  const wasNew=!foundSet.has(cur.s);
-  foundSet.add(cur.s); try{localStorage.setItem("dinoFound",JSON.stringify([...foundSet]));}catch(e){} setZukan();
-  found(); burst();
-  elHint.textContent= wasNew? "あたらしい きょうりゅう！" : "みつけた！";
-  elNext.classList.remove("hide");
-  if(foundSet.size>=DINOS.length){ setTimeout(allS,500); elHint.textContent="ぜんぶ みつけた！すごい！"; }
+function checkCollect(){
+  for(const it of items){ if(it.dug)continue;
+    if(it.cells.every(({r,c})=>openCell(grid[r][c]))){
+      it.dug=true; getS();
+      const R=itemRect(it); for(let k=0;k<18;k++){const a=Math.random()*6.28,sp=120+Math.random()*220;
+        sparks.push({x:R.x+R.w/2,y:R.y+R.h/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-50,t:0,r:3+Math.random()*4,c:["#ffd23f","#fff","#ffe98a"][k%3]});}
+      banner=(it.type==="dino"?it.name:it.name)+" を ほりだした！"; bannerT=0;
+      if(it.type==="dino" && !foundSet.has(it.slug)){ foundSet.add(it.slug); try{localStorage.setItem("dinoFound",JSON.stringify([...foundSet]));}catch(e){} setZukan(); }
+    }
+  }
 }
-function burst(){const cx=pit.x+pit.w/2,cy=pit.y+pit.h*0.35;
-  for(let i=0;i<22;i++){const a=Math.random()*6.28,sp=120+Math.random()*260;
-    sparks.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-60,t:0,r:3+Math.random()*4,c:["#ffd23f","#fff","#ffe98a","#ffb24a"][(Math.random()*4)|0]});}}
+function caveIn(){ state="result"; caveS();
+  const got=items.filter(i=>i.dug).length, miss=items.length-got;
+  showOv("ガラガラ…！", "ほりだした: "+got+"こ"+(miss>0?(" / のこり "+miss+"こ"):"　ぜんぶ ほれた！"));
+}
+function roundClear(){ state="result"; clearS();
+  showOv("ぜんぶ ほりだした！", "すごい！つぎの ばしょを ほろう"); }
+function showOv(t,s){const ov=document.getElementById("ov");document.getElementById("ovT").textContent=t;document.getElementById("ovS").textContent=s;ov.classList.add("show");}
+document.getElementById("ovB").addEventListener("click",()=>{tone(660,0.08);newRound();});
 
-elNext.addEventListener("click",()=>{tone(660,0.08);newDig();});
+// ── にゅうりょく ──
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*S,y:(t.clientY-r.top)*S};}
+function cellAt(x,y){const c=Math.floor((x-gx)/cell),r=Math.floor((y-gy)/cell);if(r<0||c<0||r>=ROWS||c>=COLS)return null;return{r,c};}
+cv.addEventListener("pointerdown",e=>{const p=pos(e);const cl=cellAt(p.x,p.y);if(cl)applyTool(cl.r,cl.c);});
+document.getElementById("tPick").addEventListener("click",()=>setTool("pick"));
+document.getElementById("tHammer").addEventListener("click",()=>setTool("hammer"));
+function setTool(t){tool=t;tone(600,0.05);document.getElementById("tPick").classList.toggle("on",t==="pick");document.getElementById("tHammer").classList.toggle("on",t==="hammer");}
 
 // ── えがく ──
-function drawDino(){
-  ctx.save(); pitPath(ctx); ctx.clip();
-  ctx.fillStyle="#e9d3a8"; ctx.fillRect(pit.x,pit.y,pit.w,pit.h);     // すなの したじ
-  const pad=Math.min(pit.w,pit.h)*0.12;
-  const bx=pit.x+pad,by=pit.y+pad,bw=pit.w-pad*2,bh=pit.h-pad*2;
-  if(ready(curImg)){
-    const ar=curImg.naturalWidth/curImg.naturalHeight, br2=bw/bh; let w,h;
-    if(ar>br2){w=bw;h=bw/ar;}else{h=bh;w=bh*ar;}
-    ctx.drawImage(curImg, bx+(bw-w)/2, by+(bh-h)/2, w, h);
-  }else{
-    ctx.fillStyle="#c9b48a"; ctx.font=`900 ${Math.min(PW,PH)*0.06}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText("なにか いるよ…", pit.x+pit.w/2, pit.y+pit.h/2);
-  }
+function cellRect(r,c){return {x:gx+c*cell,y:gy+r*cell,w:cell,h:cell};}
+function itemRect(it){return {x:gx+it.c0*cell,y:gy+it.r0*cell,w:(it.c1-it.c0+1)*cell,h:(it.r1-it.r0+1)*cell};}
+function drawGem(R,color){
+  const cx=R.x+R.w/2,cy=R.y+R.h/2,rad=Math.min(R.w,R.h)*0.42;
+  ctx.save();ctx.translate(cx,cy);
+  ctx.beginPath();ctx.moveTo(0,-rad);ctx.lineTo(rad*0.85,-rad*0.2);ctx.lineTo(rad*0.55,rad);ctx.lineTo(-rad*0.55,rad);ctx.lineTo(-rad*0.85,-rad*0.2);ctx.closePath();
+  ctx.fillStyle=color;ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-rad);ctx.lineTo(rad*0.85,-rad*0.2);ctx.lineTo(0,-rad*0.05);ctx.closePath();ctx.fillStyle="rgba(255,255,255,.55)";ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-rad);ctx.lineTo(-rad*0.85,-rad*0.2);ctx.lineTo(0,-rad*0.05);ctx.closePath();ctx.fillStyle="rgba(255,255,255,.28)";ctx.fill();
+  ctx.lineWidth=Math.max(1.5,cell*0.04);ctx.strokeStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.moveTo(0,-rad);ctx.lineTo(rad*0.85,-rad*0.2);ctx.lineTo(rad*0.55,rad);ctx.lineTo(-rad*0.55,rad);ctx.lineTo(-rad*0.85,-rad*0.2);ctx.closePath();ctx.stroke();
   ctx.restore();
+}
+function drawItem(it){
+  // あいてる（ほれた）マスだけ クリップして えがく＝ほった ぶんだけ みえる
+  const open=it.cells.filter(({r,c})=>openCell(grid[r][c])); if(!open.length)return;
+  ctx.save();ctx.beginPath();for(const {r,c} of open){const R=cellRect(r,c);ctx.rect(R.x,R.y,R.w,R.h);}ctx.clip();
+  const B=itemRect(it);
+  if(it.type==="dino"){ const im=getImg(it.slug);
+    if(ready(im)){const ar=im.naturalWidth/im.naturalHeight,br=B.w/B.h;let w,h;if(ar>br){w=B.w;h=B.w/ar;}else{h=B.h;w=B.h*ar;}ctx.drawImage(im,B.x+(B.w-w)/2,B.y+(B.h-h)/2,w,h);}
+    else{ctx.fillStyle="#cdb88e";ctx.fillRect(B.x,B.y,B.w,B.h);}
+  } else { drawGem(B,it.color); }
+  ctx.restore();
+}
+function drawDirt(R,terr,cover,max){
+  ctx.fillStyle= terr===1? "#7d6552" : "#b98a52";        // 岩=灰茶 / 石=明茶
+  ctx.fillRect(R.x,R.y,R.w,R.h);
+  ctx.fillStyle="rgba(255,255,255,.12)";ctx.fillRect(R.x,R.y,R.w,R.h*0.16);
+  ctx.fillStyle="rgba(0,0,0,.16)";ctx.fillRect(R.x,R.y+R.h*0.84,R.w,R.h*0.16);
+  if(cover<max){ ctx.strokeStyle="rgba(0,0,0,.32)";ctx.lineWidth=Math.max(1.5,cell*0.05);
+    ctx.beginPath();ctx.moveTo(R.x+R.w*0.25,R.y+R.h*0.3);ctx.lineTo(R.x+R.w*0.5,R.y+R.h*0.55);ctx.lineTo(R.x+R.w*0.4,R.y+R.h*0.78);ctx.stroke(); }
+}
+function drawBedrock(R){
+  ctx.fillStyle="#4a4a52";ctx.fillRect(R.x,R.y,R.w,R.h);
+  ctx.fillStyle="rgba(255,255,255,.10)";ctx.fillRect(R.x,R.y,R.w,R.h*0.16);
+  ctx.strokeStyle="rgba(0,0,0,.45)";ctx.lineWidth=Math.max(1.5,cell*0.05);
+  ctx.beginPath();ctx.moveTo(R.x+R.w*0.2,R.y+R.h*0.2);ctx.lineTo(R.x+R.w*0.8,R.y+R.h*0.8);ctx.moveTo(R.x+R.w*0.8,R.y+R.h*0.2);ctx.lineTo(R.x+R.w*0.2,R.y+R.h*0.8);ctx.stroke();
 }
 function draw(){
   ctx.clearRect(0,0,PW,PH);
-  ctx.fillStyle="#f2e3c6"; ctx.fillRect(0,0,PW,PH);
-  // あなの かげ
-  ctx.save();pitPath(ctx);ctx.fillStyle="#000";ctx.shadowColor="rgba(80,50,20,.4)";ctx.shadowBlur=18*S;ctx.shadowOffsetY=4*S;ctx.fill();ctx.restore();
-  drawDino();
-  ctx.drawImage(dirtCv,0,0);                       // つち（けずられた じょうたい）
-  // あなの ふち
-  pitPath(ctx);ctx.lineWidth=Math.max(4,6*S);ctx.strokeStyle="#b58a52";ctx.stroke();
-  // つちぼこり
-  for(const p of dust){ctx.globalAlpha=Math.max(0,1-p.t/0.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
-  ctx.globalAlpha=1;
-  // キラキラ（はっけん）
+  // すなの したじ
+  ctx.fillStyle="#e3cda0";ctx.fillRect(gx,gy,cell*COLS,cell*ROWS);
+  // アイテム（ほれたぶん）
+  for(const it of items) drawItem(it);
+  // つち／岩盤／グリッド
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const g=grid[r][c],R=cellRect(r,c);
+    if(g.bedrock) drawBedrock(R);
+    else if(g.cover>0) drawDirt(R,g.terr,g.cover,g.max);
+    ctx.strokeStyle="rgba(0,0,0,.10)";ctx.lineWidth=1;ctx.strokeRect(R.x+0.5,R.y+0.5,R.w-1,R.h-1);
+  }
+  // ふち
+  ctx.strokeStyle="#3a2814";ctx.lineWidth=Math.max(3,4*S);ctx.strokeRect(gx,gy,cell*COLS,cell*ROWS);
+  // つぶ
+  for(const p of parts){ctx.globalAlpha=Math.max(0,1-p.t/0.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
   for(const s of sparks){ctx.globalAlpha=Math.max(0,1-s.t/1.1);ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();}
   ctx.globalAlpha=1;
-  // なまえ バナー
-  if(state==="found"){
-    const a=Math.min(1,bannerT*4);
-    ctx.globalAlpha=a;
-    const by=pit.y+pit.h+ (PH-(pit.y+pit.h))*0.4;
-    ctx.fillStyle="#fff";ctx.font=`900 ${Math.min(PW*0.07,PH*0.05)}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.lineWidth=6*S;ctx.strokeStyle="#7a4f29";ctx.strokeText(cur.n,PW/2,Math.min(by,PH-20*S));
-    ctx.fillText(cur.n,PW/2,Math.min(by,PH-20*S));
-    ctx.globalAlpha=1;
-  }
+  // バナー
+  if(banner && bannerT<2.2){ctx.globalAlpha=Math.min(1,(2.2-bannerT)*2);
+    ctx.fillStyle="#fff";ctx.font=`900 ${Math.min(PW*0.06,PH*0.04)}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.lineWidth=6*S;ctx.strokeStyle="#5a3a1a";ctx.strokeText(banner,PW/2,gy+cell*ROWS+ (PH-(gy+cell*ROWS))/2);ctx.fillText(banner,PW/2,gy+cell*ROWS+(PH-(gy+cell*ROWS))/2);ctx.globalAlpha=1;}
 }
 let last=0;
 function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;
-  checkProgress(dt);
-  for(const p of dust){p.t+=dt;p.x+=p.vx*dt;p.vy+=700*dt;p.y+=p.vy*dt;}
-  dust=dust.filter(p=>p.t<0.6);
-  for(const s of sparks){s.t+=dt;s.x+=s.vx*dt;s.vy+=500*dt;s.y+=s.vy*dt;}
-  sparks=sparks.filter(s=>s.t<1.1);
-  if(state==="found")bannerT+=dt;
+  for(const p of parts){p.t+=dt;p.x+=p.vx*dt;p.vy+=700*dt;p.y+=p.vy*dt;} parts=parts.filter(p=>p.t<0.6);
+  for(const s of sparks){s.t+=dt;s.x+=s.vx*dt;s.vy+=500*dt;s.y+=s.vy*dt;} sparks=sparks.filter(s=>s.t<1.1);
+  if(banner)bannerT+=dt;
   draw(); requestAnimationFrame(loop);
 }
+
+// 道具アイコン（canvas・絵文字なし）
+function toolIcons(){
+  const p=document.querySelector("#tPick canvas").getContext("2d");
+  p.clearRect(0,0,60,60);p.strokeStyle="#7a5230";p.lineWidth=6;p.lineCap="round";
+  p.beginPath();p.moveTo(30,52);p.lineTo(30,22);p.stroke();        // え
+  p.strokeStyle="#9aa0a6";p.lineWidth=7;p.beginPath();p.moveTo(12,14);p.quadraticCurveTo(30,22,48,14);p.stroke(); // つるはし頭
+  const h=document.querySelector("#tHammer canvas").getContext("2d");
+  h.clearRect(0,0,60,60);h.strokeStyle="#7a5230";h.lineWidth=6;h.lineCap="round";
+  h.beginPath();h.moveTo(30,54);h.lineTo(30,26);h.stroke();
+  h.fillStyle="#9aa0a6";h.fillRect(14,12,32,16);                  // ハンマー頭
+}
+
 addEventListener("contextmenu",e=>e.preventDefault());
-setZukan(); resize(); newDig(); requestAnimationFrame(loop);
+setZukan(); resize(); toolIcons(); newRound(); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
