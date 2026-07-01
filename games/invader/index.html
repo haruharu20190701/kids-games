@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#04060c" />
+<title>インベーダー｜こどもあそびば</title>
+<meta name="description" content="ブラウザで あそべる むかしの インベーダーゲーム。ドラッグで ほうだいを うごかして、じどうで うちながら てきの たいれつを ぜんぶ たおそう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/invader/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="インベーダー｜こどもあそびば" />
+<meta property="og:description" content="ドラッグで ほうだいを うごかして、てきの たいれつを ぜんぶ たおそう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/invader/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#9fffa0;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#04060c;}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#0c1420;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#9fffa0;flex:1;text-align:center;letter-spacing:3px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#16261c;box-shadow:0 3px 0 #060a06;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#9fffa0;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #060a06;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;background:#04060c;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+  #ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(2,4,8,.85);z-index:5;padding:20px;text-align:center;}
+  #ov.show{display:flex;}
+  #ov .t{font-size:26px;font-weight:900;color:#9fffa0;letter-spacing:2px;}#ov .s{font-size:16px;font-weight:800;color:#7fd0a0;}
+  #ov .big{font-size:19px;font-weight:900;border:none;border-radius:16px;padding:14px 30px;cursor:pointer;color:#04060c;background:#4dff6a;box-shadow:0 6px 0 #23a03e;}
+  #ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #23a03e;}
+  #help{flex:0 0 auto;text-align:center;font-size:11px;color:#4f7f5f;padding:5px 0 8px;background:#0c1420;}
+</style>
+</head>
+<body>
+  <div id="bar"><a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a><div id="title">インベーダー</div><div style="width:42px"></div></div>
+  <div id="stage"><canvas id="cv"></canvas>
+    <div id="ov"><div class="t" id="ovT">GAME OVER</div><div class="s" id="ovS"></div><button class="big" id="ovB">もういちど</button></div>
+  </div>
+  <div id="help">ドラッグで うごかす／たまは じどうで でる</div>
+<script>
+"use strict";
+let actx=null;
+function tone(f,d=0.05,t="square",v=0.08,delay=0){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);}catch(e){}}
+function sShot(){tone(880,0.03,"square",0.05);}
+function sKill(){tone(200,0.08,"square",0.09);tone(120,0.1,"sawtooth",0.07,0.02);}
+function sHit(){[300,200,140].forEach((f,i)=>tone(f,0.16,"sawtooth",0.11,i*0.06));}
+function sWave(){[400,600,800].forEach((f,i)=>tone(f,0.12,"square",0.09,i*0.06));}
+function sOver(){[440,330,247,165].forEach((f,i)=>tone(f,0.2,"sawtooth",0.12,i*0.12));}
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let PW=0,PH=0,S=1,U=1;
+function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;U=Math.min(PW,PH);
+  if(player)player.y=PH-U*0.09;}
+addEventListener("resize",resize);
+
+const AC=8, AR=4;
+let aliens=[], baseX=0, baseY=0, dir=1, player=null, pb=null, bombs=[], barriers=[], pt=[];
+let score=0, hi=0, lives=3, wave=1, state="play", bombT=0, started=false;
+try{hi=parseInt(localStorage.getItem("invaderHi")||"0",10)||0;}catch(e){}
+const AROWCOL=["#ff6b6b","#ffd23f","#7dff9a","#7dd0ff"];
+const AROWSC=[30,20,20,10];
+
+function buildAliens(){aliens=[];const gx=U*0.085;baseX=(PW-(AC-1)*gx)/2 - U*0.0; baseY=U*0.14+(wave-1)*U*0.04;dir=1;
+  for(let r=0;r<AR;r++)for(let c=0;c<AC;c++)aliens.push({c,r,alive:true});}
+function buildBarriers(){barriers=[];const bw=7,bh=4,bs=U*0.02;const total=4;const gap=(PW- total*bw*bs)/(total+1);
+  for(let i=0;i<total;i++){const bx=gap+i*(bw*bs+gap),by=PH-U*0.24;const blocks=[];for(let y=0;y<bh;y++){blocks[y]=[];for(let x=0;x<bw;x++)blocks[y][x]=!( (y===bh-1)&&(x>1&&x<bw-2) );}
+    barriers.push({x:bx,y:by,bs,bw,bh,blocks});}}
+function reset(full){ if(full){lives=3;score=0;wave=1;} player={x:PW/2,y:PH-U*0.09,r:U*0.035}; pb=null;bombs=[];pt=[];bombT=1; state="play"; buildAliens(); buildBarriers(); document.getElementById("ov").classList.remove("show"); }
+function ax(a){return baseX+a.c*U*0.085;}
+function ay(a){return baseY+a.r*U*0.07;}
+function aliveCount(){return aliens.filter(a=>a.alive).length;}
+
+function over(){state="over";sOver();if(score>hi){hi=score;try{localStorage.setItem("invaderHi",hi);}catch(e){}}document.getElementById("ovS").textContent="SCORE "+score+"　／　HI "+hi;document.getElementById("ov").classList.add("show");}
+document.getElementById("ovB").addEventListener("click",()=>{tone(660,0.08);reset(true);});
+
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*S,y:(t.clientY-r.top)*S};}
+let dragging=false;
+cv.addEventListener("pointerdown",e=>{started=true;dragging=true;if(state==="play"){const p=pos(e);player.x=Math.max(player.r,Math.min(PW-player.r,p.x));}try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+cv.addEventListener("pointermove",e=>{if(dragging&&state==="play"){const p=pos(e);player.x=Math.max(player.r,Math.min(PW-player.r,p.x));}});
+addEventListener("pointerup",()=>dragging=false);
+
+function boom(x,y,col){for(let i=0;i<10;i++){const a=Math.random()*6.28,s=U*(0.3+Math.random());pt.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0,life:0.4,r:U*0.008,c:col});}}
+function hitBarrier(x,y){for(const b of barriers){if(x<b.x||x>b.x+b.bw*b.bs||y<b.y||y>b.y+b.bh*b.bs)continue;const cx=Math.floor((x-b.x)/b.bs),cy=Math.floor((y-b.y)/b.bs);if(cy>=0&&cy<b.bh&&cx>=0&&cx<b.bw&&b.blocks[cy][cx]){b.blocks[cy][cx]=false;return true;}}return false;}
+
+function update(dt){
+  for(const p of pt){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;} pt=pt.filter(p=>p.t<p.life);
+  if(state!=="play")return;
+  // マーチ
+  const alive=aliens.filter(a=>a.alive); if(alive.length===0){ wave++; sWave(); reset(false); return; }
+  const spd=U*(0.10+ (AC*AR-alive.length)/(AC*AR)*0.5)* (1+(wave-1)*0.15);
+  baseX+=dir*spd*dt;
+  let minx=1e9,maxx=-1e9,maxy=-1e9; for(const a of alive){const x=ax(a);minx=Math.min(minx,x);maxx=Math.max(maxx,x);maxy=Math.max(maxy,ay(a));}
+  if(minx< U*0.05 && dir<0){dir=1;baseY+=U*0.045;} if(maxx> PW-U*0.05 && dir>0){dir=-1;baseY+=U*0.045;}
+  if(maxy> player.y-U*0.05){ over(); return; }
+  // オートショット（画面に1発）
+  if(!pb){ pb={x:player.x,y:player.y-player.r,vy:-PH*1.3,r:U*0.01}; sShot(); }
+  else { pb.y+=pb.vy*dt; if(pb.y<0)pb=null; }
+  if(pb){ // 自弾 × 敵/バリア
+    let hitOne=false;
+    for(const a of alive){ if(Math.abs(pb.x-ax(a))<U*0.036 && Math.abs(pb.y-ay(a))<U*0.03){ a.alive=false; score+=AROWSC[a.r]; boom(ax(a),ay(a),AROWCOL[a.r]); sKill(); hitOne=true; break; } }
+    if(hitOne)pb=null; else if(hitBarrier(pb.x,pb.y))pb=null;
+  }
+  // 敵の ばくだん
+  bombT-=dt; if(bombT<=0 && alive.length){ const a=alive[Math.floor(Math.random()*alive.length)]; bombs.push({x:ax(a),y:ay(a)+U*0.03,vy:PH*(0.45+wave*0.03),r:U*0.011}); bombT=Math.max(0.5,1.4-wave*0.1); }
+  for(const b of bombs){b.y+=b.vy*dt;}
+  for(let i=bombs.length-1;i>=0;i--){const b=bombs[i];
+    if(b.y>PH){bombs.splice(i,1);continue;}
+    if(hitBarrier(b.x,b.y)){bombs.splice(i,1);continue;}
+    if(Math.abs(b.x-player.x)<player.r && Math.abs(b.y-player.y)<player.r){bombs.splice(i,1);lives--;sHit();boom(player.x,player.y,"#4dff6a"); if(lives<=0){over();return;} }
+  }
+}
+function drawAlien(x,y,r,col,frame){
+  ctx.fillStyle=col; const s=r;
+  ctx.fillRect(x-s,y-s*0.6,s*2,s*1.2);                 // からだ
+  ctx.fillRect(x-s*1.4,y-s*0.2,s*0.5,s*0.8);ctx.fillRect(x+s*0.9,y-s*0.2,s*0.5,s*0.8); // うで
+  ctx.fillStyle="#04060c";ctx.fillRect(x-s*0.5,y-s*0.2,s*0.28,s*0.28);ctx.fillRect(x+s*0.22,y-s*0.2,s*0.28,s*0.28); // め
+  ctx.fillStyle=col; const ly=y+s*0.6; // あし（2フレーム）
+  if(frame){ctx.fillRect(x-s*0.9,ly,s*0.4,s*0.5);ctx.fillRect(x+s*0.5,ly,s*0.4,s*0.5);}
+  else{ctx.fillRect(x-s*0.5,ly,s*0.4,s*0.5);ctx.fillRect(x+s*0.1,ly,s*0.4,s*0.5);}
+}
+let animT=0;
+function draw(){
+  ctx.fillStyle="#04060c";ctx.fillRect(0,0,PW,PH);
+  const frame=Math.floor(animT*2)%2;
+  for(const a of aliens){ if(a.alive) drawAlien(ax(a),ay(a),U*0.028,AROWCOL[a.r],frame); }
+  // バリア
+  for(const b of barriers){ctx.fillStyle="#4dff6a";for(let y=0;y<b.bh;y++)for(let x=0;x<b.bw;x++)if(b.blocks[y][x])ctx.fillRect(b.x+x*b.bs,b.y+y*b.bs,b.bs-0.5,b.bs-0.5);}
+  // 自弾/敵弾
+  if(pb){ctx.fillStyle="#fff";ctx.fillRect(pb.x-pb.r,pb.y-pb.r*2,pb.r*2,pb.r*4);}
+  ctx.fillStyle="#ff7a7a";for(const b of bombs)ctx.fillRect(b.x-b.r,b.y-b.r*2,b.r*2,b.r*4);
+  // 自機
+  if(state==="play"){ctx.fillStyle="#4dff6a";const p=player,s=p.r;ctx.fillRect(p.x-s,p.y-s*0.3,s*2,s*0.9);ctx.fillRect(p.x-s*0.18,p.y-s*0.8,s*0.36,s*0.6);}
+  // パーティクル
+  for(const q of pt){ctx.globalAlpha=Math.max(0,1-q.t/q.life);ctx.fillStyle=q.c;ctx.fillRect(q.x-q.r,q.y-q.r,q.r*2,q.r*2);}ctx.globalAlpha=1;
+  // HUD
+  ctx.fillStyle="#9fffa0";ctx.font=`900 ${U*0.04}px sans-serif`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillText("SCORE "+score,U*0.03,U*0.02);
+  ctx.textAlign="right";ctx.fillText("ライフ "+lives+"  WAVE "+wave,PW-U*0.03,U*0.02);
+  if(!started){ctx.fillStyle="rgba(159,255,160,.8)";ctx.font=`900 ${U*0.05}px sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("ドラッグして あそぶ",PW/2,PH*0.62);}
+}
+let last=0;function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;animT+=dt;update(dt);draw();requestAnimationFrame(loop);}
+addEventListener("contextmenu",e=>e.preventDefault());
+resize();reset(true);requestAnimationFrame(loop);
+</script>
+</body>
+</html>

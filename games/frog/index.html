@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#0c1626" />
+<title>カエルわたり｜こどもあそびば</title>
+<meta name="description" content="ブラウザで あそべる むかしの みちわたり（フロッガー）ゲーム。スワイプで カエルを うごかして、くるまや かわを よけて むこうがわへ わたろう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/frog/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="カエルわたり｜こどもあそびば" />
+<meta property="og:description" content="スワイプで カエルを うごかして、くるまや かわを よけて わたろう。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/frog/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#cfe0ff;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#0a1220;}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#16233c;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#cfe0ff;flex:1;text-align:center;letter-spacing:1px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#26375c;box-shadow:0 3px 0 #0f1a2e;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#cfe0ff;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0f1a2e;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+  #ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(6,12,24,.82);z-index:5;padding:20px;text-align:center;}
+  #ov.show{display:flex;}
+  #ov .t{font-size:26px;font-weight:900;color:#fff;}#ov .s{font-size:16px;font-weight:800;color:#9fc0ff;}
+  #ov .big{font-size:19px;font-weight:900;border:none;border-radius:16px;padding:14px 30px;cursor:pointer;color:#fff;background:#39b46a;box-shadow:0 6px 0 #237a46;}
+  #ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #237a46;}
+  #help{flex:0 0 auto;text-align:center;font-size:11px;color:#6b83b0;padding:5px 0 8px;background:#16233c;}
+</style>
+</head>
+<body>
+  <div id="bar"><a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a><div id="title">カエルわたり</div><div style="width:42px"></div></div>
+  <div id="stage"><canvas id="cv"></canvas>
+    <div id="ov"><div class="t" id="ovT">ゲームオーバー</div><div class="s" id="ovS"></div><button class="big" id="ovB">もういちど</button></div>
+  </div>
+  <div id="help">スワイプで カエルが ぴょん！くるまと かわに きをつけて</div>
+<script>
+"use strict";
+let actx=null;
+function tone(f,d=0.06,t="square",v=0.09,delay=0){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);}catch(e){}}
+function sHop(){tone(500,0.05,"sine",0.09);tone(760,0.05,"sine",0.07,0.04);}
+function sGoal(){[523,659,784,1047].forEach((f,i)=>tone(f,0.14,"triangle",0.12,i*0.06));}
+function sBad(){[300,200,140].forEach((f,i)=>tone(f,0.16,"sawtooth",0.11,i*0.07));}
+function sOver(){[440,330,247,165].forEach((f,i)=>tone(f,0.2,"sawtooth",0.12,i*0.12));}
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const COLS=11, ROWS=11; let PW=0,PH=0,S=1,cell=0,ox=0,oy=0;
+function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;
+  cell=Math.floor(Math.min(PW/COLS,PH/ROWS));ox=Math.floor((PW-cell*COLS)/2);oy=Math.floor((PH-cell*ROWS)/2);}
+addEventListener("resize",resize);
+function rowY(cy){return oy+(ROWS-1-cy)*cell;}
+
+// レーン定義（cy 0=スタート下 … 10=ゴール上）
+const LANES=[
+  {t:"grass"},                          // 0 start
+  {t:"road",spd:2.2,len:2,col:"#ff6b6b"},// 1
+  {t:"road",spd:-1.6,len:1,col:"#ffd23f"},//2
+  {t:"road",spd:2.8,len:1,col:"#5fd0ff"},//3
+  {t:"road",spd:-2.0,len:2,col:"#c98bff"},//4
+  {t:"grass"},                          // 5 median
+  {t:"river",spd:1.4,len:3,col:"#9a6736"},//6
+  {t:"river",spd:-1.8,len:2,col:"#7a8a4a"},//7 (turtle-ish)
+  {t:"river",spd:2.0,len:3,col:"#9a6736"},//8
+  {t:"river",spd:-1.3,len:2,col:"#7a8a4a"},//9
+  {t:"grass",goal:true},                // 10 goal
+];
+let objs=[], frog=null, lives=3, score=0, hi=0, level=1, state="play", deadFlash=0;
+try{hi=parseInt(localStorage.getItem("frogHi")||"0",10)||0;}catch(e){}
+function buildObjs(){objs=[];for(let cy=0;cy<ROWS;cy++){const L=LANES[cy];objs[cy]=[];if(L.t==="road"||L.t==="river"){const n=3;for(let i=0;i<n;i++)objs[cy].push({x:i*(COLS/n)+Math.random(),len:L.len,spd:L.spd*(1+ (level-1)*0.15)});}}}
+function reset(full){ if(full){lives=3;score=0;level=1;} frog={cx:5,cy:0,rideSpd:0}; state="play"; deadFlash=0; if(full)buildObjs(); document.getElementById("ov").classList.remove("show"); }
+function resetFrog(){frog={cx:5,cy:0,rideSpd:0};}
+function lose(){lives--; sBad(); deadFlash=0.4; if(lives<=0)over(); else resetFrog();}
+function over(){state="over";sOver();if(score>hi){hi=score;try{localStorage.setItem("frogHi",hi);}catch(e){}}document.getElementById("ovS").textContent="スコア "+score+"　／　さいこう "+hi;document.getElementById("ov").classList.add("show");}
+document.getElementById("ovB").addEventListener("click",()=>{tone(660,0.08);reset(true);});
+
+let sx=0,sy=0;
+function pos(e){const t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+cv.addEventListener("pointerdown",e=>{const p=pos(e);sx=p.x;sy=p.y;});
+cv.addEventListener("pointerup",e=>{if(state!=="play")return;const p=pos(e);const dx=p.x-sx,dy=p.y-sy;if(Math.hypot(dx,dy)<16)return;
+  if(Math.abs(dx)>Math.abs(dy)){frog.cx=Math.max(0,Math.min(COLS-1,Math.round(frog.cx)+(dx>0?1:-1)));}
+  else{frog.cy=Math.max(0,Math.min(ROWS-1,frog.cy+(dy<0?1:-1)));}
+  sHop();});
+
+function update(dt){
+  if(state!=="play")return; if(deadFlash>0)deadFlash-=dt;
+  for(let cy=0;cy<ROWS;cy++){const L=LANES[cy];if(!objs[cy])continue;for(const o of objs[cy]){o.x+=o.spd*dt;if(o.spd>0&&o.x>COLS)o.x=-o.len;if(o.spd<0&&o.x<-o.len)o.x=COLS;}}
+  const L=LANES[frog.cy];
+  if(L.t==="road"){ for(const o of objs[frog.cy]){ if(frog.cx< o.x+o.len && frog.cx+1> o.x){ lose(); return; } } }
+  else if(L.t==="river"){ let on=null; for(const o of objs[frog.cy]){ if(frog.cx< o.x+o.len && frog.cx+1> o.x){on=o;break;} }
+    if(!on){ lose(); return; } frog.cx+=on.spd*dt; if(frog.cx<-0.5||frog.cx>COLS-0.5){ lose(); return; } }
+  if(L.goal){ score+=100; sGoal(); level++; resetFrog(); for(const cy in objs)for(const o of objs[cy])o.spd*=1.06; }
+}
+function draw(){
+  ctx.clearRect(0,0,PW,PH);
+  for(let cy=0;cy<ROWS;cy++){const L=LANES[cy],y=rowY(cy);
+    ctx.fillStyle= L.t==="grass"?(L.goal?"#2f8f4a":"#3a7d43"): L.t==="road"?"#33373f":"#1f4e7a";
+    ctx.fillRect(ox,y,cell*COLS,cell);
+    if(L.t==="road"){ctx.fillStyle="rgba(255,255,255,.3)";for(let c=0;c<COLS;c++)ctx.fillRect(ox+c*cell+cell*0.35,y+cell*0.47,cell*0.3,cell*0.06);}
+  }
+  // くるま/まるた
+  for(let cy=0;cy<ROWS;cy++){const L=LANES[cy];if(!objs[cy])continue;const y=rowY(cy);
+    for(const o of objs[cy]){const x=ox+o.x*cell;
+      if(L.t==="road"){ctx.fillStyle=L.col;rr(x+2,y+cell*0.16,o.len*cell-4,cell*0.68,cell*0.16);ctx.fill();ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(x+cell*0.14,y+cell*0.28,o.len*cell*0.5,cell*0.16);}
+      else{ctx.fillStyle=L.col;rr(x+2,y+cell*0.2,o.len*cell-4,cell*0.6,cell*0.12);ctx.fill();ctx.fillStyle="rgba(0,0,0,.18)";for(let k=0;k<o.len;k++)ctx.fillRect(x+k*cell+cell*0.45,y+cell*0.25,cell*0.06,cell*0.5);}
+    }
+  }
+  // カエル
+  const fx=ox+frog.cx*cell+cell/2, fy=rowY(frog.cy)+cell/2;
+  if(!(deadFlash>0 && Math.floor(deadFlash*20)%2)){
+    ctx.fillStyle="#5fd35a";ctx.beginPath();ctx.arc(fx,fy,cell*0.38,0,7);ctx.fill();
+    ctx.fillStyle="#3fa93a";ctx.beginPath();ctx.arc(fx-cell*0.2,fy+cell*0.1,cell*0.12,0,7);ctx.arc(fx+cell*0.2,fy+cell*0.1,cell*0.12,0,7);ctx.fill();
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(fx-cell*0.14,fy-cell*0.18,cell*0.11,0,7);ctx.arc(fx+cell*0.14,fy-cell*0.18,cell*0.11,0,7);ctx.fill();
+    ctx.fillStyle="#0a1a0a";ctx.beginPath();ctx.arc(fx-cell*0.14,fy-cell*0.18,cell*0.055,0,7);ctx.arc(fx+cell*0.14,fy-cell*0.18,cell*0.055,0,7);ctx.fill();
+  }
+  // HUD
+  ctx.fillStyle="#cfe0ff";ctx.font=`900 ${cell*0.5}px sans-serif`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillText("SCORE "+score,ox+4,4);
+  ctx.textAlign="right";ctx.fillText("ライフ "+lives,ox+cell*COLS-4,4);
+}
+function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+let last=0;function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;update(dt);draw();requestAnimationFrame(loop);}
+addEventListener("contextmenu",e=>e.preventDefault());
+resize();reset(true);requestAnimationFrame(loop);
+</script>
+</body>
+</html>
