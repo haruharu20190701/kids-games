@@ -86,11 +86,18 @@ cv.addEventListener("pointerup",e=>{if(state!=="play")return;const p=pos(e);cons
 
 function tileOf(x,y){return {c:Math.round((x-ox-cell/2)/cell), r:Math.round((y-oy-cell/2)/cell)};}
 function moveEnt(e,speed,dt,chooser){
-  const T=tileOf(e.x,e.y), cx=tcx(T.c),cy=tcy(T.r), aligned=Math.abs(e.x-cx)<Math.max(2,cell*0.12)&&Math.abs(e.y-cy)<Math.max(2,cell*0.12);
-  if(aligned){ e.x=cx;e.y=cy; chooser(e,T);
-    if(isWall(T.c+e.dir.x,T.r+e.dir.y))e.dir={x:0,y:0};
-  }
-  e.x+=e.dir.x*speed*dt; e.y+=e.dir.y*speed*dt;
+  const T=tileOf(e.x,e.y), cx=tcx(T.c),cy=tcy(T.r);
+  const nx=e.x+e.dir.x*speed*dt, ny=e.y+e.dir.y*speed*dt;
+  // タイル中心を「またいだ瞬間」だけ 決定する（吸い付き防止）。とまってる時は毎フレームOK。
+  let atCenter=false;
+  if(e.dir.x===0&&e.dir.y===0) atCenter=true;
+  else if(e.dir.x!==0 && (e.x-cx)*(nx-cx)<=0) atCenter=true;
+  else if(e.dir.y!==0 && (e.y-cy)*(ny-cy)<=0) atCenter=true;
+  if(atCenter){
+    e.x=cx; e.y=cy; chooser(e,T);
+    if(isWall(T.c+e.dir.x,T.r+e.dir.y)) e.dir={x:0,y:0};
+    e.x+=e.dir.x*speed*dt; e.y+=e.dir.y*speed*dt;
+  } else { e.x=nx; e.y=ny; }
 }
 function update(dt){
   if(state!=="play")return;
