@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#04040f" />
+<title>パクパク｜こどもあそびば</title>
+<meta name="description" content="ブラウザで あそべる むかしの めいろゲーム（パックマン風）。スワイプで うごかして ドットを ぜんぶ たべよう。おばけに つかまらないでね。パワーえさで おばけを おいかえせる。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/pakupaku/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="パクパク｜こどもあそびば" />
+<meta property="og:description" content="めいろで ドットを たべよう。おばけに つかまらないでね。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/pakupaku/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:#ffe36b;
+    height:100dvh;display:flex;flex-direction:column;overflow:hidden;touch-action:none;background:#04040f;}
+  #bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#141433;flex:0 0 auto;}
+  #bar #title{font-weight:900;font-size:19px;color:#ffe36b;flex:1;text-align:center;letter-spacing:3px;}
+  .hbtn{font-size:22px;width:42px;height:42px;border:none;border-radius:14px;background:#26265a;box-shadow:0 3px 0 #0c0c22;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;color:#ffe36b;}
+  .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #0c0c22;}
+  #stage{flex:1 1 auto;min-height:0;position:relative;}
+  #cv{display:block;width:100%;height:100%;min-width:0;min-height:0;}
+  #ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(4,4,15,.85);z-index:5;padding:20px;text-align:center;}
+  #ov.show{display:flex;}
+  #ov .t{font-size:26px;font-weight:900;color:#ffe36b;letter-spacing:2px;}#ov .s{font-size:16px;font-weight:800;color:#ffd0a0;}
+  #ov .big{font-size:19px;font-weight:900;border:none;border-radius:16px;padding:14px 30px;cursor:pointer;color:#04040f;background:#ffd23f;box-shadow:0 6px 0 #b8912a;}
+  #ov .big:active{transform:translateY(3px);box-shadow:0 3px 0 #b8912a;}
+  #help{flex:0 0 auto;text-align:center;font-size:11px;color:#8a8ac0;padding:5px 0 8px;background:#141433;}
+</style>
+</head>
+<body>
+  <div id="bar"><a class="hbtn" href="../../index.html" aria-label="ホーム">🏠</a><div id="title">パクパク</div><div style="width:42px"></div></div>
+  <div id="stage"><canvas id="cv"></canvas>
+    <div id="ov"><div class="t" id="ovT">ゲームオーバー</div><div class="s" id="ovS"></div><button class="big" id="ovB">もういちど</button></div>
+  </div>
+  <div id="help">スワイプで うごく／パワーえさで おばけを たべられる</div>
+<script>
+"use strict";
+let actx=null;
+function tone(f,d=0.05,t="square",v=0.08,delay=0){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+delay;o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start(t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.stop(t0+d);}catch(e){}}
+function sDot(){tone(520,0.02,"square",0.04);}
+function sPow(){[400,600,800].forEach((f,i)=>tone(f,0.08,"square",0.08,i*0.05));}
+function sEat(){[800,1100,1400].forEach((f,i)=>tone(f,0.07,"sine",0.1,i*0.04));}
+function sDie(){[400,300,220,150].forEach((f,i)=>tone(f,0.18,"sawtooth",0.11,i*0.1));}
+function sWin(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,0.14,"triangle",0.12,i*0.06));}
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const W=13,H=15; let PW=0,PH=0,S=1,cell=0,ox=0,oy=0;
+function resize(){const r=cv.getBoundingClientRect();S=Math.min(devicePixelRatio||1,2);PW=Math.round(r.width*S);PH=Math.round(r.height*S);cv.width=PW;cv.height=PH;
+  cell=Math.floor(Math.min(PW/W,PH/H));ox=Math.floor((PW-cell*W)/2);oy=Math.floor((PH-cell*H)/2);}
+addEventListener("resize",resize);
+
+function isWall(c,r){return c<0||r<0||c>=W||r>=H||(r===0||c===0||r===H-1||c===W-1)||(r%2===0&&c%2===0);}
+let dots=[], dotsLeft=0, pac=null, ghosts=[], score=0, hi=0, lives=3, level=1, state="play", fright=0;
+try{hi=parseInt(localStorage.getItem("pakuHi")||"0",10)||0;}catch(e){}
+const GC=["#ff5a5a","#ff9ad2","#5fd0ff"];
+function tcx(c){return ox+c*cell+cell/2;} function tcy(r){return oy+r*cell+cell/2;}
+function buildDots(){dots=[];dotsLeft=0;for(let r=0;r<H;r++){dots[r]=[];for(let c=0;c<W;c++){if(!isWall(c,r)){dots[r][c]=1;dotsLeft++;}else dots[r][c]=0;}}
+  // パワーえさ 四隅
+  [[1,1],[W-2,1],[1,H-2],[W-2,H-2]].forEach(([c,r])=>{if(dots[r][c]){dots[r][c]=2;}});
+  // 自機・おばけ位置のドット消す
+  const clear=[[6,13],[6,7],[5,7],[7,7]]; clear.forEach(([c,r])=>{if(dots[r]&&dots[r][c]){dots[r][c]=0;dotsLeft--;}});}
+function reset(full){ if(full){lives=3;score=0;level=1;} buildDots();
+  pac={x:tcx(6),y:tcy(13),dir:{x:0,y:0},want:{x:0,y:0},mouth:0};
+  ghosts=[{x:tcx(6),y:tcy(7)},{x:tcx(5),y:tcy(7)},{x:tcx(7),y:tcy(7)}].map((g,i)=>({...g,dir:{x:0,y:-1},col:GC[i],home:{c:i===0?6:i===1?5:7,r:7}}));
+  fright=0;state="play";document.getElementById("ov").classList.remove("show"); }
+function respawn(){ pac.x=tcx(6);pac.y=tcy(13);pac.dir={x:0,y:0};pac.want={x:0,y:0};
+  ghosts.forEach(g=>{g.x=tcx(g.home.c);g.y=tcy(g.home.r);g.dir={x:0,y:-1};}); fright=0; }
+function over(){state="over";sDie();if(score>hi){hi=score;try{localStorage.setItem("pakuHi",hi);}catch(e){}}document.getElementById("ovS").textContent="SCORE "+score+"　／　HI "+hi;document.getElementById("ov").classList.add("show");}
+document.getElementById("ovB").addEventListener("click",()=>{tone(660,0.08);reset(true);});
+
+let sx=0,sy=0;
+function pos(e){const t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+cv.addEventListener("pointerdown",e=>{const p=pos(e);sx=p.x;sy=p.y;});
+cv.addEventListener("pointerup",e=>{if(state!=="play")return;const p=pos(e);const dx=p.x-sx,dy=p.y-sy;if(Math.hypot(dx,dy)<16)return;
+  if(Math.abs(dx)>Math.abs(dy))pac.want={x:dx>0?1:-1,y:0};else pac.want={x:0,y:dy>0?1:-1};});
+
+function tileOf(x,y){return {c:Math.round((x-ox-cell/2)/cell), r:Math.round((y-oy-cell/2)/cell)};}
+function moveEnt(e,speed,dt,chooser){
+  const T=tileOf(e.x,e.y), cx=tcx(T.c),cy=tcy(T.r), aligned=Math.abs(e.x-cx)<Math.max(2,cell*0.12)&&Math.abs(e.y-cy)<Math.max(2,cell*0.12);
+  if(aligned){ e.x=cx;e.y=cy; chooser(e,T);
+    if(isWall(T.c+e.dir.x,T.r+e.dir.y))e.dir={x:0,y:0};
+  }
+  e.x+=e.dir.x*speed*dt; e.y+=e.dir.y*speed*dt;
+}
+function update(dt){
+  if(state!=="play")return;
+  pac.mouth+=dt*10; if(fright>0)fright-=dt;
+  const pspd=cell*5.0;
+  moveEnt(pac,pspd,dt,(e,T)=>{ if((e.want.x||e.want.y)&&!isWall(T.c+e.want.x,T.r+e.want.y))e.dir={...e.want};
+    // ドット
+    if(dots[T.r]&&dots[T.r][T.c]){ const v=dots[T.r][T.c]; dots[T.r][T.c]=0; dotsLeft--; if(v===2){score+=50;fright=6;sPow();ghosts.forEach(g=>g.eaten=false);} else {score+=10;sDot();}
+      if(dotsLeft<=0){ level++; sWin(); reset(false); return; } }
+  });
+  const gspd=cell*(fright>0?3.0:4.2);
+  for(const g of ghosts){ if(g.eaten){ // 目だけで巣に戻る（かんたん化：即復帰）
+      g.x=tcx(g.home.c);g.y=tcy(g.home.r);g.dir={x:0,y:-1};g.eaten=false; }
+    moveEnt(g,gspd,dt,(e,T)=>{
+      const opts=[]; const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+      for(const d of dirs){ if(isWall(T.c+d.x,T.r+d.y))continue; if(d.x===-e.dir.x&&d.y===-e.dir.y)continue; opts.push(d); }
+      if(opts.length===0)opts.push({x:-e.dir.x,y:-e.dir.y});
+      let best=opts[0];
+      if(fright>0){ best=opts[Math.floor(Math.random()*opts.length)]; }
+      else { let bd=1e9; for(const d of opts){ const nx=tcx(T.c+d.x),ny=tcy(T.r+d.y); const dist=(nx-pac.x)**2+(ny-pac.y)**2; if(dist<bd){bd=dist;best=d;} }
+        if(Math.random()<0.12)best=opts[Math.floor(Math.random()*opts.length)]; }
+      e.dir=best;
+    });
+  }
+  // せっしょく
+  for(const g of ghosts){ if(Math.hypot(g.x-pac.x,g.y-pac.y)<cell*0.62){
+    if(fright>0){ g.eaten=true; score+=200; sEat(); }
+    else { lives--; if(lives<=0){over();return;} respawn(); return; } } }
+}
+function drawGhost(g){const x=g.x,y=g.y,r=cell*0.42; const blue=fright>0;
+  ctx.fillStyle= blue? (fright<2&&Math.floor(fright*6)%2? "#fff":"#3b5bff") : g.col;
+  ctx.beginPath();ctx.arc(x,y-r*0.1,r,Math.PI,0);ctx.lineTo(x+r,y+r*0.8);
+  for(let i=0;i<3;i++){ctx.lineTo(x+r-(i*2+1)*r/3,y+r*0.5);ctx.lineTo(x+r-(i*2+2)*r/3,y+r*0.8);}
+  ctx.lineTo(x-r,y+r*0.8);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x-r*0.35,y-r*0.1,r*0.26,0,7);ctx.arc(x+r*0.35,y-r*0.1,r*0.26,0,7);ctx.fill();
+  ctx.fillStyle= blue?"#fff":"#123";ctx.beginPath();ctx.arc(x-r*0.35+g.dir.x*r*0.12,y-r*0.1+g.dir.y*r*0.12,r*0.13,0,7);ctx.arc(x+r*0.35+g.dir.x*r*0.12,y-r*0.1+g.dir.y*r*0.12,r*0.13,0,7);ctx.fill();
+}
+function draw(){
+  ctx.fillStyle="#04040f";ctx.fillRect(0,0,PW,PH);
+  // かべ
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++)if(isWall(c,r)){ctx.fillStyle="#1b1b6a";const x=ox+c*cell,y=oy+r*cell;ctx.fillRect(x+cell*0.12,y+cell*0.12,cell*0.76,cell*0.76);ctx.fillStyle="#3a3ab0";ctx.fillRect(x+cell*0.2,y+cell*0.2,cell*0.6,cell*0.14);}
+  // ドット
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++){const v=dots[r]&&dots[r][c];if(v===1){ctx.fillStyle="#ffd8a0";ctx.beginPath();ctx.arc(tcx(c),tcy(r),cell*0.08,0,7);ctx.fill();}else if(v===2){ctx.fillStyle="#ffd23f";ctx.beginPath();ctx.arc(tcx(c),tcy(r),cell*0.2*(0.8+0.2*Math.sin(Date.now()/200)),0,7);ctx.fill();}}
+  // パック
+  const a=Math.abs(Math.sin(pac.mouth))*0.32; let ang=0; if(pac.dir.x>0)ang=0;else if(pac.dir.x<0)ang=Math.PI;else if(pac.dir.y>0)ang=Math.PI/2;else if(pac.dir.y<0)ang=-Math.PI/2;
+  ctx.fillStyle="#ffe23f";ctx.beginPath();ctx.moveTo(pac.x,pac.y);ctx.arc(pac.x,pac.y,cell*0.45,ang+a,ang+Math.PI*2-a);ctx.closePath();ctx.fill();
+  for(const g of ghosts) drawGhost(g);
+  // HUD
+  ctx.fillStyle="#ffe36b";ctx.font=`900 ${cell*0.55}px sans-serif`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillText("SCORE "+score,ox+2,2);
+  ctx.textAlign="right";ctx.fillText("ライフ "+lives,ox+cell*W-2,2);
+}
+let last=0;function loop(t){if(!last)last=t;let dt=(t-last)/1000;last=t;if(dt>0.05)dt=0.05;update(dt);draw();requestAnimationFrame(loop);}
+addEventListener("contextmenu",e=>e.preventDefault());
+resize();reset(true);requestAnimationFrame(loop);
+</script>
+</body>
+</html>
