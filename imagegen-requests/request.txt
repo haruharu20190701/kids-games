@@ -1,3 +1,6 @@
 kind: icon
 ---
-shooter | cute kawaii flat vector app icon of a blue hero spaceship shooting laser beams in space with stars, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+snake | cute kawaii flat vector app icon of a cute green snake with an apple, retro snake game, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+pakupaku | cute kawaii flat vector app icon of a round yellow character with an open mouth eating dots in a maze, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+frog | cute kawaii flat vector app icon of a cute green frog hopping across a road with a car, bright cheerful colors, soft rounded shapes, thick clean outlines, centered, plain pure white background, simple, no text, no watermark, kids game icon, high quality
+invader | cute kawaii flat vector app icon of a retro pixel space invader alien, green, bright cheerful colors, soft rounded shapes, thick clean outlines, centered single subject, plain pure white background, simple, no text, no watermark, kids game icon, high quality
