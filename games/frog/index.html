@@ -62,20 +62,20 @@ function rowY(cy){return oy+(ROWS-1-cy)*cell;}
 // レーン定義（cy 0=スタート下 … 10=ゴール上）
 const LANES=[
   {t:"grass"},                          // 0 start
-  {t:"road",spd:2.2,len:2,col:"#ff6b6b"},// 1
-  {t:"road",spd:-1.6,len:1,col:"#ffd23f"},//2
-  {t:"road",spd:2.8,len:1,col:"#5fd0ff"},//3
-  {t:"road",spd:-2.0,len:2,col:"#c98bff"},//4
+  {t:"road",spd:1.1,len:1,col:"#ff6b6b"},// 1  ゆっくり・くるまは すくなめ
+  {t:"road",spd:-0.85,len:1,col:"#ffd23f"},//2
+  {t:"road",spd:1.3,len:2,col:"#5fd0ff"},//3
+  {t:"road",spd:-1.0,len:1,col:"#c98bff"},//4
   {t:"grass"},                          // 5 median
-  {t:"river",spd:1.4,len:3,col:"#9a6736"},//6
-  {t:"river",spd:-1.8,len:2,col:"#7a8a4a"},//7 (turtle-ish)
-  {t:"river",spd:2.0,len:3,col:"#9a6736"},//8
-  {t:"river",spd:-1.3,len:2,col:"#7a8a4a"},//9
+  {t:"river",spd:0.85,len:3,col:"#9a6736"},//6  まるたは ながく のりやすく
+  {t:"river",spd:-1.0,len:3,col:"#7a8a4a"},//7
+  {t:"river",spd:1.1,len:3,col:"#9a6736"},//8
+  {t:"river",spd:-0.75,len:3,col:"#7a8a4a"},//9
   {t:"grass",goal:true},                // 10 goal
 ];
 let objs=[], frog=null, lives=3, score=0, hi=0, level=1, state="play", deadFlash=0;
 try{hi=parseInt(localStorage.getItem("frogHi")||"0",10)||0;}catch(e){}
-function buildObjs(){objs=[];for(let cy=0;cy<ROWS;cy++){const L=LANES[cy];objs[cy]=[];if(L.t==="road"||L.t==="river"){const n=3;for(let i=0;i<n;i++)objs[cy].push({x:i*(COLS/n)+Math.random(),len:L.len,spd:L.spd*(1+ (level-1)*0.15)});}}}
+function buildObjs(){objs=[];for(let cy=0;cy<ROWS;cy++){const L=LANES[cy];objs[cy]=[];if(L.t==="road"||L.t==="river"){const n=L.t==="road"?2:3;for(let i=0;i<n;i++)objs[cy].push({x:i*(COLS/n)+Math.random()*0.5,len:L.len,spd:L.spd*(1+ (level-1)*0.07)});}}}
 function reset(full){ if(full){lives=3;score=0;level=1;} frog={cx:5,cy:0,rideSpd:0}; state="play"; deadFlash=0; if(full)buildObjs(); document.getElementById("ov").classList.remove("show"); }
 function resetFrog(){frog={cx:5,cy:0,rideSpd:0};}
 function lose(){lives--; sBad(); deadFlash=0.4; if(lives<=0)over(); else resetFrog();}
@@ -97,7 +97,7 @@ function update(dt){
   if(L.t==="road"){ for(const o of objs[frog.cy]){ if(frog.cx< o.x+o.len && frog.cx+1> o.x){ lose(); return; } } }
   else if(L.t==="river"){ let on=null; for(const o of objs[frog.cy]){ if(frog.cx< o.x+o.len && frog.cx+1> o.x){on=o;break;} }
     if(!on){ lose(); return; } frog.cx+=on.spd*dt; if(frog.cx<-0.5||frog.cx>COLS-0.5){ lose(); return; } }
-  if(L.goal){ score+=100; sGoal(); level++; resetFrog(); for(const cy in objs)for(const o of objs[cy])o.spd*=1.06; }
+  if(L.goal){ score+=100; sGoal(); level++; resetFrog(); for(const cy in objs)for(const o of objs[cy])o.spd*=1.03; }
 }
 function draw(){
   ctx.clearRect(0,0,PW,PH);
