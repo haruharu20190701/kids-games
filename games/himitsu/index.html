@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ひみつのおうち" />
+<title>ひみつのおうち｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの おうちたんけんゲーム。へやを さがして かくれた たからを あつめ、ほしを ためて あたらしい へやの かぎを あけよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/himitsu/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ひみつのおうち｜こどもあそびば" />
+<meta property="og:description" content="へやを たんけんして かくれた たからを あつめよう！ほしを ためると ひみつの へやが あくよ。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/himitsu/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── ひみつのおうち（たんけん・あつめ・アンロック）── */
+  :root{ --bg1:#fdeedc; --bg2:#f6d9ae; --ink:#5b4636; --card:#fffdf5; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:var(--card);box-shadow:0 4px 0 #d9b481;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #d9b481;}
+  header{width:100%;max-width:560px;text-align:center;padding:10px 14px 0;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;}
+  .chips{display:flex;justify-content:center;gap:8px;margin-top:6px;}
+  .chip{font-size:15px;font-weight:900;background:var(--card);border-radius:999px;padding:5px 14px;box-shadow:0 3px 0 #d9b481;border:none;font-family:inherit;color:var(--ink);}
+  .chip.pop{animation:chipPop .4s;}
+  @keyframes chipPop{40%{transform:scale(1.25);}}
+  button.chip{cursor:pointer;}
+  button.chip:active{transform:translateY(2px);box-shadow:0 1px 0 #d9b481;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#fff;border-radius:999px;cursor:pointer;transition:transform .08s;}
+  .btn:active{transform:translateY(2px);}
+  .btn.green{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  .btn.orange{background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;}
+  .btn.brown{background:linear-gradient(180deg,#b98a52,#8a5a2b);box-shadow:0 4px 0 #5e3c1c;}
+  /* ── がめん ── */
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:6px 12px 12px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── おうちマップ ── */
+  #map-s .hint{text-align:center;font-size:14px;font-weight:800;color:#8a7a66;margin:2px 0 8px;}
+  #next{text-align:center;font-size:13px;font-weight:800;color:#b06a00;margin-bottom:6px;min-height:16px;}
+  #roomGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;overflow:auto;touch-action:pan-y;padding:4px 2px 8px;}
+  .rcard{position:relative;background:var(--card);border-radius:18px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    box-shadow:0 5px 0 #d9b481;cursor:pointer;}
+  .rcard:active{transform:translateY(3px);box-shadow:0 2px 0 #d9b481;}
+  .rcard .re{font-size:42px;line-height:1.1;}
+  .rcard .rn{font-size:16px;font-weight:900;}
+  .rcard .rp{font-size:12px;font-weight:800;color:#8a7a66;}
+  .rcard .paw{position:absolute;right:8px;top:6px;font-size:20px;animation:bob 1.2s ease-in-out infinite;}
+  .rcard .secmark{position:absolute;left:10px;top:8px;font-size:15px;}
+  .rcard.locked{cursor:default;background:#efe6d4;box-shadow:0 5px 0 #cbbb9b;}
+  .rcard.locked:active{transform:none;box-shadow:0 5px 0 #cbbb9b;}
+  .rcard.locked .re{filter:grayscale(1) opacity(.55);}
+  .lockbar{width:86%;height:8px;background:#ddd0b0;border-radius:999px;overflow:hidden;}
+  .lockbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd93b,#fb8500);}
+  #mapBtns{display:flex;justify-content:center;gap:10px;padding:8px 0 2px;flex:0 0 auto;}
+  #mapBtns .btn{font-size:17px;padding:11px 24px;}
+  #compBanner{display:none;text-align:center;font-size:16px;font-weight:900;color:#b06a00;background:#fff6d8;border-radius:14px;padding:8px;margin-bottom:8px;box-shadow:0 3px 0 #e0c27a;}
+  #compBanner.show{display:block;}
+  /* ── へやの なか ── */
+  #room-s{gap:6px;}
+  #roomTop{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  #roomTop .btn{font-size:14px;padding:9px 14px;flex:0 0 auto;}
+  #roomName{flex:1;text-align:center;font-size:18px;font-weight:900;}
+  #roomHint{text-align:center;font-size:13px;font-weight:800;color:#8a7a66;min-height:16px;flex:0 0 auto;}
+  #scene{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;box-shadow:inset 0 3px 10px rgba(0,0,0,.14), 0 4px 0 #d9b481;}
+  .spot{position:absolute;transform:translate(-50%,-50%);padding:8px;line-height:1;cursor:pointer;z-index:2;}
+  .spot .se{display:block;font-size:calc(var(--u,44px) * var(--s,1));filter:drop-shadow(0 3px 3px rgba(0,0,0,.22));transition:opacity .3s, filter .3s;}
+  .spot.done{pointer-events:none;}
+  .spot.done .se{opacity:.35;filter:grayscale(.9);}
+  .spot.poke .se{animation:poke .35s;}
+  @keyframes poke{25%{transform:rotate(-9deg) scale(1.12);}60%{transform:rotate(8deg) scale(1.05);}}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  .float{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:17px;color:#5b4636;
+    text-shadow:0 1px 0 #fff,0 0 6px #fff;pointer-events:none;z-index:6;white-space:nowrap;transition:transform 1s ease, opacity 1s;}
+  #allDone{position:absolute;left:50%;bottom:10px;transform:translate(-50%,120%);z-index:7;background:var(--card);border-radius:16px;
+    padding:10px 16px;box-shadow:0 6px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;font-weight:900;font-size:15px;transition:transform .4s;}
+  #allDone.show{transform:translate(-50%,0);}
+  #allDone .btn{font-size:14px;padding:8px 14px;}
+  /* ── たからちょう ── */
+  #book-s .bookwrap{flex:1;overflow:auto;touch-action:pan-y;padding:2px 2px 8px;}
+  .bsec{margin-bottom:10px;}
+  .bsec h3{font-size:15px;font-weight:900;margin:6px 2px;color:#7a6a52;}
+  .bgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .bcell{background:var(--card);border-radius:14px;box-shadow:0 3px 0 #d9b481;aspect-ratio:1/1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px;}
+  .bcell .be{font-size:30px;line-height:1.1;}
+  .bcell .bn{font-size:8.5px;font-weight:800;text-align:center;line-height:1.05;overflow:hidden;max-width:100%;white-space:nowrap;text-overflow:ellipsis;}
+  .bcell .br{font-size:8px;color:#f0a500;letter-spacing:-1px;}
+  .bcell.none{background:#efe6d4;box-shadow:0 3px 0 #cbbb9b;}
+  .bcell.none .be{filter:grayscale(1) brightness(.55) contrast(.5);opacity:.75;}
+  .booktitle{text-align:center;font-size:18px;font-weight:900;margin:2px 0 4px;flex:0 0 auto;}
+  .booktitle small{color:#8a7a66;font-size:13px;}
+  #book-s .btn.back{align-self:center;font-size:16px;padding:10px 24px;margin-top:8px;flex:0 0 auto;}
+  /* ── みつけたカード・アンロック ── */
+  #ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(60,45,25,.6);z-index:90;padding:24px;}
+  #ovl.show{display:flex;}
+  .sheet{background:var(--card);border-radius:22px;padding:20px 18px;max-width:330px;width:100%;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.4);}
+  .sheet .ce{font-size:74px;line-height:1.15;animation:cardIn .5s;}
+  @keyframes cardIn{0%{transform:scale(.2) rotate(-16deg);}65%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .sheet .ct{font-size:21px;font-weight:900;margin-top:6px;}
+  .sheet .cs{font-size:14px;font-weight:800;color:#8a7a66;margin-top:3px;}
+  .sheet .cr{font-size:15px;color:#f0a500;margin-top:2px;}
+  .sheet .btn{font-size:17px;padding:11px 28px;margin-top:12px;}
+  .sheet.gold{background:linear-gradient(180deg,#fff8dd,#ffe9a8);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  /* ── よこむき ── */
+  @media (orientation:landscape) and (max-height:480px){
+    header{padding:4px 14px 0;} .title{font-size:17px;}
+    .chips{margin-top:3px;} .chip{font-size:13px;padding:3px 11px;}
+    #map-s .hint{margin:0 0 4px;font-size:12px;}
+    #roomGrid{grid-template-columns:repeat(4,1fr);gap:8px;}
+    .rcard .re{font-size:30px;}
+    .bgrid{grid-template-columns:repeat(8,1fr);}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header>
+    <div class="title">🗝️ ひみつのおうち</div>
+    <div class="chips">
+      <span class="chip" id="starChip">⭐ 0</span>
+      <button class="chip" id="bookChip">🎁 0/0</button>
+    </div>
+  </header>
+
+  <div id="app">
+    <!-- おうちマップ（へやえらび）-->
+    <section id="map-s" class="screen show">
+      <div class="hint">へやに はいって かくれた たからを さがそう！</div>
+      <div id="compBanner">👑 すごい！ たからを ぜんぶ みつけたよ！</div>
+      <div id="next"></div>
+      <div id="roomGrid"></div>
+      <div id="mapBtns"><button class="btn brown" id="toBook">🎁 たからちょう</button></div>
+    </section>
+
+    <!-- へやの なか -->
+    <section id="room-s" class="screen">
+      <div id="roomTop">
+        <button class="btn brown" id="backMap">◀ おうち</button>
+        <div id="roomName"></div>
+        <span class="chip" id="leftChip">🔍 0</span>
+      </div>
+      <div id="roomHint">かぐを タップして さがしてね</div>
+      <div id="scene">
+        <div id="allDone">ぜんぶ さがしたね！<button class="btn green" id="doneBack">おうちへ ▶</button></div>
+      </div>
+    </section>
+
+    <!-- たからちょう -->
+    <section id="book-s" class="screen">
+      <div class="booktitle">🎁 たからちょう <small>(<span id="bCount">0</span>/<span id="bTotal">0</span>)</small></div>
+      <div class="bookwrap" id="bookWrap"></div>
+      <button class="btn brown back" id="bookBack">◀ もどる</button>
+    </section>
+  </div>
+
+  <div id="ovl"><div class="sheet" id="sheet"></div></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   ひみつのおうち
+   - おうちの へやを たんけん。かぐを タップして たからさがし
+   - ⭐ほしを あつめると あたらしい へやの かぎが あく（アンロック）
+   - たからは「たからちょう」に きろく（ぜんぶで 40こ）
+   - かくへやに 1つ「ひみつ」（おなじばしょを 3かい タップで はっけん）
+   - ねこちゃんが どこかの へやに かくれんぼ（🐾の へやに いる）
+   - しんこうは localStorage に ほぞん ＝ つぎに あそんでも つづきから
+   - おとは Web Audio。がぞくアセットなし（emoji のみ）
+   ========================================================= */
+
+// ── へやデータ（sec = ひみつの かぐの ばんごう）──
+const ROOMS=[
+  {id:"genkan", nm:"げんかん",   e:"🚪", need:0,  wall:"#f6e7c9", floor:"#d9a86b", sec:4,
+   spots:[["🖼️",28,30,1.0],["🪞",62,28,1.0],["🧥",86,40,1.1],["🌂",13,58,1.1],["👞",36,78,1.4],["🪴",62,78,1.2],["📦",86,80,1.1],["🧹",12,84,1.0]]},
+  {id:"living", nm:"リビング",   e:"🛋️", need:6,  wall:"#e9f1dc", floor:"#cfa06e", sec:1,
+   spots:[["🕰️",18,26,1.0],["🖼️",50,28,1.1],["📚",84,38,1.3],["🧸",12,76,1.1],["🛋️",34,72,1.6],["📺",66,60,1.3],["🧺",52,86,1.0],["🪴",90,80,1.1]]},
+  {id:"kitchen",nm:"キッチン",   e:"🍳", need:14, wall:"#e3f0f6", floor:"#c9ccd1", sec:4,
+   spots:[["🍽️",22,30,1.1],["☕",50,26,0.9],["🫙",78,30,1.0],["🍳",14,64,1.2],["🗄️",84,60,1.5],["🍞",38,82,1.0],["🧺",62,84,1.1],["🪣",90,84,1.0]]},
+  {id:"kids",   nm:"こどもべや", e:"🧸", need:26, wall:"#fdeaf1", floor:"#e8c17e", sec:4,
+   spots:[["🪁",20,28,1.1],["🎈",48,26,1.0],["🖍️",76,30,1.0],["🛏️",26,72,1.6],["🧰",78,58,1.3],["🚂",12,86,1.1],["🎒",52,86,1.0],["🧸",90,84,1.1]]},
+  {id:"bath",   nm:"おふろば",   e:"🛁", need:40, wall:"#ddf3f5", floor:"#bfe4ea", sec:4,
+   spots:[["🪞",28,28,1.0],["🧴",54,26,1.0],["🪥",78,28,0.9],["🚿",92,44,1.0],["🛁",32,72,1.7],["🧼",12,62,0.9],["🧺",66,82,1.2],["🧽",88,80,0.9]]},
+  {id:"garden", nm:"おにわ",     e:"🌷", need:56, wall:"#cfeeff", floor:"#a8d97c", sec:5,
+   spots:[["🌳",16,32,1.7],["🌻",48,32,1.1],["🛖",82,36,1.4],["🌷",12,70,1.1],["🪨",38,64,1.1],["🕳️",64,82,1.3],["🏺",88,72,1.1],["🪵",30,88,1.0]]},
+  {id:"attic",  nm:"やねうらべや",e:"🧳", need:74, wall:"#e8d9c0", floor:"#a97b4f", sec:4,
+   spots:[["🕸️",14,26,1.0],["🖼️",42,28,1.0],["📻",70,26,1.0],["🪜",90,52,1.3],["🧳",28,72,1.4],["📦",58,78,1.3],["🕰️",82,78,1.2],["🧵",12,80,0.9]]},
+  {id:"base",   nm:"ちかしつ",   e:"🔦", need:95, wall:"#d8d4cf", floor:"#8f8a85", sec:4,
+   spots:[["🕯️",20,26,0.9],["⚙️",48,26,1.0],["🪤",76,28,0.9],["🧪",12,58,0.9],["🛢️",26,74,1.5],["📦",52,82,1.2],["💼",78,72,1.2],["🧱",92,86,1.0]]},
+];
+const RBY={}; ROOMS.forEach(r=>RBY[r.id]=r);
+
+// ── たからデータ（sec:true は「ひみつ」でしか でない）──
+const ITEMS=[
+  {id:"ball",  room:"genkan", e:"⚽", nm:"ボール",           r:1},
+  {id:"hat",   room:"genkan", e:"🎩", nm:"シルクハット",     r:1},
+  {id:"shell", room:"genkan", e:"🐚", nm:"かいがら",         r:2},
+  {id:"cap",   room:"genkan", e:"🧢", nm:"ぼうし",           r:2},
+  {id:"key",   room:"genkan", e:"🗝️", nm:"きんの かぎ",      r:3, sec:true},
+  {id:"coin",  room:"living", e:"🪙", nm:"ぴかぴか コイン",  r:1},
+  {id:"disc",  room:"living", e:"📀", nm:"ひかる ディスク",  r:1},
+  {id:"glass", room:"living", e:"🕶️", nm:"サングラス",       r:2},
+  {id:"piece", room:"living", e:"🧩", nm:"パズルの ピース",  r:2},
+  {id:"gem",   room:"living", e:"💎", nm:"かがやく ほうせき",r:3, sec:true},
+  {id:"cookie",room:"kitchen",e:"🍪", nm:"クッキー",         r:1},
+  {id:"candy", room:"kitchen",e:"🍬", nm:"あめちゃん",       r:1},
+  {id:"cake2", room:"kitchen",e:"🧁", nm:"カップケーキ",     r:2},
+  {id:"honey", room:"kitchen",e:"🍯", nm:"はちみつ",         r:2},
+  {id:"cake",  room:"kitchen",e:"🎂", nm:"まぼろしの ケーキ",r:3, sec:true},
+  {id:"train", room:"kids",   e:"🚂", nm:"きしゃの おもちゃ",r:1},
+  {id:"yoyo",  room:"kids",   e:"🪀", nm:"ヨーヨー",         r:1},
+  {id:"dice",  room:"kids",   e:"🎲", nm:"サイコロ",         r:2},
+  {id:"heli",  room:"kids",   e:"🚁", nm:"ヘリコプター",     r:2},
+  {id:"robot", room:"kids",   e:"🤖", nm:"でんせつの ロボット",r:3, sec:true},
+  {id:"duck",  room:"bath",   e:"🦆", nm:"あひるちゃん",     r:1},
+  {id:"boat",  room:"bath",   e:"🚤", nm:"ふねの おもちゃ",  r:1},
+  {id:"fish",  room:"bath",   e:"🐠", nm:"さかなの おもちゃ",r:2},
+  {id:"bubble",room:"bath",   e:"🫧", nm:"しゃぼんだま",     r:2},
+  {id:"ring",  room:"bath",   e:"💍", nm:"きらきらの ゆびわ",r:3, sec:true},
+  {id:"chou",  room:"garden", e:"🦋", nm:"ちょうちょ",       r:1},
+  {id:"ichigo",room:"garden", e:"🍓", nm:"あまい いちご",    r:1},
+  {id:"donguri",room:"garden",e:"🌰", nm:"どんぐり",         r:2},
+  {id:"hane",  room:"garden", e:"🪶", nm:"きれいな はね",    r:2},
+  {id:"chest", room:"garden", e:"💰", nm:"たからぶくろ",     r:3, sec:true},
+  {id:"map",   room:"attic",  e:"📜", nm:"ふるい ちず",      r:1},
+  {id:"rappa", room:"attic",  e:"🎺", nm:"ラッパ",           r:1},
+  {id:"doll",  room:"attic",  e:"🪆", nm:"マトリョーシカ",   r:2},
+  {id:"camera",room:"attic",  e:"📷", nm:"ふるい カメラ",    r:2},
+  {id:"ball2", room:"attic",  e:"🔮", nm:"うらないの たま",  r:3, sec:true},
+  {id:"compass",room:"base",  e:"🧭", nm:"コンパス",         r:1},
+  {id:"bulb",  room:"base",   e:"💡", nm:"ふしぎな でんきゅう",r:1},
+  {id:"bell",  room:"base",   e:"🔔", nm:"ならせる ベル",    r:2},
+  {id:"statue",room:"base",   e:"🗿", nm:"ちいさな せきぞう",r:2},
+  {id:"crown", room:"base",   e:"👑", nm:"おうさまの かんむり",r:3, sec:true},
+];
+const IBY={}; ITEMS.forEach(it=>IBY[it.id]=it);
+const stars=n=>"★".repeat(n)+"☆".repeat(3-n);
+const EMPTIES=[["🕸️","くもの すだ…"],["🧦","くつしたが でてきた"],["💨","ほこりだけ…"],["🐜","ありさん こんにちは"]];
+
+// ── セーブ（st=ほし, tr=たから, se=ひみつずみのへや, un=アンロックえんしゅつずみ）──
+const SAVE="himitsu.save";
+let S={st:0, tr:new Set(), se:new Set(), un:new Set()};
+try{
+  const d=JSON.parse(localStorage.getItem(SAVE));
+  if(d){ S.st=d.st|0; S.tr=new Set((d.tr||[]).filter(id=>IBY[id])); S.se=new Set((d.se||[]).filter(id=>RBY[id])); S.un=new Set(d.un||[]); }
+}catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify({st:S.st,tr:[...S.tr],se:[...S.se],un:[...S.un]})); }catch(e){} }
+const unlocked=r=>S.st>=r.need;
+
+// ── ねこの かくれんぼ（ひらくたびに どこかの へやへ）──
+const cat={room:null, found:false};
+function placeCat(){
+  const rs=ROOMS.filter(unlocked);
+  cat.room=rs[(Math.random()*rs.length)|0].id;
+}
+placeCat();
+
+// ── おと ──
+let actx=null;
+function beep(f,d=0.07,t="sine",v=0.13){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.stop(actx.currentTime+d);}catch(e){}}
+function tick(){ beep(620,0.04,"sine",0.1); }
+function pokeSnd(){ beep(300,0.05,"triangle",0.12); }
+function coinSnd(){ beep(880,0.08,"square",0.09); setTimeout(()=>beep(1320,0.12,"square",0.09),70); }
+function winSnd(){ [659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.12,"triangle",0.18),i*80)); }
+function fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90)); }
+function meow(){ beep(700,0.12,"sine",0.14); setTimeout(()=>beep(560,0.16,"sine",0.14),120); }
+function buzz(){ try{navigator.vibrate&&navigator.vibrate(25);}catch(e){} }
+
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🗝️","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+// ── がめん・HUD ──
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const starChip=document.getElementById("starChip"), bookChip=document.getElementById("bookChip");
+function updateHUD(pop){
+  starChip.textContent="⭐ "+S.st;
+  bookChip.textContent="🎁 "+S.tr.size+"/"+ITEMS.length;
+  if(pop){ starChip.classList.remove("pop"); void starChip.offsetWidth; starChip.classList.add("pop"); }
+}
+
+// ── おうちマップ ──
+function buildMap(){
+  const g=document.getElementById("roomGrid"); g.innerHTML="";
+  ROOMS.forEach(r=>{
+    const ok=unlocked(r);
+    const c=document.createElement("div"); c.className="rcard"+(ok?"":" locked");
+    const pool=ITEMS.filter(it=>it.room===r.id);
+    const got=pool.filter(it=>S.tr.has(it.id)).length;
+    let sub, bar="";
+    if(ok){ sub=`🎁 ${got}/${pool.length}`; }
+    else{
+      sub=`🔒 ⭐${r.need}こで あく`;
+      bar=`<div class="lockbar"><i style="width:${Math.min(100,S.st/r.need*100)}%"></i></div>`;
+    }
+    c.innerHTML=
+      (S.se.has(r.id)?`<span class="secmark">✨</span>`:"")+
+      (ok&&cat.room===r.id&&!cat.found?`<span class="paw">🐾</span>`:"")+
+      `<div class="re">${r.e}</div><div class="rn">${r.nm}</div><div class="rp">${sub}</div>${bar}`;
+    if(ok) c.addEventListener("click",()=>{ tick(); enterRoom(r); });
+    else c.addEventListener("click",pokeSnd);
+    g.appendChild(c);
+  });
+  // つぎの もくひょう
+  const nx=ROOMS.find(r=>!unlocked(r));
+  document.getElementById("next").textContent = nx ? `つぎ： あと ⭐${nx.need-S.st}こで 「${nx.nm}」の かぎが あくよ` : "ぜんぶの へやが あいたよ！すごい！";
+  document.getElementById("compBanner").classList.toggle("show", S.tr.size===ITEMS.length);
+}
+function goMap(){ V=null; buildMap(); updateHUD(); show("map-s"); }
+
+// ── へやの なか ──
+let V=null; // いま の へや（contents, opened, secTaps）
+const scene=document.getElementById("scene");
+function sizeScene(){
+  const r=scene.getBoundingClientRect();
+  scene.style.setProperty("--u", Math.max(30, Math.min(r.width/6, r.height/6.5))+"px");
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ if(V) sizeScene(); },150); });
+
+function pickItem(room){
+  const pool=ITEMS.filter(it=>it.room===room.id && !it.sec);
+  const un=pool.filter(it=>!S.tr.has(it.id));
+  const src=un.length?un:pool;
+  return src[(Math.random()*src.length)|0].id;
+}
+function deal(room){
+  const n=room.spots.length;
+  const cont=Array.from({length:n},()=>({t:"empty", em:EMPTIES[(Math.random()*EMPTIES.length)|0]}));
+  const free=[...Array(n).keys()];
+  if(!S.se.has(room.id)){ cont[room.sec]={t:"secret"}; free.splice(free.indexOf(room.sec),1); }
+  // シャッフル
+  for(let i=free.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [free[i],free[j]]=[free[j],free[i]]; }
+  if(cat.room===room.id && !cat.found && free.length) cont[free.pop()]={t:"cat"};
+  for(let k=0;k<3&&free.length;k++) cont[free.pop()]={t:"star"};
+  for(let k=0;k<2&&free.length;k++) cont[free.pop()]={t:"tre", id:pickItem(room)};
+  return cont;
+}
+function enterRoom(room){
+  V={room, cont:deal(room), opened:new Set(), secTaps:0};
+  document.getElementById("roomName").textContent=room.e+" "+room.nm;
+  document.getElementById("roomHint").textContent = S.se.has(room.id) ? "かぐを タップして さがしてね" : "かぐを タップ！ どこかに ひみつが…";
+  scene.style.background=`linear-gradient(180deg, ${room.wall} 0 52%, ${room.floor} 52% 100%)`;
+  scene.querySelectorAll(".spot,.float").forEach(el=>el.remove());
+  document.getElementById("allDone").classList.remove("show");
+  room.spots.forEach((sp,i)=>{
+    const d=document.createElement("div"); d.className="spot";
+    d.style.left=sp[1]+"%"; d.style.top=sp[2]+"%"; d.style.setProperty("--s",sp[3]);
+    d.innerHTML=`<span class="se">${sp[0]}</span>`;
+    d.addEventListener("pointerdown",()=>openSpot(i,d));
+    scene.appendChild(d);
+  });
+  updateLeft();
+  show("room-s");
+  requestAnimationFrame(sizeScene);
+}
+function updateLeft(){ document.getElementById("leftChip").textContent="🔍 "+(V.room.spots.length-V.opened.size); }
+function floatText(spotEl,txt){
+  const f=document.createElement("div"); f.className="float"; f.textContent=txt;
+  f.style.left=spotEl.style.left; f.style.top=spotEl.style.top;
+  scene.appendChild(f);
+  requestAnimationFrame(()=>{ f.style.transform="translate(-50%,-140%)"; f.style.opacity="0"; });
+  setTimeout(()=>f.remove(),1100);
+}
+function poke(el){ el.classList.remove("poke"); void el.offsetWidth; el.classList.add("poke"); }
+function addStars(n,pop=true){ S.st+=n; save(); updateHUD(pop); }
+
+function openSpot(i,el){
+  if(!V||V.opened.has(i)) return;
+  if(actx&&actx.state==="suspended")actx.resume();
+  const c=V.cont[i];
+  poke(el); buzz();
+  // ひみつは 3かい タップで はっけん
+  if(c.t==="secret"){
+    V.secTaps++;
+    if(V.secTaps>=3){ foundSecret(i,el); }
+    else{ pokeSnd(); beep(980,0.09,"triangle",0.12); floatText(el, V.secTaps===1?"✨ なにか ありそう！":"✨✨ もう すこし！"); }
+    return;
+  }
+  V.opened.add(i); el.classList.add("done"); updateLeft();
+  if(c.t==="star"){
+    coinSnd(); addStars(1); floatText(el,"⭐ +1"); afterOpen();
+  }else if(c.t==="tre"){
+    const it=IBY[c.id];
+    if(!S.tr.has(it.id)){
+      S.tr.add(it.id); save(); updateHUD(); winSnd(); if(it.r>=2)confetti();
+      showCard({e:it.e, t:"みつけた！", s:it.nm, r:stars(it.r)});
+    }else{
+      coinSnd(); addStars(1);
+      showCard({e:it.e, t:"もういっこ みつけた！", s:it.nm+"　⭐+1"});
+    }
+  }else if(c.t==="cat"){
+    cat.found=true; meow(); addStars(3); confetti();
+    showCard({e:"🐈", t:"ねこちゃん みっけ！", s:"かくれんぼ じょうず！　⭐+3"});
+  }else{
+    pokeSnd(); floatText(el, c.em[0]+" "+c.em[1]); afterOpen();
+  }
+}
+function foundSecret(i,el){
+  const room=V.room;
+  V.opened.add(i); el.classList.add("done"); updateLeft();
+  S.se.add(room.id);
+  const it=ITEMS.find(x=>x.room===room.id&&x.sec);
+  const isNew=!S.tr.has(it.id);
+  if(isNew) S.tr.add(it.id);
+  S.st+=3; save(); updateHUD(true);
+  fanfare(); confetti();
+  document.getElementById("roomHint").textContent="かぐを タップして さがしてね";
+  showCard({e:it.e, t:"🎉 ひみつ はっけん！", s:it.nm+"　⭐+3", r:stars(it.r), gold:true});
+}
+function afterOpen(){
+  if(V && V.opened.size>=V.room.spots.length){
+    setTimeout(()=>document.getElementById("allDone").classList.add("show"),500);
+  }
+  checkUnlock();
+}
+
+// ── みつけたカード ──
+const ovl=document.getElementById("ovl"), sheet=document.getElementById("sheet");
+function showCard(o){
+  sheet.className="sheet"+(o.gold?" gold":"");
+  sheet.innerHTML=`<div class="ce">${o.e}</div><div class="ct">${o.t}</div>`+
+    (o.s?`<div class="cs">${o.s}</div>`:"")+(o.r?`<div class="cr">${o.r}</div>`:"")+
+    `<button class="btn green" id="cardOk">やったね！</button>`;
+  ovl.classList.add("show");
+  document.getElementById("cardOk").addEventListener("click",()=>{ tick(); ovl.classList.remove("show"); afterOpen(); });
+}
+
+// ── アンロック（ほしが たまったら あたらしい へや）──
+function checkUnlock(){
+  if(ovl.classList.contains("show")) return;
+  const r=ROOMS.find(x=>x.need>0 && unlocked(x) && !S.un.has(x.id));
+  if(!r) return;
+  S.un.add(r.id); save();
+  fanfare(); confetti();
+  sheet.className="sheet gold";
+  sheet.innerHTML=`<div class="ce">${r.e}</div><div class="ct">🔓 かぎが あいた！</div>`+
+    `<div class="cs">「${r.nm}」に はいれるように なったよ！</div>`+
+    `<button class="btn orange" id="cardOk">みにいく！</button>`;
+  ovl.classList.add("show");
+  document.getElementById("cardOk").addEventListener("click",()=>{ tick(); ovl.classList.remove("show"); goMap(); checkUnlock(); });
+}
+
+// ── たからちょう ──
+function buildBook(){
+  document.getElementById("bCount").textContent=S.tr.size;
+  document.getElementById("bTotal").textContent=ITEMS.length;
+  const w=document.getElementById("bookWrap"); w.innerHTML="";
+  ROOMS.forEach(r=>{
+    const pool=ITEMS.filter(it=>it.room===r.id);
+    const sec=document.createElement("div"); sec.className="bsec";
+    sec.innerHTML=`<h3>${r.e} ${r.nm}</h3>`;
+    const g=document.createElement("div"); g.className="bgrid";
+    pool.forEach(it=>{
+      const got=S.tr.has(it.id);
+      const c=document.createElement("div"); c.className="bcell"+(got?"":" none");
+      c.innerHTML=`<div class="be">${got?it.e:(it.sec?"❓":"❔")}</div>`+
+        `<div class="bn">${got?it.nm:"？？？"}</div><div class="br">${got?stars(it.r):""}</div>`;
+      g.appendChild(c);
+    });
+    sec.appendChild(g); w.appendChild(sec);
+  });
+}
+
+// ── ボタン ──
+document.getElementById("backMap").addEventListener("click",()=>{ tick(); goMap(); });
+document.getElementById("doneBack").addEventListener("click",()=>{ tick(); goMap(); });
+document.getElementById("toBook").addEventListener("click",()=>{ tick(); buildBook(); show("book-s"); });
+document.getElementById("bookChip").addEventListener("click",()=>{ tick(); buildBook(); show("book-s"); });
+// へやの とちゅうで ひらいたら、へやを こわさず そのまま もどる
+document.getElementById("bookBack").addEventListener("click",()=>{ tick(); if(V){ show("room-s"); requestAnimationFrame(sizeScene); } else goMap(); });
+
+// ── スタート ──
+updateHUD(); goMap();
+</script>
+</body>
+</html>
