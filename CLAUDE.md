@@ -183,6 +183,7 @@ kids/
 ## 公開フロー（GitHub Pages）
 - main ブランチのルートで設定済み。デプロイは:
   `git add -A && git commit -m "..." && git push` → 約1〜3分で反映。
+- **リモートセッション（作業ブランチ指定あり）でも、完成したら main へ自動マージしてよい**（ユーザー承認済み 2026-07）。作業ブランチに push → main へ ff/merge → main を push。マージ push が画像生成を起動する場合は、その後 生成完了まで main へ別 push しない。
 - gh のアクティブアカウントは **haruharu20190701**（必要なら `gh auth switch --user haruharu20190701`）。
 - `.claude/`（ローカル設定・メモリ）は **.gitignore 済み。絶対に公開しない**。
 - 相対パス（`../../index.html` など）のみ使用しているので、`/kids-games/` のサブパス配信でもそのまま動く。
