@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="トロフィーへや" />
+<title>トロフィーへや｜こどもあそびば</title>
+<meta name="description" content="いままで あそんだ ぜんぶの ゲームの きろくを あつめた へや。メダルを あつめて、きょうの ミッションに ちょうせんしよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/trophy/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="トロフィーへや｜こどもあそびば" />
+<meta property="og:description" content="ぜんぶの ゲームの きろくを あつめた へや。メダルと きょうの ミッション。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/trophy/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── トロフィーへや（ドット絵・えもじ なし）── */
+  :root{ --bg1:#2a2340; --bg2:#171327; --ink:#f4ecd8; --card:#332b4d; --line:#8a7bb5; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;min-height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--ink);
+    min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+    padding:14px 12px 30px;
+  }
+  #home{position:fixed;left:10px;top:9px;z-index:70;width:44px;height:44px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;background:#f4ecd8;box-shadow:0 4px 0 #7a6ba5;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #7a6ba5;}
+  #home canvas{display:block;image-rendering:pixelated;}
+  canvas{image-rendering:pixelated;display:block;}
+  h1{font-size:23px;font-weight:900;letter-spacing:2px;margin:2px 0 2px;text-align:center;}
+  .sub{font-size:13px;font-weight:800;color:#b9aee0;margin-bottom:12px;text-align:center;line-height:1.6;}
+  .wrap{width:100%;max-width:560px;}
+  .panel{background:var(--card);border:3px solid var(--line);padding:10px 10px 12px;margin-bottom:14px;}
+  .panel h2{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:6px;}
+  /* レベル */
+  #lvRow{display:flex;align-items:center;gap:10px;}
+  #lvNum{font-size:34px;font-weight:900;line-height:1;color:#ffd93b;}
+  #lvInfo{flex:1;font-size:12px;font-weight:800;color:#cfc6e8;line-height:1.5;}
+  .pbar{height:10px;background:#221d38;border:2px solid #6a6390;margin-top:4px;}
+  .pbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd93b,#ff8b3d);}
+  /* ミッション */
+  .mis{display:flex;align-items:center;gap:8px;background:#3d3459;border:2px solid #6a6390;padding:6px 8px;margin-bottom:6px;}
+  .mis .txt{flex:1;font-size:13px;font-weight:800;line-height:1.4;}
+  .mis .txt small{display:block;font-size:11px;color:#b9aee0;font-weight:800;}
+  .mis .go{font-size:12px;font-weight:900;color:#241f33;background:linear-gradient(180deg,#ffe9a8,#ffc94d);
+    box-shadow:0 3px 0 #b3822a;border-radius:6px;padding:6px 9px;text-decoration:none;}
+  .mis.done{background:#2f4a3a;border-color:#4fd463;}
+  .mis.done .txt{color:#a8f0a0;}
+  #streak{font-size:12px;font-weight:800;color:#ffd93b;margin-top:6px;text-align:center;}
+  /* メダル */
+  #medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;}
+  .md{background:#3d3459;border:2px solid #6a6390;padding:7px 4px 6px;display:flex;flex-direction:column;
+    align-items:center;gap:3px;text-decoration:none;color:var(--ink);}
+  .md:active{transform:translateY(2px);}
+  .md .nm{font-size:11px;font-weight:900;text-align:center;line-height:1.2;}
+  .md .vl{font-size:10px;font-weight:800;color:#b9aee0;}
+  .md.none{opacity:.42;}
+  .md.gold{border-color:#ffd93b;} .md.silver{border-color:#dfe6ef;} .md.bronze{border-color:#d18f4f;}
+  .foot{font-size:11px;color:#8d84ad;text-align:center;margin-top:6px;line-height:1.6;}
+  .btnrow{display:flex;gap:8px;justify-content:center;margin-top:4px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#241f33;border-radius:8px;cursor:pointer;
+    background:linear-gradient(180deg,#dcd8ea,#a7a2bd);box-shadow:0 4px 0 #6d6885;font-size:13px;padding:9px 14px;}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #6d6885;}
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ"><canvas id="homeCv" width="26" height="26"></canvas></a>
+  <h1>トロフィーへや</h1>
+  <div class="sub">あそんだ きろくが ぜんぶ ここに あつまるよ</div>
+
+  <div class="wrap">
+    <div class="panel">
+      <h2><canvas id="cupCv" width="16" height="16" style="width:24px;height:24px"></canvas>トロフィーレベル</h2>
+      <div id="lvRow">
+        <div id="lvNum">1</div>
+        <div id="lvInfo"></div>
+      </div>
+      <div class="pbar"><i id="lvBar"></i></div>
+    </div>
+
+    <div class="panel">
+      <h2><canvas id="stampCv" width="16" height="16" style="width:24px;height:24px"></canvas>きょうの ミッション</h2>
+      <div id="missions"></div>
+      <div id="streak"></div>
+    </div>
+
+    <div class="panel">
+      <h2><canvas id="medalCv" width="16" height="16" style="width:24px;height:24px"></canvas>メダル</h2>
+      <div id="medals"></div>
+      <div class="foot" id="mdFoot"></div>
+    </div>
+
+    <div class="btnrow"><button class="btn" id="reload">きろくを よみなおす</button></div>
+    <div class="foot">きろくは この たんまつの なかだけに ほぞんされて います。<br>
+      ゲームで あそぶと ここの きろくも ふえます。</div>
+  </div>
+
+<script>
+/* =========================================================
+   トロフィーへや
+   - おなじ サイトの ゲームは localStorage を きょうゆうして いるので、
+     この ページから ぜんぶの きろくを よみとって メダルに できる
+     （ゲームがわの コードは 1ぎょうも かえて いない）
+   - きょうの ミッション：ひづけから きまる 3つの もくひょう。
+     「その ひの はじまりの すうじ」を この ページの キーに ほぞんして、
+     いま との さで しんちょくを だす（ゲームがわの かいぞう ふよう）
+   - えもじは つかわず、メダル・スタンプ・トロフィーは ドットで えがく
+   ========================================================= */
+
+/* ── よみとり ヘルパー ── */
+function raw(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function num(k){ const v=parseInt(raw(k),10); return isNaN(v)?0:v; }
+function arr(k){ try{ const a=JSON.parse(raw(k)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function obj(k){ try{ const o=JSON.parse(raw(k)); return (o&&typeof o==="object")?o:{}; }catch(e){ return {}; } }
+
+/* ── ゲームの きろく（キーと しきい）──
+   th=[どう, ぎん, きん] / more:true は「おおいほど すごい」きろく */
+const GAMES=[
+  {slug:"pinpull",   nm:"ピンぬき",     unit:"もん",  th:[3,10,20],  read:()=>arr("pinpull.cleared").length},
+  {slug:"watersort", nm:"いろみずわけ", unit:"レベル",th:[3,10,20],  read:()=>Math.max(0,num("watersort.level")-1)},
+  {slug:"gaterun",   nm:"すうじゲート", unit:"レベル",th:[3,10,20],  read:()=>Math.max(0,(obj("gaterun.save").lv|0)-1)},
+  {slug:"carout",    nm:"くるまだし",   unit:"レベル",th:[3,10,20],  read:()=>Math.max(0,num("carout.level")-1)},
+  {slug:"untangle",  nm:"ロープほどき", unit:"レベル",th:[3,10,20],  read:()=>Math.max(0,num("untangle.level")-1)},
+  {slug:"orusuban",  nm:"おるすばん",   unit:"にち",  th:[1,4,10],   read:()=>(obj("orusuban.save").best|0)},
+  {slug:"himitsu",   nm:"ひみつのおうち",unit:"こ",   th:[5,18,40],  read:()=>(obj("himitsu.save").tr||[]).length},
+  {slug:"mushi",     nm:"むしバトル",   unit:"しゅ",  th:[2,6,12],   read:()=>arr("mushibattle.caught").length},
+  {slug:"dino",      nm:"きょうりゅう", unit:"しゅ",  th:[2,6,10],   read:()=>arr("dinoFound").length},
+  {slug:"tetris",    nm:"テトリス",     unit:"てん",  th:[300,1500,5000], read:()=>num("tetrisHi")},
+  {slug:"snake",     nm:"スネーク",     unit:"てん",  th:[5,20,50],  read:()=>num("snakeHi")},
+  {slug:"shooter",   nm:"シューティング",unit:"てん", th:[200,1000,3000], read:()=>num("shooterHi")},
+  {slug:"invader",   nm:"インベーダー", unit:"てん",  th:[200,1000,3000], read:()=>num("invaderHi")},
+  {slug:"pakupaku",  nm:"パクパク",     unit:"てん",  th:[100,600,2000], read:()=>num("pakuHi")},
+  {slug:"frog",      nm:"カエルわたり", unit:"てん",  th:[3,10,25],  read:()=>num("frogHi")},
+  {slug:"cooking",   nm:"おりょうり",   unit:"★",    th:[3,10,20],  read:()=>num("cookingStars")},
+  {slug:"shopping",  nm:"おかいもの",   unit:"★",    th:[3,10,20],  read:()=>num("shopStars")},
+  {slug:"silhouette",nm:"シルエット",   unit:"★",    th:[3,10,20],  read:()=>num("silStars")},
+  {slug:"pet",       nm:"ペット",       unit:"★",    th:[3,10,20],  read:()=>num("petStars")},
+  {slug:"redpanda",  nm:"レッサーパンダ",unit:"★",   th:[3,10,20],  read:()=>num("redpandaStars")},
+  {slug:"machigai",  nm:"まちがいさがし",unit:"もん", th:[2,6,12],   read:()=>num("machigaiCleared")},
+  {slug:"daruma",    nm:"だるまさん",   unit:"かい",  th:[1,5,12],   read:()=>num("darumaCleared")},
+  {slug:"candle",    nm:"ろうそくフー", unit:"かい",  th:[1,5,12],   read:()=>num("candleDone")},
+  {slug:"amida",     nm:"あみだくじ",   unit:"かい",  th:[1,5,12],   read:()=>num("amidaBest")},
+  {slug:"voice",     nm:"こえであそぼ", unit:"てん",  th:[3,10,25],  read:()=>num("voiceBest")},
+];
+
+/* ── ドットえ：ぶひん ── */
+function P(t,x,y,w,h,c){ t.fillStyle=c; t.fillRect(x,y,w,h); }
+/* いえ（ホーム）*/
+(function(){ const t=document.getElementById("homeCv").getContext("2d");
+  P(t,3,11,20,14,"#c98d5a"); P(t,5,13,16,12,"#e8b07a"); P(t,1,11,24,2,"#8a5a2b");
+  for(let i=0;i<11;i++) P(t,12-i,11-i,2+i*2,1,"#c0392b");
+  P(t,10,16,6,9,"#7a4f2a"); P(t,14,20,1,1,"#ffd93b");
+})();
+/* トロフィー（16x16）*/
+function drawCup(t){
+  P(t,4,2,8,6,"#ffd93b"); P(t,5,3,6,4,"#fff3a8");
+  P(t,2,3,2,4,"#c9970f"); P(t,12,3,2,4,"#c9970f");
+  P(t,7,8,2,3,"#c9970f"); P(t,5,11,6,2,"#c9970f"); P(t,4,13,8,2,"#8a6a0a");
+}
+/* スタンプ（16x16）*/
+function drawStamp(t){
+  P(t,3,3,10,10,"#f06a5a"); P(t,4,4,8,8,"#ff9a8a");
+  P(t,6,7,2,3,"#f4ecd8"); P(t,8,6,3,2,"#f4ecd8"); P(t,7,9,4,2,"#f4ecd8");
+}
+/* メダル（16x16／いろは しゅるいで かわる）*/
+function drawMedal(t,kind){
+  const col={gold:["#ffd93b","#fff8c0","#a8790a"],silver:["#c8d4e2","#ffffff","#6b7a8c"],
+             bronze:["#d18f4f","#f2c091","#7a4a20"],none:["#4a4666","#5c5880","#302c4a"]}[kind];
+  t.clearRect(0,0,16,16);
+  // リボン（あかで めだつように）
+  const rib=(kind==="none")?"#3a3654":"#c94f4c", rib2=(kind==="none")?"#2b2842":"#8f3330";
+  P(t,4,0,3,5,rib); P(t,9,0,3,5,rib); P(t,6,3,4,2,rib2);
+  // メダル ほんたい（まるく みえる ように かどを おとす）
+  P(t,5,5,6,1,col[2]); P(t,4,6,8,1,col[2]);
+  P(t,3,7,10,4,col[2]); P(t,4,11,8,1,col[2]); P(t,5,12,6,1,col[2]);
+  P(t,5,6,6,1,col[0]); P(t,4,7,8,4,col[0]); P(t,5,11,6,1,col[0]);
+  P(t,6,7,4,3,col[1]);
+  P(t,7,8,2,2,col[2]);
+}
+function medalCanvas(kind,size){
+  const c=document.createElement("canvas"); c.width=16; c.height=16;
+  drawMedal(c.getContext("2d"),kind);
+  c.style.width=(size||34)+"px"; c.style.height=(size||34)+"px";
+  return c;
+}
+drawCup(document.getElementById("cupCv").getContext("2d"));
+drawStamp(document.getElementById("stampCv").getContext("2d"));
+drawMedal(document.getElementById("medalCv").getContext("2d"),"gold");
+
+/* ── メダルの はんてい ── */
+function medalOf(gm){
+  const v=gm.read();
+  let kind="none";
+  if(v>=gm.th[2]) kind="gold";
+  else if(v>=gm.th[1]) kind="silver";
+  else if(v>=gm.th[0]) kind="bronze";
+  else if(v>0) kind="bronze0";
+  return {v,kind};
+}
+const MEDAL_PT={gold:5,silver:3,bronze:1,bronze0:0,none:0};
+
+/* ── きょうの ミッション ──
+   ひづけから きまる 3つ。しんちょくは「その ひの はじまりの すうじ」との さ */
+const DKEY="trophy.daily";
+function today(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function seedOf(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function rnd(seed){ let x=seed||1; return ()=>{ x^=x<<13; x>>>=0; x^=x>>17; x^=x<<5; x>>>=0; return x/4294967296; }; }
+
+const MISSIONS=[
+  {slug:"pinpull",   nm:"ピンぬき",     verb:"もん クリア", need:[2,3],  read:()=>arr("pinpull.cleared").length},
+  {slug:"watersort", nm:"いろみずわけ", verb:"レベル すすむ",need:[2,3], read:()=>num("watersort.level")},
+  {slug:"gaterun",   nm:"すうじゲート", verb:"レベル すすむ",need:[1,2], read:()=>(obj("gaterun.save").lv|0)},
+  {slug:"carout",    nm:"くるまだし",   verb:"レベル すすむ",need:[2,3], read:()=>num("carout.level")},
+  {slug:"untangle",  nm:"ロープほどき", verb:"レベル すすむ",need:[2,3], read:()=>num("untangle.level")},
+  {slug:"orusuban",  nm:"おるすばん",   verb:"にち クリア",  need:[1,2], read:()=>(obj("orusuban.save").day|0)},
+  {slug:"himitsu",   nm:"ひみつのおうち",verb:"こ みつける", need:[2,4], read:()=>(obj("himitsu.save").tr||[]).length},
+  {slug:"mushi",     nm:"むしバトル",   verb:"しゅ つかまえる",need:[1,2],read:()=>arr("mushibattle.caught").length},
+  {slug:"dino",      nm:"きょうりゅう", verb:"しゅ ほりだす",need:[1,2], read:()=>arr("dinoFound").length},
+];
+function buildDaily(){
+  let d=obj(DKEY);
+  const t=today();
+  if(d.date!==t){
+    // あたらしい ひ：ミッションを 3つ えらんで、いまの すうじを ひかえる
+    const r=rnd(seedOf(t));
+    const pool=MISSIONS.slice();
+    // ひづけで きまる じゅんばんに シャッフル
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    const pick=pool.slice(0,3);
+    // きのう ぜんぶ たっせい して いれば れんぞくを つづける
+    const streak=(d.date&&d.done3&&isYesterday(d.date))? (d.streak|0) : 0;
+    d={date:t, streak:streak, done3:false,
+       ms:pick.map(m=>({slug:m.slug, need:m.need[Math.floor(r()*m.need.length)], base:m.read(), got:false}))};
+    try{ localStorage.setItem(DKEY, JSON.stringify(d)); }catch(e){}
+  }
+  return d;
+}
+function isYesterday(s){
+  const p=s.split("-").map(Number);
+  const y=new Date(); y.setDate(y.getDate()-1);
+  return p[0]===y.getFullYear()&&p[1]===y.getMonth()+1&&p[2]===y.getDate();
+}
+function renderMissions(){
+  const d=buildDaily();
+  const wrap=document.getElementById("missions"); wrap.innerHTML="";
+  let done=0;
+  d.ms.forEach(ms=>{
+    const M=MISSIONS.find(x=>x.slug===ms.slug); if(!M) return;
+    const now=M.read();
+    const prog=Math.max(0, Math.min(ms.need, now-ms.base));
+    const ok=prog>=ms.need;
+    if(ok){ ms.got=true; done++; }
+    const row=document.createElement("div"); row.className="mis"+(ok?" done":"");
+    const ic=document.createElement("canvas"); ic.width=16; ic.height=16;
+    ic.style.width="26px"; ic.style.height="26px";
+    if(ok) drawStamp(ic.getContext("2d")); else drawMedal(ic.getContext("2d"),"none");
+    row.appendChild(ic);
+    const tx=document.createElement("div"); tx.className="txt";
+    tx.innerHTML=M.nm+"を "+ms.need+M.verb+"<small>"+(ok?"できた！":("いま "+prog+" / "+ms.need))+"</small>";
+    row.appendChild(tx);
+    if(!ok){ const a=document.createElement("a"); a.className="go"; a.href="../"+ms.slug+"/index.html"; a.textContent="あそぶ"; row.appendChild(a); }
+    wrap.appendChild(row);
+  });
+  // 3つ ぜんぶ できたら れんぞく日数を ふやす
+  if(done>=3&&!d.done3){ d.done3=true; d.streak=(d.streak|0)+1; }
+  try{ localStorage.setItem(DKEY, JSON.stringify(d)); }catch(e){}
+  const st=document.getElementById("streak");
+  st.textContent = d.done3
+    ? ("きょうの ミッション ぜんぶ たっせい！　れんぞく "+d.streak+"にち")
+    : ("できた ミッション "+done+" / 3");
+  return {done, streak:d.streak|0};
+}
+
+/* ── メダルいちらん ── */
+function renderMedals(){
+  const el=document.getElementById("medals"); el.innerHTML="";
+  let pt=0, got=0, played=0;
+  GAMES.forEach(gm=>{
+    const m=medalOf(gm);
+    pt+=MEDAL_PT[m.kind]||0;
+    if(m.kind==="gold"||m.kind==="silver"||m.kind==="bronze") got++;
+    if(m.v>0) played++;
+    const a=document.createElement("a");
+    a.className="md "+(m.v<=0?"none":(m.kind==="bronze0"?"":m.kind));
+    a.href="../"+gm.slug+"/index.html";
+    a.appendChild(medalCanvas(m.kind==="bronze0"?"none":m.kind, 42));
+    const nm=document.createElement("div"); nm.className="nm"; nm.textContent=gm.nm; a.appendChild(nm);
+    const vl=document.createElement("div"); vl.className="vl";
+    vl.textContent = m.v>0 ? (m.v+gm.unit) : "まだ";
+    a.appendChild(vl);
+    el.appendChild(a);
+  });
+  document.getElementById("mdFoot").textContent =
+    "あそんだ ゲーム "+played+" / "+GAMES.length+"　メダル "+got+"こ";
+  return {pt, got, played};
+}
+
+/* ── トロフィーレベル ── */
+function renderLevel(md,ms){
+  const pt=md.pt + (ms.streak*2) + md.played;
+  const lv=Math.max(1, Math.floor(Math.sqrt(pt/2))+1);
+  const cur=(lv-1)*(lv-1)*2, next=lv*lv*2;
+  document.getElementById("lvNum").textContent=lv;
+  document.getElementById("lvInfo").innerHTML=
+    "ポイント "+pt+"　（メダル・れんぞくで ふえる）<br>つぎの レベルまで あと "+Math.max(0,next-pt);
+  document.getElementById("lvBar").style.width=Math.min(100,(pt-cur)/(next-cur)*100)+"%";
+}
+
+function renderAll(){
+  const ms=renderMissions();
+  const md=renderMedals();
+  renderLevel(md,ms);
+}
+document.getElementById("reload").addEventListener("click",renderAll);
+addEventListener("visibilitychange",()=>{ if(!document.hidden) renderAll(); });
+addEventListener("focus",renderAll);
+
+/* ── テストよう ── */
+window.__T={
+  render:renderAll,
+  medals:()=>GAMES.map(gm=>({slug:gm.slug, ...medalOf(gm)})),
+  daily:()=>obj(DKEY),
+  clearDaily:()=>{ try{ localStorage.removeItem(DKEY); }catch(e){} },
+  keys:()=>GAMES.map(g=>g.slug)
+};
+
+renderAll();
+</script>
+</body>
+</html>
