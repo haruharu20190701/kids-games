@@ -48,7 +48,12 @@
   .screen.show{display:flex;}
   /* ── もんだいえらび ── */
   #pick-s .lead{text-align:center;font-size:15px;font-weight:800;color:#8a7a66;margin:2px 0 8px;line-height:1.5;}
-  #lvGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;overflow:auto;touch-action:pan-y;padding:4px 2px 8px;}
+  #lvWrap{flex:1;overflow:auto;touch-action:pan-y;padding:2px 2px 8px;}
+  .secTitle{font-size:15px;font-weight:900;margin:4px 2px 6px;display:flex;align-items:center;gap:8px;}
+  .secTitle .tag{font-size:12px;font-weight:800;color:#fff;background:#c98d5a;border-radius:999px;padding:2px 10px;}
+  .secTitle .tag.hard{background:#e0562f;}
+  .secTitle .note{font-size:12px;font-weight:800;color:#a3937c;}
+  .lvgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
   .lv{background:var(--card);border-radius:16px;box-shadow:0 4px 0 #d9a26e;aspect-ratio:1/1;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;}
   .lv:active{transform:translateY(2px);box-shadow:0 2px 0 #d9a26e;}
@@ -82,7 +87,7 @@
   /* ── よこむき ── */
   @media (orientation:landscape) and (max-height:520px){
     header{padding:4px 14px 0;} .title{font-size:17px;}
-    #lvGrid{grid-template-columns:repeat(8,1fr);}
+    .lvgrid{grid-template-columns:repeat(8,1fr);}
     #goals .goal{font-size:12px;padding:3px 10px;}
     #tip{display:none;}
   }
@@ -96,7 +101,7 @@
     <!-- もんだいえらび -->
     <section id="pick-s" class="screen show">
       <div class="lead">🔥ようがんは モンスター👾へ<br>💧みずは おはな🌸へ　🐣ひよこは まもる</div>
-      <div id="lvGrid"></div>
+      <div id="lvWrap"></div>
     </section>
 
     <!-- あそぶ -->
@@ -317,6 +322,187 @@ const LEVELS=[
   "#.#......#.#",
   "#F#.MMM..#F#",
   "############"]},
+ /* ── ここから むずかしい編（ピンが おおい／ぬいちゃ だめな ピンが ある）── */
+ { hard:true, nm:"よっつの ピン", tip:"みずを ぜんぶ かけてから ようがんを ながそう", map:[
+  "############",
+  "#ww#....#ww#",
+  "#ww#....#ww#",
+  "#11#....#22#",
+  "#..........#",
+  "#..#ll#ll#.#",
+  "#..#ll#ll#.#",
+  "#..#33#44#.#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#F..M...M.F#",
+  "#####..#####"]},
+ { hard:true, nm:"はいすいこうを あけろ", tip:"したの せんを ぬくと ようがんが ながれでる", map:[
+  "############",
+  "#...#lll#..#",
+  "#...#lll#..#",
+  "#...11111..#",
+  "#..........#",
+  "#www#......#",
+  "#www#......#",
+  "#2222......#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#FF..M....C#",
+  "######3#####"]},
+ { hard:true, nm:"どの あなを あける？", tip:"ひよこの がわの あなを あけたら おしまい", map:[
+  "############",
+  "#..#lll#...#",
+  "#..#lll#...#",
+  "#..#lll#...#",
+  "#..11111...#",
+  "#..........#",
+  "#####2######",
+  "#..........#",
+  "####3###4###",
+  "#......#...#",
+  "#......#...#",
+  "#......#...#",
+  "#....M.#.C.#",
+  "############"]},
+ { hard:true, nm:"みずで まもる", tip:"ようがんが くる まえに おはなを さかせる", map:[
+  "############",
+  "#..#ll#ll#.#",
+  "#..#ll#ll#.#",
+  "#..#11#22#.#",
+  "#..........#",
+  "#ww#....#ww#",
+  "#ww#....#ww#",
+  "#33#....#44#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#F..M..M..F#",
+  "#####..#####"]},
+ { hard:true, nm:"たての ゲート", tip:"ひよこの へやに ようがんを いれない みちを さがそう", map:[
+  "############",
+  "#..#lll#...#",
+  "#..#lll3...#",
+  "#..#lll3...#",
+  "#..11111...#",
+  "#..........#",
+  "#..#www#...#",
+  "#..#www#...#",
+  "#..22222...#",
+  "#....#.....#",
+  "#....#.....#",
+  "#....#.....#",
+  "#.CF.#..M..#",
+  "############"]},
+ { hard:true, nm:"みっつの へや", tip:"とびらを あけると となりの へやに ながれていく", map:[
+  "############",
+  "#ll#www#lll#",
+  "#ll#www#lll#",
+  "#ll#www#lll#",
+  "#11#222#333#",
+  "#..#...#...#",
+  "#..#...#...#",
+  "#..4...#...#",
+  "#..4...#...#",
+  "#..#...#...#",
+  "#..#...#...#",
+  "#..#...#...#",
+  "#M.#.F.#.C.#",
+  "############"]},
+ { hard:true, nm:"ふたつの たな", tip:"たなの あなを えらんで ようがんを おろそう", map:[
+  "############",
+  "#w##lll#...#",
+  "#w##lll#...#",
+  "#w##lll#...#",
+  "#1122222...#",
+  "#..........#",
+  "#####3######",
+  "#..........#",
+  "####4###5###",
+  "#......#...#",
+  "#......#...#",
+  "#......#...#",
+  "#F..M..#.C.#",
+  "############"]},
+ { hard:true, nm:"みずを ながしてから", tip:"みず→せんを ぬく→ようがん の じゅんばん", map:[
+  "############",
+  "#ww#....#ww#",
+  "#ww#....#ww#",
+  "#11#....#22#",
+  "#..........#",
+  "#..#ll#ll#.#",
+  "#..#ll#ll#.#",
+  "#..#33#44#.#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#F..M...M.F#",
+  "#####55#####"]},
+ { hard:true, nm:"ふたつの ゲート", tip:"よこの とびらを つかって みずと ようがんを わけよう", map:[
+  "############",
+  "#..#lll#...#",
+  "#..#lll3...#",
+  "#..#lll3...#",
+  "#..11111...#",
+  "#..........#",
+  "#..#www#...#",
+  "#..#www4...#",
+  "#..22222...#",
+  "#....#.....#",
+  "#....#.....#",
+  "#....#.....#",
+  "#.CF.#.FM..#",
+  "#########.##"]},
+ { hard:true, nm:"はいすいと ゲート", tip:"ぬいちゃ だめな とびらが あるよ", map:[
+  "############",
+  "#..#lll#...#",
+  "#..#lll3...#",
+  "#..#lll3...#",
+  "#..11111...#",
+  "#..........#",
+  "#www#......#",
+  "#www#......#",
+  "#2222......#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#FF..M...C.#",
+  "######4#####"]},
+ { hard:true, nm:"たなと ひよこ", tip:"みぎの あな、ひだりの あな、どっち？", map:[
+  "############",
+  "#...#lll#..#",
+  "#...#lll#..#",
+  "#...#lll#..#",
+  "#...11111..#",
+  "#..........#",
+  "######2#####",
+  "#..........#",
+  "###3###4####",
+  "#....#.....#",
+  "#....#.....#",
+  "#....#.....#",
+  "#.C..#..M..#",
+  "############"]},
+ { hard:true, nm:"さいしゅうもんだい", tip:"5ほんの ピン。じゅんばんを よく かんがえて！", map:[
+  "############",
+  "#ww#....#ww#",
+  "#ww#....#ww#",
+  "#11#....#22#",
+  "#..........#",
+  "#..#ll#ll#.#",
+  "#..#ll#ll#.#",
+  "#..#33#44#.#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#..........#",
+  "#CF.M..M.FC#",
+  "#####55#####"]},
 ];
 
 /* ── セーブ ── */
@@ -324,7 +510,13 @@ const SAVE="pinpull.cleared";
 let cleared=new Set();
 try{ const a=JSON.parse(localStorage.getItem(SAVE)); if(Array.isArray(a)) cleared=new Set(a.filter(n=>Number.isInteger(n)&&n>=0&&n<LEVELS.length)); }catch(e){}
 function save(){ try{ localStorage.setItem(SAVE, JSON.stringify([...cleared])); }catch(e){} }
-function openMax(){ let m=0; for(let i=0;i<LEVELS.length;i++){ if(cleared.has(i)) m=Math.max(m,i+1); } return Math.min(m,LEVELS.length-1); }
+const HARD_START=12;                     // ここから むずかしい編
+const EASY_NEED=8;                       // やさしいを これだけ クリアすると むずかしいが あく
+function easyMax(){ let m=0; for(let i=0;i<HARD_START;i++) if(cleared.has(i)) m=Math.max(m,i+1); return Math.min(m,HARD_START-1); }
+function easyDone(){ let c=0; for(let i=0;i<HARD_START;i++) if(cleared.has(i)) c++; return c; }
+function hardOpen(){ if(easyDone()>=EASY_NEED) return true; for(let i=HARD_START;i<LEVELS.length;i++) if(cleared.has(i)) return true; return false; }
+function hardMax(){ let m=HARD_START; for(let i=HARD_START;i<LEVELS.length;i++) if(cleared.has(i)) m=Math.max(m,i+1); return Math.min(m,LEVELS.length-1); }
+function isOpen(i){ return i<HARD_START ? (i<=easyMax()) : (hardOpen() && i<=hardMax()); }
 
 /* ── おと ── */
 let actx=null;
@@ -466,7 +658,8 @@ function winLevel(){
   sWin(); confetti(); drawGoals();
   setTimeout(()=>{
     const last=lvIdx>=LEVELS.length-1;
-    sheetShow({ e:"🎉", t:"クリア！", s:first&&!last?"あたらしい もんだいが あいたよ！":(last?"ぜんぶ クリア！すごい！":"ばっちり！"),
+    const justOpened = first && lvIdx<HARD_START && easyDone()>=EASY_NEED && easyDone()-1<EASY_NEED;
+    sheetShow({ e:"🎉", t:"クリア！", s:justOpened?"むずかしい もんだいが あいたよ！":(first&&!last?"あたらしい もんだいが あいたよ！":(last?"ぜんぶ クリア！すごい！":"ばっちり！")),
       btns: last?[["もんだいへ","brown",()=>goPick()]]:[["もういっかい","brown",()=>startLevel(lvIdx)],["つぎへ ▶","green",()=>startLevel(lvIdx+1)]] });
   },800);
 }
@@ -614,15 +807,23 @@ cv.addEventListener("pointerdown",e=>{
 /* ── がめん ── */
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
 function buildPick(){
-  const el=document.getElementById("lvGrid"); el.innerHTML="";
-  const max=openMax();
-  LEVELS.forEach((L,i)=>{
-    const ok=i<=max, got=cleared.has(i);
-    const d=document.createElement("div"); d.className="lv"+(ok?"":" locked");
-    d.innerHTML="<b>"+(ok?(i+1):"🔒")+"</b><div class='st'>"+(got?"⭐":(ok?"":""))+"</div>";
-    if(ok) d.addEventListener("click",()=>{ sTick(); startLevel(i); });
-    el.appendChild(d);
-  });
+  const wrap=document.getElementById("lvWrap"); wrap.innerHTML="";
+  const mk=(title,tagCls,note,from,to)=>{
+    const h=document.createElement("div"); h.className="secTitle";
+    h.innerHTML="<span class='tag "+tagCls+"'>"+title+"</span>"+(note?"<span class='note'>"+note+"</span>":"");
+    wrap.appendChild(h);
+    const g=document.createElement("div"); g.className="lvgrid";
+    for(let i=from;i<to;i++){
+      const ok=isOpen(i), got=cleared.has(i);
+      const d=document.createElement("div"); d.className="lv"+(ok?"":" locked");
+      d.innerHTML="<b>"+(ok?(i+1):"🔒")+"</b><div class='st'>"+(got?"⭐":"")+"</div>";
+      if(ok) d.addEventListener("click",()=>{ sTick(); startLevel(i); });
+      g.appendChild(d);
+    }
+    wrap.appendChild(g);
+  };
+  mk("やさしい","", "", 0, HARD_START);
+  mk("むずかしい","hard", hardOpen()?"ピンが おおいよ":("やさしいを "+EASY_NEED+"もん クリアすると あくよ"), HARD_START, LEVELS.length);
 }
 function goPick(){ running=false; ovl.classList.remove("show"); buildPick(); show("pick-s"); }
 function startLevel(n){
