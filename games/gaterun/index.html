@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="すうじゲート" />
+<title>すうじゲート｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの なかまあつめランナー。×2や+10の ゲートを えらんで なかまを ふやし、ボスの ぐんだんに かとう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/gaterun/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="すうじゲート｜こどもあそびば" />
+<meta property="og:description" content="×2や+10の ゲートを くぐって なかまを ふやそう！さいごは ボスと たいけつ。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/gaterun/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── すうじゲート（なかまを ふやして ボスに かつ）── */
+  :root{ --bg1:#dff3ff; --bg2:#a9dcf5; --ink:#26404f; --card:#fffdf8; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:var(--card);box-shadow:0 4px 0 #6fa8c4;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #6fa8c4;}
+  header{width:100%;max-width:560px;text-align:center;padding:10px 14px 0;flex:0 0 auto;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#fff;border-radius:999px;cursor:pointer;transition:transform .08s;}
+  .btn:active{transform:translateY(2px);}
+  .btn.green{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  .btn.orange{background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;}
+  .btn.blue{background:linear-gradient(180deg,#4cc9f0,#3a86ff);box-shadow:0 4px 0 #2563c9;}
+  .btn.gray{background:linear-gradient(180deg,#b8c4cc,#8d9aa4);box-shadow:0 4px 0 #6a757d;}
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:4px 12px 12px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── スタート ── */
+  #start-s{align-items:center;justify-content:center;gap:14px;}
+  #start-s .hero{font-size:64px;line-height:1;}
+  #start-s .lead{font-size:15px;font-weight:800;color:#43687c;text-align:center;line-height:1.6;}
+  #start-s .btn{font-size:22px;padding:15px 34px;}
+  #start-s .rec{font-size:14px;font-weight:800;color:#43687c;}
+  /* ── ゲームがめん ── */
+  #play-s{gap:5px;}
+  #bar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  #bar .btn{font-size:14px;padding:9px 13px;flex:0 0 auto;}
+  #lvName{flex:1;text-align:center;font-size:17px;font-weight:900;}
+  #prog{height:9px;background:#fff;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.2);flex:0 0 auto;}
+  #prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd93b,#fb8500);}
+  #cvWrap{flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;}
+  canvas{touch-action:none;border-radius:14px;box-shadow:0 5px 0 #7fb2c9, 0 10px 22px rgba(0,0,0,.16);}
+  #tip{text-align:center;font-size:13px;font-weight:800;color:#43687c;min-height:17px;flex:0 0 auto;}
+  /* ── けっか ── */
+  #ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,45,60,.62);z-index:90;padding:24px;}
+  #ovl.show{display:flex;}
+  .sheet{background:var(--card);border-radius:22px;padding:20px 18px;max-width:330px;width:100%;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.4);}
+  .sheet .ce{font-size:66px;line-height:1.15;animation:cardIn .5s;}
+  @keyframes cardIn{0%{transform:scale(.2) rotate(-16deg);}65%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .sheet .ct{font-size:22px;font-weight:900;margin-top:4px;}
+  .sheet .cs{font-size:15px;font-weight:800;color:#43687c;margin-top:4px;line-height:1.5;}
+  .sheet .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .sheet .btn{font-size:17px;padding:11px 20px;}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:520px){
+    header{padding:4px 14px 0;} .title{font-size:17px;}
+    #start-s .hero{font-size:44px;} #start-s .btn{font-size:18px;padding:12px 26px;}
+    #tip{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🚪 すうじゲート</div></header>
+
+  <div id="app">
+    <!-- スタート -->
+    <section id="start-s" class="screen show">
+      <div class="hero">🏃‍♂️🚪</div>
+      <div class="lead">ゆびで よこに うごかして、<br>おおきく なる ゲートを くぐろう！<br>さいごは ボスの ぐんだんと たいけつ。</div>
+      <button class="btn blue" id="btnGo">はじめる ▶</button>
+      <div class="rec" id="rec"></div>
+      <button class="btn gray" id="btnFirst" style="font-size:15px;padding:10px 20px;display:none">レベル1 から</button>
+    </section>
+
+    <!-- あそぶ -->
+    <section id="play-s" class="screen">
+      <div id="bar">
+        <button class="btn gray" id="toStart">◀ もどる</button>
+        <div id="lvName">レベル 1</div>
+        <button class="btn orange" id="retry">やりなおし</button>
+      </div>
+      <div id="prog"><i id="progI"></i></div>
+      <div id="cvWrap"><canvas id="cv"></canvas></div>
+      <div id="tip">ゆびで よこに スライド！</div>
+    </section>
+  </div>
+
+  <div id="ovl"><div class="sheet" id="sheet"></div></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   すうじゲート
+   - なかまを つれて まえに はしる。ゆびを よこに うごかして そうさ
+   - ゲートは 2つ ならんでいる。くぐった ほうの けいさんが なかまに かかる
+     （×2 ×3 +5 +10 …ふえる／ −5 ÷2 …へる）
+   - まわる ハンマーに ぶつかると なかまが へる
+   - さいごに ボスの ぐんだんと たいけつ。なかまが おおければ かち！
+   - ボスの かずは「いちばん いい えらびかたの 45%」なので、
+     ちゃんと えらべば かならず かてる
+   - すすんだ レベルと さいこうきろくは localStorage に ほぞん
+   ========================================================= */
+
+/* ── セーブ ── */
+const SAVE="gaterun.save";
+let maxLv=1, best=0;
+try{ const d=JSON.parse(localStorage.getItem(SAVE)); if(d){ maxLv=Math.max(1,d.lv|0); best=Math.max(0,d.best|0); } }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify({lv:maxLv,best})); }catch(e){} }
+
+/* ── おと ── */
+let actx=null;
+function ac(){ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); return actx; }
+function beep(f,d=0.07,t="sine",v=0.13){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+function sweep(f1,f2,d=0.18,t="triangle",v=0.14){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+d);g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+const sGood=()=>{ [660,880,1170].forEach((f,i)=>setTimeout(()=>beep(f,0.09,"triangle",0.14),i*55)); };
+const sBad=()=>sweep(420,150,0.22,"sawtooth",0.13);
+const sHit=()=>beep(150,0.14,"square",0.14);
+const sWin=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90));
+const sLose=()=>{ beep(300,0.2,"sawtooth",0.13); setTimeout(()=>beep(200,0.3,"sawtooth",0.12),160); };
+const sTick=()=>beep(620,0.04,"sine",0.1);
+const sStep=()=>beep(90+Math.random()*30,0.03,"sine",0.05);
+
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🏃","🚪"];for(let i=0;i<24;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+/* ── レベルづくり ── */
+const OPS_GOOD=[["×",2],["×",2],["×",3],["+",5],["+",10],["+",20]];
+const OPS_BAD =[["−",5],["−",10],["÷",2],["−",20]];
+function applyOp(n,op,v){
+  if(op==="×") return Math.floor(n*v);
+  if(op==="+") return n+v;
+  if(op==="−") return Math.max(0,n-v);
+  if(op==="÷") return Math.max(0,Math.floor(n/v));
+  return n;
+}
+function genLevel(lv){
+  const objs=[]; let y=1100;
+  const nGates=4+Math.min(5,Math.floor(lv/2));
+  for(let i=0;i<nGates;i++){
+    // だんだん わるい ゲートも まざる
+    const bothGood = (lv<=2) || Math.random()<Math.max(0.25,0.7-lv*0.05);
+    const g1=OPS_GOOD[(Math.random()*OPS_GOOD.length)|0];
+    const g2= bothGood ? OPS_GOOD[(Math.random()*OPS_GOOD.length)|0] : OPS_BAD[(Math.random()*OPS_BAD.length)|0];
+    const flip=Math.random()<0.5;
+    objs.push({type:"gate", y, left:(flip?g2:g1), right:(flip?g1:g2), taken:false});
+    y+=760+Math.random()*220;
+    if(i>=1 && i<nGates-1 && (i%2===1)){
+      // まわる ハンマー（みちの はんぶんくらいを ふさぐ）
+      const side=Math.random()<0.5?0:1;
+      objs.push({type:"obst", y, side, w:0.42+Math.random()*0.16, hit:false, dmgPct:0.35});
+      y+=620;
+    }
+  }
+  // いちばん いい えらびかたの けいさん（ボスの かずを きめるため）
+  let bestN=1;
+  for(const o of objs){ if(o.type!=="gate") continue;
+    bestN=Math.max(applyOp(bestN,o.left[0],o.left[1]), applyOp(bestN,o.right[0],o.right[1])); }
+  const bossN=Math.max(3, Math.floor(bestN*0.45));
+  objs.push({type:"boss", y:y+520, n:bossN});
+  return {objs, len:y+520, bossN};
+}
+
+/* ── ゲームの じょうたい ── */
+let lv=1, count=1, scroll=0, objs=[], len=1, bossN=0, phase="run";
+let crowdX=0.5, targetX=0.5, running=false, tms=0, pops=[], battle=null;
+
+function startLevel(n){
+  lv=n;
+  const L=genLevel(n);
+  objs=L.objs; len=L.len; bossN=L.bossN;
+  count=1; scroll=0; crowdX=0.5; targetX=0.5; phase="run"; pops=[]; battle=null;
+  document.getElementById("lvName").textContent="レベル "+n;
+  document.getElementById("progI").style.width="0%";
+  ovl.classList.remove("show");
+  show("play-s");
+  requestAnimationFrame(()=>{ resize(); running=true; lastT=0; requestAnimationFrame(loop); });
+}
+
+/* ── えがく じゅんび ── */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let CW=320, CH=520, RX0=0, RX1=320, RW=320, CROWD_Y=0;
+function resize(){
+  const wrap=document.getElementById("cvWrap"), r=wrap.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  CW=Math.floor(r.width); CH=Math.floor(r.height);
+  const dpr=Math.min(devicePixelRatio||1,2);
+  cv.style.width=CW+"px"; cv.style.height=CH+"px";
+  cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  RW=Math.min(CW*0.86, 430); RX0=(CW-RW)/2; RX1=RX0+RW;
+  CROWD_Y=CH*0.76;
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,150); });
+addEventListener("orientationchange",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,250); });
+
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function outText(txt,x,y,size,fill,stroke){
+  ctx.font="900 "+size+"px system-ui,-apple-system,sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.lineWidth=Math.max(3,size*0.22); ctx.strokeStyle=stroke||"#fff"; ctx.strokeText(txt,x,y);
+  ctx.fillStyle=fill; ctx.fillText(txt,x,y);
+}
+/* ひとり えがく */
+function drawGuy(x,y,s,col,dark){
+  ctx.fillStyle=dark; rr(x-s*0.34,y-s*0.1,s*0.68,s*0.72,s*0.3); ctx.fill();
+  ctx.fillStyle=col;  rr(x-s*0.30,y-s*0.14,s*0.60,s*0.66,s*0.26); ctx.fill();
+  ctx.fillStyle="#ffe0bd"; ctx.beginPath(); ctx.arc(x,y-s*0.42,s*0.30,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#3a2b1c"; ctx.beginPath(); ctx.arc(x,y-s*0.56,s*0.30,Math.PI,Math.PI*2); ctx.fill();
+}
+function drawCrowd(cx,cy,n,col,dark,t,scale){
+  const show=Math.min(n,64), s=(scale||1)*Math.max(13,RW*0.075);
+  const pts=[];
+  for(let i=0;i<show;i++){
+    const ang=i*2.399, rad=Math.sqrt(i)*s*0.52;
+    pts.push({x:cx+Math.cos(ang)*rad, y:cy+Math.sin(ang)*rad*0.5+Math.sin(t*0.011+i*1.7)*s*0.09});
+  }
+  pts.sort((a,b)=>a.y-b.y);
+  for(const p of pts) drawGuy(p.x,p.y,s,col,dark);
+}
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  // くさ
+  ctx.fillStyle="#8fd06a"; ctx.fillRect(0,0,CW,CH);
+  // みち
+  const rg=ctx.createLinearGradient(RX0,0,RX1,0);
+  rg.addColorStop(0,"#9aa3ab"); rg.addColorStop(0.5,"#b6bfc6"); rg.addColorStop(1,"#9aa3ab");
+  ctx.fillStyle=rg; ctx.fillRect(RX0,0,RW,CH);
+  ctx.fillStyle="rgba(255,255,255,.5)";
+  const dash=54, off=(scroll%(dash*2));
+  for(let y=-dash*2+off;y<CH+dash;y+=dash*2) ctx.fillRect(CW/2-3,y,6,dash);
+  ctx.fillStyle="#e8f7d8"; ctx.fillRect(RX0-6,0,6,CH); ctx.fillRect(RX1,0,6,CH);
+  // ものたち
+  for(const o of objs){
+    const sy=CROWD_Y-(o.y-scroll);
+    if(sy<-260||sy>CH+260) continue;
+    if(o.type==="gate"){
+      const h=Math.max(38,RW*0.13);
+      for(const side of [0,1]){
+        const [op,v]=side?o.right:o.left;
+        const x=side?CW/2:RX0, w=RW/2;
+        const good=(op==="×"||op==="+");
+        const g=ctx.createLinearGradient(x,sy-h/2,x,sy+h/2);
+        if(good){ g.addColorStop(0,"rgba(90,230,140,.92)"); g.addColorStop(1,"rgba(30,180,90,.92)"); }
+        else { g.addColorStop(0,"rgba(255,140,150,.92)"); g.addColorStop(1,"rgba(225,60,80,.92)"); }
+        ctx.fillStyle=g; rr(x+3,sy-h/2,w-6,h,10); ctx.fill();
+        ctx.lineWidth=3; ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.stroke();
+        outText(op+v, x+w/2, sy, Math.round(h*0.62), "#fff", good?"#178c4a":"#a51e33");
+      }
+    }else if(o.type==="obst"){
+      const w=RW*o.w, x=o.side? RX1-w : RX0;
+      ctx.fillStyle="rgba(90,70,60,.25)"; ctx.fillRect(x,sy-8,w,16);
+      // まわる ハンマー
+      const cx2=x+w/2, ang=tms*0.004+(o.side?1:0);
+      ctx.save(); ctx.translate(cx2,sy); ctx.rotate(ang);
+      ctx.fillStyle="#7a5b3a"; rr(-w*0.46,-6,w*0.92,12,6); ctx.fill();
+      ctx.fillStyle="#c0392b"; ctx.beginPath(); ctx.arc(w*0.44,0,Math.max(10,RW*0.05),0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-w*0.44,0,Math.max(10,RW*0.05),0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }else if(o.type==="boss"){
+      const n=battle?battle.bn:o.n;
+      if(n>0){
+        drawCrowd(CW/2, sy, n, "#ff6b6b", "#c0392b", tms, 1);
+        outText("👹 "+n, CW/2, sy-Math.max(40,RW*0.16), Math.round(Math.max(20,RW*0.085)), "#fff", "#a51e33");
+      }
+    }
+  }
+  // じぶんの ぐんだん
+  const cx=RX0+crowdX*RW;
+  drawCrowd(cx, CROWD_Y, battle?battle.pn:count, "#4dabf7", "#1c6fb5", tms, 1);
+  outText(String(battle?battle.pn:count), cx, CROWD_Y-Math.max(44,RW*0.17), Math.round(Math.max(26,RW*0.115)), "#fff", "#1c6fb5");
+  // ふきだし（+10 など）
+  for(const p of pops){
+    ctx.save(); ctx.globalAlpha=Math.max(0,p.life);
+    outText(p.txt, p.x, p.y, Math.round(Math.max(20,RW*0.09)), p.good?"#2f9e44":"#e03131", "#fff");
+    ctx.restore();
+  }
+}
+
+/* ── ループ ── */
+let lastT=0;
+function loop(ts){
+  if(!running) return;
+  if(!lastT) lastT=ts;
+  const dt=Math.min(60, ts-lastT); lastT=ts; tms+=dt;
+  if(phase==="run"){
+    scroll+=dt*0.42;
+    crowdX+=(targetX-crowdX)*Math.min(1,dt*0.012);
+    // ゲート・しょうがいぶつの はんてい
+    for(const o of objs){
+      const sy=CROWD_Y-(o.y-scroll);
+      if(o.type==="gate" && !o.taken && sy>=CROWD_Y){
+        o.taken=true;
+        const [op,v]=(crowdX<0.5)?o.left:o.right;
+        const before=count;
+        count=applyOp(count,op,v);
+        const good=count>=before;
+        pops.push({txt:op+v, x:RX0+crowdX*RW, y:CROWD_Y-RW*0.3, life:1, good});
+        if(good) sGood(); else sBad();
+        if(count<=0){ lose("なかまが いなくなっちゃった…"); return; }
+      }
+      if(o.type==="obst" && !o.hit && sy>=CROWD_Y-10){
+        const w=o.w, x0=o.side?(1-w):0, x1=x0+w;
+        if(crowdX>x0&&crowdX<x1){
+          o.hit=true;
+          const lost=Math.max(1,Math.floor(count*o.dmgPct));
+          count=Math.max(0,count-lost);
+          pops.push({txt:"−"+lost, x:RX0+crowdX*RW, y:CROWD_Y-RW*0.3, life:1, good:false});
+          sHit();
+          if(count<=0){ lose("なかまが いなくなっちゃった…"); return; }
+        }else o.hit=true;
+      }
+      if(o.type==="boss" && sy>=CROWD_Y-RW*0.55 && phase==="run"){
+        phase="battle"; battle={pn:count, bn:o.n, t:0}; sHit();
+      }
+    }
+    document.getElementById("progI").style.width=Math.min(100,scroll/len*100)+"%";
+    if(tms%160<dt) sStep();
+  }else if(phase==="battle"){
+    battle.t+=dt;
+    // どちらも へっていく（すくない ほうが 0に なる）
+    const step=Math.max(1, Math.ceil(Math.min(battle.pn,battle.bn)/28));
+    if(battle.t>420 && (battle.pn>0&&battle.bn>0)){
+      battle.pn-=step; battle.bn-=step;
+      if(battle.pn<0)battle.pn=0; if(battle.bn<0)battle.bn=0;
+      if(battle.t%90<20) sHit();
+    }
+    if(battle.pn<=0||battle.bn<=0){
+      if(battle.bn<=0 && battle.pn>0) win(battle.pn);
+      else lose("ボスの ぐんだんが おおかった…");
+      return;
+    }
+  }
+  for(const p of pops){ p.y-=dt*0.05; p.life-=dt*0.0014; }
+  pops=pops.filter(p=>p.life>0);
+  render();
+  requestAnimationFrame(loop);
+}
+function win(left){
+  phase="done"; running=false; sWin(); confetti();
+  if(lv+1>maxLv) maxLv=lv+1;
+  if(left>best) best=left;
+  save();
+  setTimeout(()=>sheetShow({ e:"🎉", t:"かった！", s:"のこり "+left+" にん！（さいこう "+best+" にん）",
+    btns:[["もういっかい","gray",()=>startLevel(lv)],["つぎへ ▶","green",()=>startLevel(lv+1)]] }),700);
+}
+function lose(msg){
+  phase="done"; running=false; sLose();
+  setTimeout(()=>sheetShow({ e:"😢", t:"ざんねん…", s:msg,
+    btns:[["もどる","gray",()=>goStart()],["もういっかい","orange",()=>startLevel(lv)]] }),600);
+}
+
+/* ── そうさ（ゆびで よこに）── */
+let dragging=false;
+function setX(clientX){
+  const r=cv.getBoundingClientRect();
+  const x=(clientX-r.left)/r.width*CW;
+  targetX=Math.max(0.06, Math.min(0.94, (x-RX0)/RW));
+}
+cv.addEventListener("pointerdown",e=>{ e.preventDefault(); ac(); dragging=true; try{cv.setPointerCapture(e.pointerId);}catch(_){} setX(e.clientX); });
+cv.addEventListener("pointermove",e=>{ if(dragging){ e.preventDefault(); setX(e.clientX); } });
+cv.addEventListener("pointerup",()=>{ dragging=false; });
+cv.addEventListener("pointercancel",()=>{ dragging=false; });
+
+/* ── がめん ── */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const ovl=document.getElementById("ovl"), sheet=document.getElementById("sheet");
+function sheetShow(o){
+  sheet.innerHTML="<div class='ce'>"+o.e+"</div><div class='ct'>"+o.t+"</div>"+(o.s?"<div class='cs'>"+o.s+"</div>":"")+"<div class='row' id='sRow'></div>";
+  const row=document.getElementById("sRow");
+  (o.btns||[]).forEach(([label,cls,fn])=>{
+    const b=document.createElement("button"); b.className="btn "+cls; b.textContent=label;
+    b.addEventListener("click",()=>{ sTick(); fn(); });
+    row.appendChild(b);
+  });
+  ovl.classList.add("show");
+}
+function goStart(){
+  running=false; ovl.classList.remove("show");
+  document.getElementById("btnGo").textContent=maxLv>1?("つづきから（レベル "+maxLv+"）▶"):"はじめる ▶";
+  document.getElementById("btnFirst").style.display=maxLv>1?"block":"none";
+  document.getElementById("rec").textContent=best?("さいこうきろく "+best+" にん"):"";
+  show("start-s");
+}
+document.getElementById("btnGo").addEventListener("click",()=>{ ac(); sTick(); startLevel(maxLv); });
+document.getElementById("btnFirst").addEventListener("click",()=>{ ac(); sTick(); startLevel(1); });
+document.getElementById("toStart").addEventListener("click",()=>{ sTick(); goStart(); });
+document.getElementById("retry").addEventListener("click",()=>{ sTick(); startLevel(lv); });
+
+/* ── テストよう ── */
+window.__T={
+  start:n=>startLevel(n),
+  gen:n=>genLevel(n),
+  state:()=>({lv,count,scroll,len,phase,bossN,crowdX}),
+  setX:v=>{ targetX=v; },
+  // ぜんぶ いい ほうを えらんだ ばあいの さいご（かてるか かくにん）
+  bestPlay:n=>{
+    const L=genLevel(n); let c=1;
+    for(const o of L.objs){ if(o.type!=="gate") continue;
+      c=Math.max(applyOp(c,o.left[0],o.left[1]), applyOp(c,o.right[0],o.right[1])); }
+    return {best:c, boss:L.bossN, win:c>L.bossN};
+  },
+  fast:()=>{ scroll=len-600; }
+};
+
+/* ── スタート ── */
+goStart();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ロープほどき" />
+<title>ロープほどき｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの ロープほどきパズル。くいを うごかして ロープの からまりを ぜんぶ ほどこう。レベルは どんどん つづく。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/untangle/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ロープほどき｜こどもあそびば" />
+<meta property="og:description" content="くいを ドラッグして ロープの からまりを ほどく パズル。ぜんぶ ほどけるかな？" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/untangle/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── ロープほどき（こうさを なくす パズル）── */
+  :root{ --bg1:#fff6e5; --bg2:#f6dfb8; --ink:#5b4636; --card:#fffdf8; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:var(--card);box-shadow:0 4px 0 #d3ab72;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #d3ab72;}
+  header{width:100%;max-width:560px;text-align:center;padding:10px 14px 0;flex:0 0 auto;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#fff;border-radius:999px;cursor:pointer;transition:transform .08s;}
+  .btn:active{transform:translateY(2px);}
+  .btn.green{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  .btn.orange{background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;}
+  .btn.blue{background:linear-gradient(180deg,#4cc9f0,#3a86ff);box-shadow:0 4px 0 #2563c9;}
+  .btn.gray{background:linear-gradient(180deg,#b8c4cc,#8d9aa4);box-shadow:0 4px 0 #6a757d;}
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:4px 12px 12px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── スタート ── */
+  #start-s{align-items:center;justify-content:center;gap:14px;}
+  #start-s .hero{font-size:64px;line-height:1;}
+  #start-s .lead{font-size:15px;font-weight:800;color:#8a7a66;text-align:center;line-height:1.6;}
+  #start-s .btn{font-size:22px;padding:15px 34px;}
+  /* ── ゲームがめん ── */
+  #play-s{gap:6px;}
+  #bar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  #bar .btn{font-size:14px;padding:9px 12px;flex:0 0 auto;}
+  #lvName{flex:1;text-align:center;font-size:17px;font-weight:900;}
+  #cross{text-align:center;font-size:16px;font-weight:900;flex:0 0 auto;}
+  #cross.ok{color:#2f9e44;}
+  #cvWrap{flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;}
+  canvas{touch-action:none;border-radius:16px;background:linear-gradient(180deg,#fffdf3,#fdf0d8);
+    box-shadow:0 5px 0 #d3ab72, 0 10px 22px rgba(0,0,0,.16);}
+  #tip{text-align:center;font-size:13px;font-weight:800;color:#8a7a66;min-height:17px;flex:0 0 auto;}
+  /* ── けっか ── */
+  #ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(60,45,25,.6);z-index:90;padding:24px;}
+  #ovl.show{display:flex;}
+  .sheet{background:var(--card);border-radius:22px;padding:20px 18px;max-width:330px;width:100%;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.4);}
+  .sheet .ce{font-size:66px;line-height:1.15;animation:cardIn .5s;}
+  @keyframes cardIn{0%{transform:scale(.2) rotate(-16deg);}65%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .sheet .ct{font-size:22px;font-weight:900;margin-top:4px;}
+  .sheet .cs{font-size:15px;font-weight:800;color:#8a7a66;margin-top:4px;line-height:1.5;}
+  .sheet .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .sheet .btn{font-size:17px;padding:11px 20px;}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:520px){
+    header{padding:4px 14px 0;} .title{font-size:17px;}
+    #start-s .hero{font-size:44px;} #start-s .btn{font-size:18px;padding:12px 26px;}
+    #tip{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🪢 ロープほどき</div></header>
+
+  <div id="app">
+    <!-- スタート -->
+    <section id="start-s" class="screen show">
+      <div class="hero">🪢</div>
+      <div class="lead">くいを ゆびで うごかして、<br>あかい ロープの かさなりを ぜんぶ なくそう！</div>
+      <button class="btn blue" id="btnGo">はじめる ▶</button>
+      <button class="btn gray" id="btnFirst" style="font-size:15px;padding:10px 20px;display:none">レベル1 から</button>
+    </section>
+
+    <!-- あそぶ -->
+    <section id="play-s" class="screen">
+      <div id="bar">
+        <button class="btn gray" id="toStart">◀ もどる</button>
+        <div id="lvName">レベル 1</div>
+        <button class="btn orange" id="hint">💡 ヒント</button>
+      </div>
+      <div id="cross">からまり 0</div>
+      <div id="cvWrap"><canvas id="cv"></canvas></div>
+      <div id="tip">くいを ドラッグして うごかそう</div>
+    </section>
+  </div>
+
+  <div id="ovl"><div class="sheet" id="sheet"></div></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   ロープほどき
+   - くい（まる）を ドラッグして うごかす。ロープが かさなって いると あかくなる
+   - かさなりが 0 に なったら クリア
+   - もんだいは「えんの うえに くいを ならべて、まじわらない ロープだけで つくる」
+     → そのあと くいの いちを かきまぜる。だから かならず ほどける
+   - 💡ヒントで せいかいの ならびが うっすら みえる
+   - すすんだ レベルは localStorage に ほぞん
+   ========================================================= */
+
+const PEGCOL=["#ff5a5f","#3a86ff","#34c759","#ffb703","#b06bff","#00c2d1","#ff7ac8","#9bd62b","#ff8c1a","#7ee8fa","#f4a261","#8ecae6"];
+
+/* ── セーブ ── */
+const SAVE="untangle.level";
+let maxLv=1;
+try{ const v=parseInt(localStorage.getItem(SAVE),10); if(v>=1&&v<10000) maxLv=v; }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE,String(maxLv)); }catch(e){} }
+
+/* ── おと ── */
+let actx=null;
+function ac(){ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); return actx; }
+function beep(f,d=0.07,t="sine",v=0.12){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+const sGrab=()=>beep(520,0.04,"sine",0.08);
+const sFix=()=>{ beep(880,0.07,"triangle",0.12); setTimeout(()=>beep(1170,0.09,"triangle",0.12),60); };
+const sWorse=()=>beep(240,0.08,"square",0.08);
+const sWin=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90));
+const sTick=()=>beep(620,0.04,"sine",0.1);
+
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🪢","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+/* ── もんだいづくり（えんの うえで まじわらない グラフ）── */
+function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+// えんしゅうの いち i,j の げんと p,q の げんが まじわるか
+function interleave(i,j,p,q,n){
+  const between=(a,x,b)=>{ // えんしゅうで a→b の あいだに x が あるか
+    if(a<b) return x>a&&x<b;
+    return x>a||x<b;
+  };
+  const pIn=between(i,p,j), qIn=between(i,q,j);
+  return pIn!==qIn;
+}
+function genGraph(lv){
+  const n=Math.min(12, 4+Math.floor((lv-1)/2));
+  const order=shuffled([...Array(n).keys()]);   // order[えんしゅういち]=くいの ばんごう
+  const posOf=[]; order.forEach((id,i)=>posOf[id]=i);
+  const edges=[], diag=[];
+  for(let i=0;i<n;i++) edges.push([order[i], order[(i+1)%n]]);
+  const want=Math.min(n-3, 1+Math.floor(lv/3));
+  let guard=0, added=0;
+  while(added<want && guard++<400){
+    const i=(Math.random()*n)|0, j=(Math.random()*n)|0;
+    if(i===j) continue;
+    const d=Math.abs(i-j);
+    if(d===1||d===n-1) continue;                       // となりは サイクルに ある
+    if(diag.some(([p,q])=>(p===i&&q===j)||(p===j&&q===i))) continue;
+    if(diag.some(([p,q])=>interleave(i,j,p,q,n))) continue;   // ほかの げんと まじわる
+    diag.push([i,j]); edges.push([order[i],order[j]]); added++;
+  }
+  return {n, edges, order, posOf};
+}
+/* ── くいを かきまぜて おく ── */
+function scatter(n,w,h,minD){
+  const pts=[];
+  for(let i=0;i<n;i++){
+    let best=null, bestD=-1;
+    for(let t=0;t<60;t++){
+      const p={x:0.10+Math.random()*0.80, y:0.10+Math.random()*0.80};
+      let d=9;
+      for(const q of pts) d=Math.min(d, Math.hypot((p.x-q.x)*w,(p.y-q.y)*h));
+      if(d>bestD){ bestD=d; best=p; }
+      if(d>minD) break;
+    }
+    pts.push(best);
+  }
+  return pts;
+}
+
+/* ── じょうたい ── */
+let lv=1, N=0, edges=[], pts=[], sol=[], drag=-1, hintT=0, crossN=0, done=false;
+
+function startLevel(n){
+  lv=n; done=false; drag=-1; hintT=0;
+  const G=genGraph(n);
+  N=G.n; edges=G.edges;
+  // せいかいの ならび（えんしゅう）
+  sol=[];
+  for(let i=0;i<N;i++){
+    const a=-Math.PI/2 + i/N*Math.PI*2;
+    const id=G.order[i];
+    sol[id]={x:0.5+Math.cos(a)*0.37, y:0.5+Math.sin(a)*0.37};
+  }
+  // かきまぜ：レベルに あわせた からまりの かずに なる ならびを えらぶ
+  // （ぜんぶ ランダムだと 5さいには むずかしすぎるので すこしずつ ふやす）
+  const target=Math.max(2, Math.min(N+3, 2+Math.floor(lv*0.7)));
+  let bestPts=null, bestScore=1e9;
+  for(let t=0;t<60;t++){
+    const cand=scatter(N, 340, 340, 62);
+    pts=cand;
+    const c=countCross();
+    if(c===0) continue;
+    const score=Math.abs(c-target);
+    if(score<bestScore){ bestScore=score; bestPts=cand.map(q=>({x:q.x,y:q.y})); if(score===0) break; }
+  }
+  pts=bestPts||scatter(N,340,340,62);
+  document.getElementById("lvName").textContent="レベル "+n;
+  ovl.classList.remove("show");
+  show("play-s");
+  requestAnimationFrame(()=>{ resize(); updateCross(); render(); });
+}
+
+/* ── こうさの かず ── */
+function seg(a,b,c,d){
+  const s=(p,q,r)=>Math.sign((q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x));
+  const d1=s(a,b,c), d2=s(a,b,d), d3=s(c,d,a), d4=s(c,d,b);
+  return d1!==d2 && d3!==d4;
+}
+function crossPairs(){
+  const out=[];
+  for(let i=0;i<edges.length;i++) for(let j=i+1;j<edges.length;j++){
+    const [a,b]=edges[i], [c,d]=edges[j];
+    if(a===c||a===d||b===c||b===d) continue;
+    if(seg(pts[a],pts[b],pts[c],pts[d])) out.push([i,j]);
+  }
+  return out;
+}
+function countCross(){ return crossPairs().length; }
+function updateCross(){
+  const before=crossN;
+  crossN=countCross();
+  const el=document.getElementById("cross");
+  el.textContent = crossN===0 ? "からまり なし！" : ("からまり "+crossN);
+  el.classList.toggle("ok", crossN===0);
+  if(!done && crossN===0){ winLevel(); return; }
+  if(before>crossN && before>0) sFix();
+  else if(before<crossN) sWorse();
+}
+function winLevel(){
+  done=true; sWin(); confetti();
+  if(lv+1>maxLv){ maxLv=lv+1; save(); }
+  setTimeout(()=>sheetShow({ e:"🎉", t:"ほどけた！", s:"レベル "+lv+" クリア！",
+    btns:[["もういっかい","gray",()=>startLevel(lv)],["つぎへ ▶","green",()=>startLevel(lv+1)]] }),600);
+}
+
+/* ── えがく ── */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let CW=320, CH=320, PR=16;
+function resize(){
+  const wrap=document.getElementById("cvWrap"), r=wrap.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  const s=Math.min(r.width, r.height);
+  CW=Math.floor(Math.min(r.width, s*1.35)); CH=Math.floor(Math.min(r.height, s*1.35));
+  const dpr=Math.min(devicePixelRatio||1,2);
+  cv.style.width=CW+"px"; cv.style.height=CH+"px";
+  cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  PR=Math.max(12, Math.min(24, Math.min(CW,CH)*0.055));
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ resize(); render(); },150); });
+addEventListener("orientationchange",()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ resize(); render(); },250); });
+const sx=p=>PR*1.4+p.x*(CW-PR*2.8), sy=p=>PR*1.4+p.y*(CH-PR*2.8);
+
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  // ヒント（せいかいの ならび）
+  if(hintT>0){
+    ctx.save(); ctx.globalAlpha=Math.min(0.5,hintT/600);
+    ctx.setLineDash([6,6]); ctx.strokeStyle="#8a7a66"; ctx.lineWidth=2;
+    for(const [a,b] of edges){ ctx.beginPath(); ctx.moveTo(sx(sol[a]),sy(sol[a])); ctx.lineTo(sx(sol[b]),sy(sol[b])); ctx.stroke(); }
+    ctx.setLineDash([]);
+    for(let i=0;i<N;i++){ ctx.beginPath(); ctx.arc(sx(sol[i]),sy(sol[i]),PR*0.5,0,Math.PI*2); ctx.fillStyle=PEGCOL[i%PEGCOL.length]; ctx.fill(); }
+    ctx.restore();
+  }
+  // どの ロープが かさなってるか
+  const bad=new Set();
+  for(const [i,j] of crossPairs()){ bad.add(i); bad.add(j); }
+  // ロープ
+  for(let i=0;i<edges.length;i++){
+    const [a,b]=edges[i], x1=sx(pts[a]), y1=sy(pts[a]), x2=sx(pts[b]), y2=sy(pts[b]);
+    ctx.lineCap="round";
+    ctx.lineWidth=PR*0.52; ctx.strokeStyle=bad.has(i)?"rgba(200,40,50,.28)":"rgba(120,90,50,.22)";
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.lineWidth=PR*0.34; ctx.strokeStyle=bad.has(i)?"#ff5a5f":"#c89a5b";
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    // ロープの あみめ
+    ctx.lineWidth=Math.max(1,PR*0.09); ctx.strokeStyle=bad.has(i)?"rgba(255,255,255,.5)":"rgba(255,255,255,.42)";
+    ctx.setLineDash([PR*0.22,PR*0.3]);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // くい
+  for(let i=0;i<N;i++){
+    const x=sx(pts[i]), y=sy(pts[i]), r=(drag===i?PR*1.18:PR);
+    ctx.beginPath(); ctx.arc(x,y+r*0.16,r,0,Math.PI*2); ctx.fillStyle="rgba(90,60,35,.22)"; ctx.fill();
+    const g=ctx.createRadialGradient(x-r*0.3,y-r*0.35,r*0.15,x,y,r);
+    g.addColorStop(0,"#ffffff"); g.addColorStop(0.35,PEGCOL[i%PEGCOL.length]); g.addColorStop(1,"rgba(0,0,0,.30)");
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.lineWidth=Math.max(2,r*0.18); ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.stroke();
+  }
+}
+
+/* ── ドラッグ ── */
+function pick(mx,my){
+  let bi=-1, bd=1e9;
+  for(let i=0;i<N;i++){
+    const d=Math.hypot(mx-sx(pts[i]), my-sy(pts[i]));
+    if(d<PR*1.9 && d<bd){ bd=d; bi=i; }
+  }
+  return bi;
+}
+function toWorld(mx,my){
+  return { x:Math.max(0,Math.min(1,(mx-PR*1.4)/(CW-PR*2.8))), y:Math.max(0,Math.min(1,(my-PR*1.4)/(CH-PR*2.8))) };
+}
+function ev(e){ const r=cv.getBoundingClientRect(); return {mx:(e.clientX-r.left)/r.width*CW, my:(e.clientY-r.top)/r.height*CH}; }
+cv.addEventListener("pointerdown",e=>{
+  e.preventDefault(); ac();
+  if(done) return;
+  const {mx,my}=ev(e); const i=pick(mx,my);
+  if(i>=0){ drag=i; sGrab(); try{cv.setPointerCapture(e.pointerId);}catch(_){} render(); }
+});
+cv.addEventListener("pointermove",e=>{
+  if(drag<0||done) return;
+  e.preventDefault();
+  const {mx,my}=ev(e); pts[drag]=toWorld(mx,my);
+  render();
+});
+function endDrag(){ if(drag<0) return; drag=-1; updateCross(); render(); }
+cv.addEventListener("pointerup",endDrag);
+cv.addEventListener("pointercancel",endDrag);
+
+/* ── ヒント（アニメ）── */
+let raf=0, lastT=0;
+function loop(ts){
+  if(!lastT) lastT=ts;
+  const dt=Math.min(60,ts-lastT); lastT=ts;
+  if(hintT>0){ hintT-=dt; if(hintT<0)hintT=0; render(); }
+  raf=requestAnimationFrame(loop);
+}
+
+/* ── がめん ── */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const ovl=document.getElementById("ovl"), sheet=document.getElementById("sheet");
+function sheetShow(o){
+  sheet.innerHTML="<div class='ce'>"+o.e+"</div><div class='ct'>"+o.t+"</div>"+(o.s?"<div class='cs'>"+o.s+"</div>":"")+"<div class='row' id='sRow'></div>";
+  const row=document.getElementById("sRow");
+  (o.btns||[]).forEach(([label,cls,fn])=>{
+    const b=document.createElement("button"); b.className="btn "+cls; b.textContent=label;
+    b.addEventListener("click",()=>{ sTick(); fn(); });
+    row.appendChild(b);
+  });
+  ovl.classList.add("show");
+}
+function goStart(){
+  ovl.classList.remove("show");
+  document.getElementById("btnGo").textContent=maxLv>1?("つづきから（レベル "+maxLv+"）▶"):"はじめる ▶";
+  document.getElementById("btnFirst").style.display=maxLv>1?"block":"none";
+  show("start-s");
+}
+document.getElementById("btnGo").addEventListener("click",()=>{ ac(); sTick(); startLevel(maxLv); });
+document.getElementById("btnFirst").addEventListener("click",()=>{ ac(); sTick(); startLevel(1); });
+document.getElementById("toStart").addEventListener("click",()=>{ sTick(); goStart(); });
+document.getElementById("hint").addEventListener("click",()=>{ sTick(); hintT=2200; render(); });
+
+/* ── テストよう ── */
+window.__T={
+  start:n=>startLevel(n),
+  state:()=>({lv,N,edges:edges.length,cross:countCross(),done}),
+  // せいかいの ならびに ならべたら からまりが 0 に なるか（とけることの かくにん）
+  checkSolvable:n=>{
+    startLevel(n);
+    const keep=pts.map(p=>({x:p.x,y:p.y}));
+    pts=sol.map(p=>({x:p.x,y:p.y}));
+    const c=countCross();
+    pts=keep;
+    return {n:N, edges:edges.length, solvedCross:c, startCross:countCross()};
+  },
+  solveNow:()=>{ pts=sol.map(p=>({x:p.x,y:p.y})); updateCross(); render(); },
+  pegPos:i=>({x:sx(pts[i]), y:sy(pts[i])}), cw:()=>CW, chh:()=>CH
+};
+
+/* ── スタート ── */
+goStart();
+raf=requestAnimationFrame(loop);
+</script>
+</body>
+</html>

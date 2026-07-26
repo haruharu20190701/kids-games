@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="いろみずわけ" />
+<title>いろみずわけ｜こどもあそびば</title>
+<meta name="description" content="5さいくらいの こども向けの いろみずわけパズル。おなじ いろの みずを 1本の ビンに あつめよう。レベルは どんどん つづく。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/watersort/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="いろみずわけ｜こどもあそびば" />
+<meta property="og:description" content="おなじ いろの みずを あつめる パズル。レベルは どんどん つづくよ！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/watersort/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── いろみずわけ（ビンの いろみずソート）── */
+  :root{ --bg1:#e7f5ff; --bg2:#bfe3fb; --ink:#2f4a5c; --card:#fffdf8; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:12px;top:10px;z-index:70;width:46px;height:46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;background:var(--card);box-shadow:0 4px 0 #7fb4d4;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #7fb4d4;}
+  header{width:100%;max-width:560px;text-align:center;padding:10px 14px 0;flex:0 0 auto;}
+  .title{font-size:22px;font-weight:900;letter-spacing:1px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#fff;border-radius:999px;cursor:pointer;transition:transform .08s;}
+  .btn:active{transform:translateY(2px);}
+  .btn.green{background:linear-gradient(180deg,#7bdc8a,#34c759);box-shadow:0 4px 0 #1f9e44;}
+  .btn.orange{background:linear-gradient(180deg,#ffb703,#fb8500);box-shadow:0 4px 0 #c96a00;}
+  .btn.blue{background:linear-gradient(180deg,#4cc9f0,#3a86ff);box-shadow:0 4px 0 #2563c9;}
+  .btn.gray{background:linear-gradient(180deg,#b8c4cc,#8d9aa4);box-shadow:0 4px 0 #6a757d;}
+  .btn:disabled{opacity:.45;}
+  #app{flex:1;width:100%;max-width:560px;display:flex;flex-direction:column;min-height:0;padding:4px 12px 12px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  /* ── スタートがめん ── */
+  #start-s{align-items:center;justify-content:center;gap:16px;}
+  #start-s .hero{font-size:74px;line-height:1;}
+  #start-s .lead{font-size:15px;font-weight:800;color:#5b7d92;text-align:center;line-height:1.6;}
+  #start-s .btn{font-size:22px;padding:15px 34px;}
+  /* ── ゲームがめん ── */
+  #play-s{gap:6px;}
+  #bar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  #bar .btn{font-size:14px;padding:9px 13px;flex:0 0 auto;}
+  #lvName{flex:1;text-align:center;font-size:18px;font-weight:900;}
+  #cvWrap{flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;}
+  canvas{touch-action:none;}
+  #tip{text-align:center;font-size:13px;font-weight:800;color:#5b7d92;min-height:17px;flex:0 0 auto;}
+  /* ── けっか ── */
+  #ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(20,50,70,.6);z-index:90;padding:24px;}
+  #ovl.show{display:flex;}
+  .sheet{background:var(--card);border-radius:22px;padding:20px 18px;max-width:330px;width:100%;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.4);}
+  .sheet .ce{font-size:66px;line-height:1.15;animation:cardIn .5s;}
+  @keyframes cardIn{0%{transform:scale(.2) rotate(-16deg);}65%{transform:scale(1.18);}100%{transform:scale(1);}}
+  .sheet .ct{font-size:22px;font-weight:900;margin-top:4px;}
+  .sheet .cs{font-size:14px;font-weight:800;color:#5b7d92;margin-top:4px;line-height:1.5;}
+  .sheet .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .sheet .btn{font-size:17px;padding:11px 20px;}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden;}
+  .conf{position:absolute;font-size:26px;will-change:transform;}
+  @media (orientation:landscape) and (max-height:520px){
+    header{padding:4px 14px 0;} .title{font-size:17px;}
+    #start-s .hero{font-size:48px;} #start-s .btn{font-size:18px;padding:12px 26px;}
+    #tip{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ">🏠</a>
+  <header><div class="title">🧪 いろみずわけ</div></header>
+
+  <div id="app">
+    <!-- スタート -->
+    <section id="start-s" class="screen show">
+      <div class="hero">🧪🧪🧪</div>
+      <div class="lead">ビンを タップして いろみずを うつそう。<br>おなじ いろだけの ビンに できたら クリア！</div>
+      <button class="btn blue" id="btnGo">はじめる ▶</button>
+      <button class="btn gray" id="btnFirst" style="font-size:15px;padding:10px 20px;display:none">レベル1 から</button>
+    </section>
+
+    <!-- あそぶ -->
+    <section id="play-s" class="screen">
+      <div id="bar">
+        <button class="btn gray" id="undo">↩ もどす</button>
+        <div id="lvName">レベル 1</div>
+        <button class="btn orange" id="retry">やりなおし</button>
+      </div>
+      <div id="cvWrap"><canvas id="cv"></canvas></div>
+      <div id="tip">ビンを タップ → うつす ビンを タップ</div>
+    </section>
+  </div>
+
+  <div id="ovl"><div class="sheet" id="sheet"></div></div>
+  <div id="confetti"></div>
+
+<script>
+/* =========================================================
+   いろみずわけ
+   - ビンを タップして えらび、べつの ビンを タップして いろみずを うつす
+   - うつせるのは「おなじ いろの うえ」か「からの ビン」だけ
+   - ぜんぶの ビンが「1いろだけ」または「から」に なったら クリア
+   - もんだいは じどうせいせい。「クリアじょうたいから ぎゃくに かきまぜる」ので
+     ぜったいに とける（といかたが ない もんだいは できない）
+   - レベルは どんどん つづく。すすんだ レベルは localStorage に ほぞん
+   ========================================================= */
+
+const CAP=4;                     // 1本の ビンに はいる かず
+const COLORS=[
+  "#ff5a5f","#3a86ff","#34c759","#ffd60a","#b06bff",
+  "#ff8c1a","#ff7ac8","#00c2d1","#9bd62b","#a5764f"
+];
+const CDARK=["#c9333a","#2563c9","#1f9e44","#d1a800","#8340d1",
+  "#c96a00","#d14a95","#008f9b","#6da117","#7a5233"];
+
+/* ── セーブ ── */
+const SAVE="watersort.level";
+let maxLv=1;
+try{ const v=parseInt(localStorage.getItem(SAVE),10); if(v>=1&&v<10000) maxLv=v; }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, String(maxLv)); }catch(e){} }
+
+/* ── おと ── */
+let actx=null;
+function ac(){ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); return actx; }
+function beep(f,d=0.07,t="sine",v=0.13){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+function sweep(f1,f2,d=0.2,t="sine",v=0.12){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.linearRampToValueAtTime(f2,a.currentTime+d);g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+const sSel=()=>beep(720,0.05,"sine",0.1);
+const sPour=()=>sweep(520,300,0.22,"sine",0.11);
+const sNo=()=>beep(180,0.12,"square",0.1);
+const sDone=()=>[880,1170].forEach((f,i)=>setTimeout(()=>beep(f,0.12,"triangle",0.15),i*90));
+const sWin=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.17,"triangle",0.2),i*90));
+
+const confEl=document.getElementById("confetti");
+function confetti(){const emo=["🎉","⭐","🌟","✨","🎊","🧪","🌈"];for(let i=0;i<22;i++){const s=document.createElement("div");s.className="conf";s.textContent=emo[(Math.random()*emo.length)|0];const x=Math.random()*100,dur=1100+Math.random()*900,delay=Math.random()*250;s.style.left=x+"vw";s.style.top="-40px";s.style.transition=`transform ${dur}ms cubic-bezier(.3,.6,.5,1) ${delay}ms, opacity ${dur}ms ${delay}ms`;confEl.appendChild(s);requestAnimationFrame(()=>{s.style.transform=`translateY(${window.innerHeight+80}px) rotate(${(Math.random()*720-360)|0}deg)`;s.style.opacity="0.2";});setTimeout(()=>s.remove(),dur+delay+100);}}
+
+/* ── もんだいの じょうたい ── */
+let lv=1, tubes=[], sel=-1, hist=[], done=false, anim=null, doneMark=new Set();
+
+function lvColors(n){ return Math.min(10, 3+Math.floor((n-1)/2)); }
+function lvFree(n){ return n>=13 ? 1 : 2; }   // レベルが たかいと からビンが 1本
+
+/* ── もんだいづくり：クリアじょうたいから ぎゃくてを ランダムに やる ──
+   ぎゃくてで つくるので、もとの てを たどれば かならず とける          */
+function genLevel(n){
+  const nc=lvColors(n), free=lvFree(n);
+  const t=[];
+  for(let c=0;c<nc;c++) t.push(Array(CAP).fill(c));
+  for(let i=0;i<free;i++) t.push([]);
+  const steps=40+nc*16;
+  let did=0;
+  for(let s=0;s<steps*6 && did<steps;s++){
+    // うつしもと B（うえの おなじいろの かたまり）を えらぶ
+    const bs=[];
+    for(let i=0;i<t.length;i++) if(t[i].length) bs.push(i);
+    if(!bs.length) break;
+    const B=bs[(Math.random()*bs.length)|0];
+    const col=t[B][t[B].length-1];
+    let run=0; for(let i=t[B].length-1;i>=0&&t[B][i]===col;i--) run++;
+    // k=run のときは B が からに なる ばあいだけ ゆるす（もどす てが せいとうに なるように）
+    const maxK = (run===t[B].length) ? run : run-1;
+    if(maxK<1) continue;
+    const k=1+((Math.random()*maxK)|0);
+    // うけとる A：からか、うえが ちがう いろ、そして k こ はいる
+    const as=[];
+    for(let i=0;i<t.length;i++){
+      if(i===B) continue;
+      if(CAP-t[i].length<k) continue;
+      if(t[i].length && t[i][t[i].length-1]===col) continue;
+      as.push(i);
+    }
+    if(!as.length) continue;
+    const A=as[(Math.random()*as.length)|0];
+    for(let i=0;i<k;i++){ t[B].pop(); t[A].push(col); }
+    did++;
+  }
+  // ならびを シャッフル（みための いち）
+  for(let i=t.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [t[i],t[j]]=[t[j],t[i]]; }
+  return t;
+}
+function isSolved(t){
+  return t.every(x=>x.length===0 || (x.length===CAP && x.every(c=>c===x[0])));
+}
+function canPour(a,b){
+  if(a===b||a<0||b<0) return 0;
+  const A=tubes[a], B=tubes[b];
+  if(!A.length || B.length>=CAP) return 0;
+  const c=A[A.length-1];
+  if(B.length && B[B.length-1]!==c) return 0;
+  let k=0; for(let i=A.length-1;i>=0&&A[i]===c;i--) k++;
+  return Math.min(k, CAP-B.length);
+}
+function tubeDone(i){ const t=tubes[i]; return t.length===CAP && t.every(c=>c===t[0]); }
+
+function startLevel(n){
+  lv=n; tubes=genLevel(n); sel=-1; hist=[]; done=false; anim=null; doneMark=new Set();
+  for(let i=0;i<tubes.length;i++) if(tubeDone(i)) doneMark.add(i);
+  document.getElementById("lvName").textContent="レベル "+n;
+  document.getElementById("undo").disabled=true;
+  ovl.classList.remove("show");
+  show("play-s");
+  requestAnimationFrame(()=>{ layout(); render(); });
+}
+
+/* ── うつす ── */
+function pour(a,b){
+  const k=canPour(a,b); if(!k) return false;
+  const col=tubes[a][tubes[a].length-1];
+  hist.push({a,b,k,col});
+  document.getElementById("undo").disabled=false;
+  anim={a,b,k,col,phase:"go",t:0,moved:0};
+  sPour();
+  return true;
+}
+function finishPour(){
+  const {a,b,k,col}=anim;
+  for(let i=0;i<k;i++){ tubes[a].pop(); tubes[b].push(col); }
+  anim=null;
+  let ring=false;
+  for(let i=0;i<tubes.length;i++){
+    if(tubeDone(i) && !doneMark.has(i)){ doneMark.add(i); ring=true; }
+    if(!tubeDone(i) && doneMark.has(i)) doneMark.delete(i);
+  }
+  if(ring) sDone();
+  if(isSolved(tubes)) winLevel();
+}
+function undo(){
+  if(anim||done||!hist.length) return;
+  const m=hist.pop();
+  for(let i=0;i<m.k;i++){ tubes[m.b].pop(); tubes[m.a].push(m.col); }
+  doneMark=new Set(); for(let i=0;i<tubes.length;i++) if(tubeDone(i)) doneMark.add(i);
+  sSel(); sel=-1;
+  document.getElementById("undo").disabled=!hist.length;
+  render();
+}
+function winLevel(){
+  done=true; sWin(); confetti();
+  if(lv+1>maxLv){ maxLv=lv+1; save(); }
+  setTimeout(()=>{
+    sheetShow({ e:"🎉", t:"クリア！", s:"レベル "+lv+" が できたよ！",
+      btns:[["もういっかい","gray",()=>startLevel(lv)],["つぎへ ▶","green",()=>startLevel(lv+1)]] });
+  },700);
+}
+
+/* ── えがく ── */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let TW=40, TH=120, SLOT=28, POS=[], CW=300, CH=300;
+function layout(){
+  const wrap=document.getElementById("cvWrap"), r=wrap.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  const n=tubes.length;
+  const rows = n<=5?1:2;
+  const per = Math.ceil(n/rows);
+  // はば・たかさの よさんから ビンの おおきさを きめる
+  // よさん：はば＝1れつぶん、たかさ＝ぜんぎょう＋すきま（ビンの たかさは はばの 2.78ばい）
+  const vBudget=(r.height-14)/(rows*2.78+(rows-1)*0.9);
+  let tw=Math.min((r.width-16)/per*0.78, vBudget);
+  tw=Math.max(20, Math.min(tw, 70));
+  TW=tw; SLOT=tw*0.62; TH=SLOT*CAP+tw*0.30;
+  CW=Math.floor(r.width); CH=Math.floor(r.height);
+  const dpr=Math.min(devicePixelRatio||1,2);
+  cv.style.width=CW+"px"; cv.style.height=CH+"px";
+  cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  // ビンの いち（ひだりうえの ざひょう）
+  POS=[];
+  const rowGap=TH*0.32;
+  const totalH=rows*TH+(rows-1)*rowGap;
+  const startY=Math.max(TW*0.5,(CH-totalH)/2);
+  for(let i=0;i<n;i++){
+    const row=Math.floor(i/per), col=i%per;
+    const cnt=Math.min(per, n-row*per);
+    const gap=(CW-cnt*TW)/(cnt+1);
+    const x=gap+col*(TW+gap);
+    const y=startY+row*(TH+rowGap);
+    POS.push({x,y});
+  }
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ layout(); render(); },150); });
+addEventListener("orientationchange",()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ layout(); render(); },250); });
+
+function tubePath(x,y,w,h){
+  const r=w*0.42;
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(x,y+h-r);
+  ctx.quadraticCurveTo(x,y+h, x+w/2,y+h);
+  ctx.quadraticCurveTo(x+w,y+h, x+w,y+h-r);
+  ctx.lineTo(x+w,y);
+}
+/* 1本の ビンを えがく。cnt=みせる みずの かず（アニメちゅうに かえる） */
+function drawTube(x,y,list,cnt,opt){
+  const w=TW,h=TH;
+  ctx.save();
+  if(opt&&opt.rot){ ctx.translate(x+w/2,y+h*0.1); ctx.rotate(opt.rot); ctx.translate(-(x+w/2),-(y+h*0.1)); }
+  // ガラスの なか
+  tubePath(x,y,w,h); ctx.closePath();
+  ctx.fillStyle="rgba(255,255,255,.55)"; ctx.fill();
+  // みず
+  ctx.save(); tubePath(x,y,w,h); ctx.closePath(); ctx.clip();
+  const inner=h-w*0.30;
+  for(let k=0;k<cnt;k++){
+    const c=list[k];
+    const sy=y+w*0.30+inner-(k+1)*SLOT;
+    const gr=ctx.createLinearGradient(x,sy,x+w,sy+SLOT);
+    gr.addColorStop(0,COLORS[c%COLORS.length]); gr.addColorStop(1,CDARK[c%CDARK.length]);
+    ctx.fillStyle=gr; ctx.fillRect(x,sy,w,SLOT+0.6);
+    ctx.fillStyle="rgba(255,255,255,.18)"; ctx.fillRect(x,sy,w,Math.max(1,SLOT*0.16));
+  }
+  ctx.restore();
+  // ガラスの ふち・ひかり
+  tubePath(x,y,w,h); ctx.closePath();
+  ctx.lineWidth=Math.max(2,w*0.075); ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.stroke();
+  ctx.lineWidth=Math.max(1,w*0.03); ctx.strokeStyle="rgba(90,130,155,.55)"; ctx.stroke();
+  ctx.fillStyle="rgba(255,255,255,.5)"; ctx.fillRect(x+w*0.17,y+h*0.10,Math.max(1.5,w*0.09),h*0.72);
+  ctx.restore();
+}
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  for(let i=0;i<tubes.length;i++){
+    const p=POS[i]; if(!p) continue;
+    if(anim&&anim.a===i) continue;                 // うつしてる ビンは あとで えがく
+    let cnt=tubes[i].length;
+    if(anim&&anim.b===i) cnt=tubes[i].length+anim.moved;
+    const lift=(sel===i?-TH*0.10:0);
+    const list=(anim&&anim.b===i)? tubes[i].concat(Array(anim.moved).fill(anim.col)) : tubes[i];
+    drawTube(p.x,p.y+lift,list,cnt,null);
+    if(doneMark.has(i)){ ctx.font=Math.round(TW*0.52)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("⭐",p.x+TW/2,p.y-TW*0.24); }
+  }
+  if(anim){
+    const pa=POS[anim.a], pb=POS[anim.b];
+    let x=pa.x, y=pa.y, rot=0;
+    const leftSide = pa.x<=pb.x;
+    const tx=pb.x+(leftSide?-TW*0.62:TW*0.62), ty=pb.y-TH*0.52;
+    let e=0;
+    if(anim.phase==="go") e=ease(anim.t);
+    else if(anim.phase==="pour") e=1;
+    else e=1-ease(anim.t);
+    x=pa.x+(tx-pa.x)*e; y=pa.y+(ty-pa.y)*e;
+    rot=(leftSide?1:-1)*e*(Math.PI/180*62);
+    const cnt=tubes[anim.a].length-anim.moved;
+    // ながれる みず
+    if(anim.phase==="pour"){
+      const lipX=pb.x+TW/2, lipY=pb.y+TH*0.02;
+      const sx=x+TW/2+(leftSide?TW*0.42:-TW*0.42), sy=y+TH*0.16;
+      ctx.save();
+      ctx.strokeStyle=COLORS[anim.col%COLORS.length];
+      ctx.lineWidth=Math.max(3,TW*0.17); ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(sx,sy);
+      ctx.quadraticCurveTo((sx+lipX)/2, sy+(lipY-sy)*0.25, lipX, lipY+TH*0.10);
+      ctx.stroke(); ctx.restore();
+    }
+    drawTube(x,y,tubes[anim.a],cnt,{rot});
+  }
+}
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+
+/* ── ループ（アニメちゅうだけ うごかす）── */
+let raf=0, lastT=0;
+function loop(ts){
+  if(!lastT) lastT=ts;
+  const dt=Math.min(60,ts-lastT); lastT=ts;
+  if(anim){
+    if(anim.phase==="go"){
+      anim.t+=dt/260;
+      if(anim.t>=1){ anim.t=0; anim.phase="pour"; anim.acc=0; }
+    }else if(anim.phase==="pour"){
+      anim.acc=(anim.acc||0)+dt;
+      const per=150;
+      while(anim.acc>=per && anim.moved<anim.k){ anim.acc-=per; anim.moved++; }
+      if(anim.moved>=anim.k && anim.acc>=90){ anim.phase="back"; anim.t=0; }
+    }else{
+      anim.t+=dt/220;
+      if(anim.t>=1) finishPour();
+    }
+    render();
+  }
+  raf=requestAnimationFrame(loop);
+}
+
+/* ── タップ ── */
+function hit(mx,my){
+  for(let i=0;i<POS.length;i++){
+    const p=POS[i];
+    if(mx>=p.x-TW*0.28&&mx<=p.x+TW*1.28&&my>=p.y-TH*0.16&&my<=p.y+TH*1.12) return i;
+  }
+  return -1;
+}
+cv.addEventListener("pointerdown",e=>{
+  e.preventDefault(); ac();
+  if(anim||done) return;
+  const r=cv.getBoundingClientRect();
+  const mx=(e.clientX-r.left)/r.width*CW, my=(e.clientY-r.top)/r.height*CH;
+  const i=hit(mx,my);
+  if(i<0){ sel=-1; render(); return; }
+  if(sel<0){
+    if(!tubes[i].length || tubeDone(i)){ sNo(); return; }
+    sel=i; sSel(); render(); return;
+  }
+  if(i===sel){ sel=-1; sSel(); render(); return; }
+  if(canPour(sel,i)){ const a=sel; sel=-1; pour(a,i); render(); }
+  else{
+    // うつせない → えらびなおし
+    if(tubes[i].length && !tubeDone(i)){ sel=i; sSel(); }
+    else { sNo(); sel=-1; }
+    render();
+  }
+});
+
+/* ── がめん ── */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const ovl=document.getElementById("ovl"), sheet=document.getElementById("sheet");
+function sheetShow(o){
+  sheet.innerHTML="<div class='ce'>"+o.e+"</div><div class='ct'>"+o.t+"</div>"+(o.s?"<div class='cs'>"+o.s+"</div>":"")+"<div class='row' id='sRow'></div>";
+  const row=document.getElementById("sRow");
+  (o.btns||[]).forEach(([label,cls,fn])=>{
+    const b=document.createElement("button"); b.className="btn "+cls; b.textContent=label;
+    b.addEventListener("click",()=>{ sSel(); fn(); });
+    row.appendChild(b);
+  });
+  ovl.classList.add("show");
+}
+document.getElementById("btnGo").addEventListener("click",()=>{ ac(); sSel(); startLevel(maxLv); });
+document.getElementById("btnFirst").addEventListener("click",()=>{ ac(); sSel(); startLevel(1); });
+document.getElementById("undo").addEventListener("click",()=>undo());
+document.getElementById("retry").addEventListener("click",()=>{ sSel(); startLevel(lv); });
+
+/* ── テストよう ── */
+window.__T={
+  lv:()=>lv, tubes:()=>tubes.map(t=>t.slice()), solved:()=>isSolved(tubes),
+  gen:(n)=>genLevel(n),
+  // その もんだいが とけるか（ふかさゆうせんたんさく）
+  solve:(t0,cap)=>{
+    const key=t=>t.map(x=>x.join(",")).sort().join("|");
+    const start=t0.map(x=>x.slice());
+    const seen=new Set([key(start)]); const st=[start]; let n=0;
+    const ok=t=>t.every(x=>x.length===0||(x.length===CAP&&x.every(c=>c===x[0])));
+    while(st.length&&n<(cap||150000)){
+      const s=st.pop(); n++;
+      if(ok(s)) return {ok:true,n};
+      for(let a=0;a<s.length;a++) for(let b=0;b<s.length;b++){
+        if(a===b||!s[a].length||s[b].length>=CAP) continue;
+        const c=s[a][s[a].length-1];
+        if(s[b].length&&s[b][s[b].length-1]!==c) continue;
+        let k=0; for(let i=s[a].length-1;i>=0&&s[a][i]===c;i--) k++;
+        k=Math.min(k,CAP-s[b].length);
+        const ns=s.map(x=>x.slice());
+        for(let i=0;i<k;i++){ ns[a].pop(); ns[b].push(c); }
+        const kk=key(ns);
+        if(!seen.has(kk)){ seen.add(kk); st.push(ns); }
+      }
+    }
+    return {ok:false,n};
+  },
+  start:(n)=>startLevel(n),
+  autoWin:()=>{ tubes=tubes.map((t,i)=>i<lvColors(lv)?Array(CAP).fill(i):[]); winLevel(); }
+};
+
+/* ── スタート ── */
+if(maxLv>1){
+  document.getElementById("btnGo").textContent="つづきから（レベル "+maxLv+"）▶";
+  document.getElementById("btnFirst").style.display="block";
+}
+raf=requestAnimationFrame(loop);
+</script>
+</body>
+</html>
