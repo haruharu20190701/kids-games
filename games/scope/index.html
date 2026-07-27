@@ -88,6 +88,9 @@
   #breathWrap{flex:1;display:flex;flex-direction:column;gap:2px;}
   #breathBar{height:5px;background:#26374f;border:1px solid #46628a;}
   #breathBar i{display:block;height:100%;background:#5ad46a;width:100%;}
+  #timeBar{height:7px;background:#26374f;border:2px solid #46628a;overflow:hidden;margin-top:2px;}
+  #timeBar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#5ad46a,#ffd93b);}
+  #timeBar.low i{background:linear-gradient(90deg,#ff8b3d,#f0705a);}
   /* オーバーレイ */
   .ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,12,22,.85);z-index:90;padding:18px;}
   .ovl.show{display:flex;}
@@ -128,7 +131,9 @@
         <div id="stageLbl">ステージ 1</div>
         <div class="cell">まと <b id="leftLbl">0</b></div>
         <div class="cell">とくてん <b id="scoreLbl">0</b></div>
+        <div class="cell" id="comboCell" style="display:none">れんぞく <b id="comboLbl">×1</b></div>
       </div>
+      <div id="timeWrap" style="display:none"><div id="timeBar"><i id="timeI"></i></div></div>
       <div id="view">
         <canvas id="cv"></canvas>
         <div id="scope">
@@ -321,10 +326,13 @@ function makeTarget(kind,x,y,z,opt){
     pole.position.set(-0.25,1.0,0); g.add(pole);
     radius=0.8; pts=200;
   }
+  const small=opt&&opt.small;
+  if(small){ g.scale.setScalar(0.55); radius*=0.55; pts=Math.round(pts*2.2); }
   g.position.set(x,y,z);
   scene.add(g);
-  const t={g, kind, radius, pts, alive:true, base:new THREE.Vector3(x,y,z),
-           bob:Math.random()*Math.PI*2, moveA:opt&&opt.moveA||0, moveSpd:opt&&opt.moveSpd||0};
+  const t={g, kind, radius, pts, alive:true, base:new THREE.Vector3(x,y,z), small:!!small,
+           bob:Math.random()*Math.PI*2, moveA:opt&&opt.moveA||0, moveSpd:opt&&opt.moveSpd||0,
+           moveB:opt&&opt.moveB||0};
   targets.push(t);
   return t;
 }
@@ -341,39 +349,61 @@ function clearTargets(){
 let G=null;
 function makeStage(n){
   clearTargets();
-  const cnt=Math.min(9, 3+Math.floor(n/2));
-  const far=Math.min(300, 55+n*16);
-  const near=Math.min(120, 35+n*6);
+  const cnt=Math.min(12, 3+Math.floor(n/1.5));
+  const near=Math.min(200, 40+n*8);
+  const far=Math.min(400, 70+n*22);
+  const smallOK = n>=5;                    // ちいさい まと
+  const vertOK  = n>=6;                    // うえしたにも うごく
   for(let i=0;i<cnt;i++){
     const z=-(near+Math.random()*(far-near));
-    const x=(Math.random()*2-1)*Math.min(10, 3+Math.abs(z)*0.035);
+    const x=(Math.random()*2-1)*Math.min(14, 3+Math.abs(z)*0.04);
     let kind;
     const r=Math.random();
-    if(n>=3 && r<0.22) kind=TYPE.CART;
-    else if(r<0.45) kind=TYPE.BALLOON;
-    else if(r<0.72) kind=TYPE.CAN;
+    // うごく まとは ちかく だけ（とおいと たまが とどく ころには どこに いるか
+    // よそくできない ＝ うんまかせに なって しまう）
+    if(n>=3 && Math.abs(z)<180 && r<0.30) kind=TYPE.CART;
+    else if(r<0.5) kind=TYPE.BALLOON;
+    else if(r<0.74) kind=TYPE.CAN;
     else kind=TYPE.BOARD;
     let y=1.2+Math.random()*1.6;
     if(kind===TYPE.CAN) y=1.3+Math.random()*0.8;
     if(kind===TYPE.CART) y=0.5;
     if(kind===TYPE.BOARD) y=1.8+Math.random()*1.0;
-    const moveA=(kind===TYPE.CART)? (2.5+Math.random()*3.5) : 0;
-    const moveSpd=(kind===TYPE.CART)? (0.25+Math.random()*0.35+n*0.01) : 0;
-    makeTarget(kind,x,y,z,{moveA,moveSpd});
+    const small = smallOK && Math.abs(z)<220 && Math.random()<0.34;
+    const moveA=(kind===TYPE.CART)? Math.min(6, 2.5+Math.random()*2.5+n*0.06) : 0;
+    const moveSpd=(kind===TYPE.CART)? Math.min(0.55, 0.24+Math.random()*0.18+n*0.012) : 0;
+    const moveB=(vertOK && kind!==TYPE.CART && Math.random()<0.3)? (0.6+Math.random()*1.4) : 0;
+    makeTarget(kind,x,y,z,{moveA,moveSpd,moveB,small});
   }
-  const windMax=Math.min(3.6, (n-1)*0.45);
-  G={ stage:n, ammo:cnt+3, left:cnt, score:0, shotsFired:0, hits:0,
-      wind:(Math.random()*2-1)*windMax, over:false, slow:1, slowT:0 };
+  const windMax=Math.min(5.5,(n-1)*0.6);
+  const gust = n>=4;                        // とっぷう（かぜが かわる）
+  const upDown = n>=8;                      // たての かぜ
+  const limit = n>=3 ? (26000+cnt*5200-Math.min(9000,n*350)) : 0;
+  G={ stage:n, ammo:cnt+Math.max(2,4-Math.floor(n/5)), left:cnt, score:0, shotsFired:0, hits:0,
+      wind:(Math.random()*2-1)*windMax, windT:0, windMax, gust, windY:0, windYMax:upDown?1.6:0,
+      combo:0, best:0, time:limit, timeMax:limit,
+      over:false, slow:1, slowT:0 };
+  G.id=(window.__stageId=(window.__stageId||0)+1);
+  G.windTarget=G.wind;
   yaw=0; pitch=0.02;
+  document.getElementById("timeWrap").style.display = limit? "block":"none";
   updateHUD();
 }
 function updateHUD(){
   document.getElementById("ammoLbl").textContent=G.ammo;
+  const cc=document.getElementById("comboCell");
+  cc.style.display = G.combo>=2 ? "block":"none";
+  document.getElementById("comboLbl").textContent="×"+comboMul().toFixed(1);
+  if(G.timeMax){
+    const r=Math.max(0,G.time)/G.timeMax;
+    document.getElementById("timeI").style.width=(r*100)+"%";
+    document.getElementById("timeBar").classList.toggle("low", r<0.28);
+  }
   document.getElementById("leftLbl").textContent=G.left;
   document.getElementById("scoreLbl").textContent=G.score;
   document.getElementById("stageLbl").textContent="ステージ "+G.stage;
   const w=G.wind;
-  document.getElementById("windLbl").textContent=Math.abs(w).toFixed(1);
+  document.getElementById("windLbl").textContent=Math.abs(w).toFixed(1)+(G.windYMax? (G.windY>=0?" ↑":" ↓")+Math.abs(G.windY).toFixed(1) : "");
   const ar=document.getElementById("windArrow");
   ar.textContent = w>=0 ? "→" : "←";
   ar.style.color = Math.abs(w)>2 ? "#ff8b3d" : "#cfe6ff";
@@ -438,6 +468,7 @@ function layoutScope(){
 
 /* ── はっしゃ ── */
 const GRAV=6.0, SPEED=200;
+function comboMul(){ return Math.min(3, 1+Math.max(0,G.combo-1)*0.5); }
 function fire(){
   ac();
   if(!G||G.over) return;
@@ -453,8 +484,9 @@ function fire(){
   geo.setDrawRange(0,0);
   const line=new THREE.Line(geo, new THREE.LineBasicMaterial({color:0x9ff0ff, transparent:true, opacity:0.75}));
   scene.add(line);
+  // たまごとに「うった ときの かぜ」を もつ（とんでる とちゅうで かわらない＝ふこうへいに ならない）
   shots.push({mesh:m, line, geo, pts:[], vel:dir.clone().multiplyScalar(SPEED), pos:p.clone(), life:0,
-              aim:window.__aimT||null, minD:Infinity, minAt:null});
+              w:G.wind, wy:G.windY, aim:window.__aimT||null, minD:Infinity, minAt:null});
   sShot();
   updateHUD();
 }
@@ -494,19 +526,22 @@ function hitTarget(t,q){
   else sClank();
   const dist=t.g.position.distanceTo(camera.position);
   const bonus=Math.floor(dist/10)*5;
-  G.score+=pts+bonus;
-  showMsg(label+" +"+(pts+bonus));
+  G.combo++;
+  const mul=comboMul();
+  const gain=Math.round((pts+bonus)*mul);
+  G.score+=gain;
+  showMsg(label+" +"+gain+(mul>1?"（れんぞく ×"+mul.toFixed(1)+"）":""));
   splash(q, t.kind===TYPE.BALLOON?0xffd93b:0x7ee8fa, 14);
   // まとの えんしゅつ
   if(t.kind===TYPE.BALLOON){ scene.remove(t.g); }
   else { t.fall=true; t.fallV=0; }
   G.slow=0.25; G.slowT=(G.left===0)?900:320;
   updateHUD();
-  if(G.left<=0) setTimeout(stageClear,700);
+  if(G.left<=0){ const id=G.id; setTimeout(()=>{ if(G&&G.id===id) stageClear(); },700); }
 }
 
 /* ── ループ ── */
-let last=0, running=false, tAcc=0;
+let last=0, running=false, tAcc=0, simT=0;
 function loop(ts){
   if(!running) return;
   if(!last) last=ts;
@@ -514,7 +549,32 @@ function loop(ts){
   // スローモーション
   if(G.slowT>0){ G.slowT-=dt*1000; if(G.slowT<=0) G.slow=1; }
   const sdt=dt*G.slow;
-  tAcc+=dt;
+  tAcc+=dt; simT+=sdt;      // tAcc=みため（ゆれ）、simT=たまと まとの じかん
+  // とっぷう：ときどき かぜが かわる（なめらかに うつる）
+  if(G.gust){
+    G.windT-=dt*1000;
+    if(G.windT<=0){
+      G.windTarget=(Math.random()*2-1)*G.windMax;
+      if(G.windYMax) G.windYTarget=(Math.random()*2-1)*G.windYMax;
+      G.windT=4200+Math.random()*4200;
+      if(Math.abs(G.windTarget-G.wind)>1.2) showMsg("かぜが かわる！");
+    }
+    G.wind+=(G.windTarget-G.wind)*Math.min(1,dt*0.35);
+    if(G.windYMax) G.windY+=((G.windYTarget||0)-G.windY)*Math.min(1,dt*0.35);
+    updateHUD();
+  }
+  // じかん せいげん
+  if(G.timeMax && !G.over){
+    G.time-=dt*1000;
+    if(G.time<=0){
+      G.over=true; running=false; sFail();
+      const id=G.id, lf=G.left, sc=G.score, sg=G.stage;
+      setTimeout(()=>{ if(!G||G.id!==id) return; sheet({t:"じかん ぎれ…", s:"のこりの まと "+lf+"こ<br>とくてん "+sc,
+        btns:[["やめる","gray",goStart],["もういっかい","yellow",()=>startStage(sg)]]}); },400);
+      return;
+    }
+    if(((tAcc*1000)|0)%250<20) updateHUD();
+  }
 
   // いき（ゆれ）
   if(breathing && breath>0){ breath=Math.max(0,breath-dt*0.42); if(breath<=0) breathing=false; }
@@ -539,8 +599,9 @@ function loop(ts){
       continue;
     }
     if(!t.alive) continue;
-    if(t.kind===TYPE.BALLOON){ t.g.position.y=t.base.y+Math.sin(tAcc*1.2+t.bob)*0.22; }
-    if(t.moveA>0){ t.g.position.x=t.base.x+Math.sin(tAcc*t.moveSpd*2+t.bob)*t.moveA; }
+    if(t.kind===TYPE.BALLOON){ t.g.position.y=t.base.y+Math.sin(simT*1.2+t.bob)*0.22; }
+    if(t.moveA>0){ t.g.position.x=t.base.x+Math.sin(simT*t.moveSpd*2+t.bob)*t.moveA; }
+    if(t.moveB>0){ t.g.position.y=t.base.y+Math.sin(simT*0.9+t.bob*1.7)*t.moveB; }
     if(t.kind===TYPE.BOARD||t.kind===TYPE.CART){ t.g.rotation.y=0; }
   }
 
@@ -552,7 +613,8 @@ function loop(ts){
       const h=sdt/steps;
       const p0=s.pos.clone();
       s.vel.y-=GRAV*h;
-      s.vel.x+=G.wind*h;
+      s.vel.y+=s.wy*h;
+      s.vel.x+=s.w*h;
       s.pos.addScaledVector(s.vel,h);
       // まとに あたったか
       let hitDone=false;
@@ -564,6 +626,7 @@ function loop(ts){
       if(hitDone){ scene.remove(s.mesh); scene.remove(s.line); shots.splice(i,1); break; }
       if(s.pos.y<=0.05){
         splash(new THREE.Vector3(s.pos.x,0.06,s.pos.z),0x9ff0ff,8); sSplash();
+        G.combo=0; updateHUD();
         showMsg("はずれ…");
         window.__lastMiss={d:s.minD, dx:s.minAt?s.minAt.x:0, dy:s.minAt?s.minAt.y:0, dz:s.minAt?s.minAt.z:0};
         scene.remove(s.mesh); scene.remove(s.line); shots.splice(i,1);
@@ -597,6 +660,7 @@ function loop(ts){
 }
 const ray=new THREE.Raycaster();
 function updateDist(){
+  if(zoomIdx===0){ document.getElementById("distLbl").textContent="--"; return; }
   ray.setFromCamera({x:0,y:0}, camera);
   let best=null;
   for(const t of targets){ if(!t.alive) continue;
@@ -613,8 +677,9 @@ function checkOut(){
   if(G.over) return;
   if(G.ammo<=0 && shots.length===0 && G.left>0){
     G.over=true; running=false; sFail();
-    setTimeout(()=>sheet({t:"たまが なくなった…", s:"のこりの まと "+G.left+"こ<br>とくてん "+G.score,
-      btns:[["やめる","gray",goStart],["もういっかい","yellow",()=>startStage(G.stage)]]}),500);
+    const id=G.id;
+    setTimeout(()=>{ if(!G||G.id!==id) return; sheet({t:"たまが なくなった…", s:"のこりの まと "+G.left+"こ<br>とくてん "+G.score,
+      btns:[["やめる","gray",goStart],["もういっかい","yellow",()=>startStage(G.stage)]]}); },500);
   }
 }
 function stageClear(){
@@ -623,13 +688,14 @@ function stageClear(){
   const miss=G.shotsFired-G.hits;
   const st=miss===0?3:(miss<=2?2:1);
   G.score+=st*100;
+  if(G.timeMax) G.score+=Math.max(0,Math.round(G.time/1000)*12);   // はやいほど ボーナス
   if(G.stage+1>S.stage) S.stage=G.stage+1;
   if(G.score>S.best) S.best=G.score;
   save(); sClear();
   const sw=document.createElement("div"); sw.className="stars";
   for(let i=0;i<3;i++) sw.appendChild(starCanvas(i<st));
   sheet({t:"ステージ "+G.stage+" クリア！", starsEl:sw,
-    s:"めいちゅう "+G.hits+" / "+G.shotsFired+" はつ<br>とくてん "+G.score+(G.score>=S.best?"（さいこう きろく！）":""),
+    s:"めいちゅう "+G.hits+" / "+G.shotsFired+" はつ"+(G.timeMax?"<br>のこり じかん "+Math.max(0,Math.round(G.time/1000))+"びょう":"")+"<br>とくてん "+G.score+(G.score>=S.best?"（さいこう きろく！）":""),
     btns:[["やめる","gray",goStart],["もういっかい","gray",()=>startStage(G.stage)],["つぎへ","green",()=>startStage(G.stage+1)]]});
 }
 
@@ -683,6 +749,10 @@ document.getElementById("btnFirst").addEventListener("click",()=>{ ac(); sTick()
 window.__T={
   start:n=>startStage(n),
   state:()=>({stage:G&&G.stage, ammo:G&&G.ammo, left:G&&G.left, score:G&&G.score, wind:G&&G.wind,
+              windMax:G&&G.windMax, gust:!!(G&&G.gust), windYMax:G&&G.windYMax, timeMax:G&&G.timeMax,
+              time:G&&G.time, combo:G&&G.combo,
+              farthest:Math.round(Math.max(0,...targets.map(t=>Math.abs(t.base.z)))),
+              small:targets.filter(t=>t.small).length,
               targets:targets.filter(t=>t.alive).length, shots:shots.length, over:!!(G&&G.over), zoom:zoomIdx}),
   aimAt:i=>{  // i ばんめの まとに ねらいを つける（うごく まと・かぜ・おちかたも けいさん）
     const t=targets.filter(x=>x.alive)[i||0]; if(!t) return null;
@@ -693,15 +763,15 @@ window.__T={
       const horiz=Math.hypot(aimP.x-c.x, aimP.z-c.z);
       tof=horiz/SPEED;
       aimP.copy(t.g.position);
-      if(t.moveA>0){                            // うごく まとは とうたつ時の いちを よそく
-        const now=performance.now()/1000;
-        aimP.x=t.base.x+Math.sin((tAcc+tof)*t.moveSpd*2+t.bob)*t.moveA;
-      }
+      const ft=simT+tof;                        // たまが とどく ころの じかん
+      if(t.moveA>0) aimP.x=t.base.x+Math.sin(ft*t.moveSpd*2+t.bob)*t.moveA;
+      if(t.kind===TYPE.BALLOON) aimP.y=t.base.y+Math.sin(ft*1.2+t.bob)*0.22;
+      if(t.moveB>0) aimP.y=t.base.y+Math.sin(ft*0.9+t.bob*1.7)*t.moveB;
     }
     const dx=aimP.x-c.x, dy=aimP.y-c.y, dz=aimP.z-c.z;
     const horiz=Math.sqrt(dx*dx+dz*dz);
     tof=horiz/SPEED;
-    const drop=0.5*GRAV*tof*tof;
+    const drop=0.5*(GRAV-(G.windY||0))*tof*tof;
     const drift=0.5*G.wind*tof*tof;
     yaw=-Math.atan2(dx-drift, -dz);
     pitch=Math.atan2((dy+drop), horiz);
@@ -712,7 +782,8 @@ window.__T={
             document.getElementById("scope").classList.toggle("on", i>0); layoutScope(); },
   breath:b=>{ breathing=!!b; },
   lastMiss:()=>window.__lastMiss||null,
-  windSet:w=>{ G.wind=w; updateHUD(); },
+  windSet:w=>{ G.wind=w; G.windTarget=w; updateHUD(); },
+  noGust:()=>{ G.gust=false; G.windY=0; G.windYMax=0; },
   reset:()=>{ S={stage:1,best:0}; save(); }
 };
 
