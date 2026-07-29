@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ビリヤード" />
+<title>ビリヤード｜こどもあそびば</title>
+<meta name="description" content="こども向けの 3D ビリヤード。ひっぱって はなすだけ。ガイドラインつきで ねらいやすい。ぜんぶの たまを ポケットに いれよう。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/billiards/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ビリヤード｜こどもあそびば" />
+<meta property="og:description" content="ひっぱって はなすだけの かんたん そうさ。ガイドラインつき 3D ビリヤード。" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/billiards/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── ビリヤード（3D・three.js 同梱／えもじ なし）── */
+  :root{ --bg1:#16321f; --bg2:#0b1a12; --ink:#eefaf0; --card:#1e3a28; --line:#5e9c72; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:10px;top:9px;z-index:80;width:44px;height:44px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;background:#eefaf0;box-shadow:0 4px 0 #3f6b4e;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #3f6b4e;}
+  #home canvas{display:block;image-rendering:pixelated;}
+  header{width:100%;max-width:640px;text-align:center;padding:9px 14px 0;flex:0 0 auto;}
+  .title{font-size:20px;font-weight:900;letter-spacing:3px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#10251a;border-radius:10px;cursor:pointer;
+    background:linear-gradient(180deg,#cfeeda,#8ed4a4);box-shadow:0 4px 0 #3f8f5a;transition:transform .07s;}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #3f8f5a;}
+  .btn.yellow{background:linear-gradient(180deg,#ffe9a8,#ffc94d);box-shadow:0 4px 0 #b3822a;}
+  .btn.gray{background:linear-gradient(180deg,#dfe6ef,#a7b4c4);box-shadow:0 4px 0 #6d7d90;}
+  #app{flex:1;width:100%;max-width:640px;display:flex;flex-direction:column;min-height:0;padding:4px 8px 8px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  #start-s{align-items:center;justify-content:center;gap:14px;}
+  #start-s .lead{font-size:14px;font-weight:800;color:#bfe4cb;text-align:center;line-height:1.9;}
+  #start-s .btn{font-size:20px;padding:14px 30px;}
+  #start-s .rec{font-size:13px;font-weight:800;color:#9ecbaa;}
+  #hud{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;flex:0 0 auto;}
+  #hud .cell{background:#1e3a28;border:2px solid #46795a;padding:3px 8px;}
+  #hud .cell b{color:#ffd93b;font-size:14px;}
+  #lvLbl{flex:1;text-align:center;font-size:14px;}
+  #view{position:relative;flex:1;min-height:0;min-width:0;overflow:hidden;border:3px solid #46795a;}
+  #cv{display:block;width:100%;height:100%;touch-action:none;}
+  #guide{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:13px;font-weight:900;
+    color:#ffe9a8;text-shadow:0 2px 4px rgba(0,0,0,.8);pointer-events:none;}
+  #big{position:absolute;left:0;right:0;top:16%;text-align:center;font-size:30px;font-weight:900;
+    color:#ffd93b;text-shadow:0 3px 0 #4a3a00,0 0 16px rgba(0,0,0,.7);opacity:0;transition:opacity .25s;pointer-events:none;}
+  #big.on{opacity:1;}
+  #ctrl{display:flex;gap:6px;flex:0 0 auto;}
+  #ctrl .btn{flex:1;font-size:14px;padding:10px 4px;}
+  .ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(4,14,9,.86);z-index:90;padding:18px;}
+  .ovl.show{display:flex;}
+  .sheet{background:var(--card);border:3px solid var(--line);padding:16px;max-width:340px;width:100%;text-align:center;}
+  .sheet h2{margin:0 0 6px;font-size:21px;}
+  .sheet .sub{font-size:14px;font-weight:800;color:#bfe4cb;line-height:1.7;}
+  .sheet .row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .sheet .btn{font-size:16px;padding:10px 18px;}
+  @media (orientation:landscape) and (max-height:520px){
+    header{padding:3px 14px 0;} .title{font-size:16px;} #hud{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ"><canvas id="homeCv" width="26" height="26"></canvas></a>
+  <header><div class="title">ビリヤード</div></header>
+
+  <div id="app">
+    <section id="start-s" class="screen show">
+      <div class="lead">
+        しろい たまを ゆびで <b>ひっぱって はなす</b>と うてるよ。<br>
+        ひっぱるほど つよい。しろい せんが すすむ みちだよ。<br>
+        ぜんぶの たまを ポケットに いれよう！
+      </div>
+      <button class="btn" id="btnGo">はじめる</button>
+      <div class="rec" id="rec"></div>
+      <button class="btn gray" id="btnFirst" style="font-size:13px;padding:8px 14px;display:none">レベル1 から</button>
+    </section>
+
+    <section id="play-s" class="screen">
+      <div id="hud">
+        <span style="width:40px;flex:0 0 auto"></span>
+        <div class="cell">のこり <b id="leftLbl">0</b></div>
+        <div id="lvLbl">レベル 1</div>
+        <div class="cell">うった かず <b id="shotLbl">0</b></div>
+      </div>
+      <div id="view">
+        <canvas id="cv"></canvas>
+        <div id="big"></div>
+        <div id="guide">しろい たまを ひっぱって はなす</div>
+      </div>
+      <div id="ctrl">
+        <button class="btn gray" id="btnQuit">やめる</button>
+        <button class="btn yellow" id="btnRetry">やりなおし</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="ovl" id="ovl"><div class="sheet" id="sheet"></div></div>
+
+<script type="module">
+/* =========================================================
+   ビリヤード（3D）
+   - three.js は リポジトリ どうこん（../../shared/three/・MIT／CDN不使用）
+   - そうさ：しろい たまを ゆびで ひっぱって はなす（パチンコの ように）
+     ・ひっぱった ながさ ＝ つよさ／むきは ひっぱった はんたい
+     ・しろい ガイドラインで「たまが すすむ みち」と「あたる ばしょ」が みえる
+   - ぶつかりは ほんとうの ビリヤードと おなじ けいさん（おなじ おもさの だんせい しょうとつ）
+     ・ぶつかった せんの むきに エネルギーを わたす → あてる ばしょで まとが きまる
+   - ぜんぶ いれたら クリア。しろい たまが おちたら（スクラッチ）1かい ぶん ペナルティ
+   - レベルが あがると たまが ふえる。すすんだ レベルは localStorage に ほぞん
+   ========================================================= */
+import * as THREE from "../../shared/three/three.module.min.js";
+
+/* いえアイコン */
+(function(){ const t=document.getElementById("homeCv").getContext("2d");
+  const P=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);};
+  P(3,11,20,14,"#c98d5a"); P(5,13,16,12,"#e8b07a"); P(1,11,24,2,"#8a5a2b");
+  for(let i=0;i<11;i++) P(12-i,11-i,2+i*2,1,"#c0392b");
+  P(10,16,6,9,"#7a4f2a"); P(14,20,1,1,"#ffd93b");
+})();
+
+/* ── セーブ ── */
+const SAVE="billiards.save";
+let S={lv:1, best:{}};
+try{ const d=JSON.parse(localStorage.getItem(SAVE)); if(d){ S.lv=Math.max(1,d.lv|0); S.best=d.best||{}; } }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(S)); }catch(e){} }
+
+/* ── おと ── */
+let actx=null;
+function ac(){ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); return actx; }
+function beep(f,d=0.07,t="sine",v=0.1){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+function noise(d=0.12,v=0.08,hp=1200){try{const a=ac(),n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+  const s=a.createBufferSource(),g=a.createGain(),f=a.createBiquadFilter();
+  f.type="highpass"; f.frequency.value=hp; g.gain.value=v; s.buffer=b; s.connect(f); f.connect(g); g.connect(a.destination); s.start();}catch(e){}}
+const sClack=(v)=>{ noise(0.06,Math.min(0.16,0.04+v*0.03),2200); beep(900+Math.random()*300,0.04,"square",Math.min(0.1,0.02+v*0.02)); };
+const sCushion=()=>noise(0.07,0.05,700);
+const sPocket=()=>{ beep(300,0.09,"sine",0.12); setTimeout(()=>noise(0.18,0.07,300),60); };
+const sScratch=()=>{ beep(220,0.2,"sawtooth",0.11); setTimeout(()=>beep(160,0.28,"sawtooth",0.1),150); };
+const sWin=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.15),i*100));
+const sTick=()=>beep(620,0.04,"square",0.07);
+
+/* ── だいの おおきさ（メートル）── */
+const TW=1.12, TL=2.24;          // よこ／たて（うちのり）
+const HW=TW/2, HL=TL/2;
+const BR=0.0286;                 // たまの はんけい
+const POCKET=0.062;
+const POCKETS=[[-HW,-HL],[HW,-HL],[-HW,0],[HW,0],[-HW,HL],[HW,HL]];
+
+/* ── 3D ── */
+const cv=document.getElementById("cv");
+const renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0e2417);
+const camera=new THREE.PerspectiveCamera(46,1,0.05,40);
+scene.add(new THREE.HemisphereLight(0xffffff,0x2a4a34,1.0));
+const lamp=new THREE.DirectionalLight(0xfff6e0,0.75); lamp.position.set(0.6,3,0.4); scene.add(lamp);
+
+/* だい */
+const felt=new THREE.Mesh(new THREE.BoxGeometry(TW,0.04,TL), new THREE.MeshLambertMaterial({color:0x1f7a48}));
+felt.position.y=-0.02; scene.add(felt);
+for(const [sx,sz,w,l] of [[0,-HL-0.06,TW+0.24,0.12],[0,HL+0.06,TW+0.24,0.12],[-HW-0.06,0,0.12,TL+0.24],[HW+0.06,0,0.12,TL+0.24]]){
+  const r=new THREE.Mesh(new THREE.BoxGeometry(w,0.09,l), new THREE.MeshLambertMaterial({color:0x6b4a2a}));
+  r.position.set(sx,0.02,sz); scene.add(r);
+  const c=new THREE.Mesh(new THREE.BoxGeometry(w*0.94,0.05,l*0.94), new THREE.MeshLambertMaterial({color:0x155c36}));
+  c.position.set(sx,0.045,sz); scene.add(c);
+}
+for(const [px,pz] of POCKETS){
+  const h=new THREE.Mesh(new THREE.CylinderGeometry(POCKET,POCKET,0.05,16), new THREE.MeshBasicMaterial({color:0x0a0a0a}));
+  h.position.set(px,0.005,pz); scene.add(h);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(POCKET,0.012,8,18), new THREE.MeshLambertMaterial({color:0x4a3520}));
+  rim.rotation.x=Math.PI/2; rim.position.set(px,0.02,pz); scene.add(rim);
+}
+/* ガイド（しろい せんと ゴーストボール）*/
+const guideMat=new THREE.LineBasicMaterial({color:0xffffff, transparent:true, opacity:0.75});
+const guideGeo=new THREE.BufferGeometry(); guideGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6),3));
+const guideLine=new THREE.Line(guideGeo,guideMat); scene.add(guideLine);
+const ghost=new THREE.Mesh(new THREE.SphereGeometry(BR,16,12), new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.28}));
+scene.add(ghost);
+const aimGeo=new THREE.BufferGeometry(); aimGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6),3));
+const aimLine=new THREE.Line(aimGeo,new THREE.LineBasicMaterial({color:0xffd93b,transparent:true,opacity:0.8})); scene.add(aimLine);
+const pullGeo=new THREE.BufferGeometry(); pullGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6),3));
+const pullLine=new THREE.Line(pullGeo,new THREE.LineBasicMaterial({color:0xff7a5a})); scene.add(pullLine);
+
+/* たま */
+const COLORS=[0xffd93b,0x2f6ad0,0xe8443a,0x8a4fd0,0xf08a2a,0x2aa858,0x8a3a2a,0x1a1a1a,0xd94a8a];
+let balls=[];
+function makeBall(x,z,col,num){
+  const g=new THREE.Group();
+  const m=new THREE.Mesh(new THREE.SphereGeometry(BR,20,16), new THREE.MeshLambertMaterial({color:col}));
+  g.add(m);
+  if(num!==0){
+    const st=new THREE.Mesh(new THREE.SphereGeometry(BR*0.45,12,10), new THREE.MeshLambertMaterial({color:0xf6f2ea}));
+    st.position.set(0,0,BR*0.72); g.add(st);
+  }
+  g.position.set(x,BR,z); scene.add(g);
+  const b={x,z,vx:0,vz:0,g,num,alive:true,col};
+  balls.push(b); return b;
+}
+function clearBalls(){ for(const b of balls) scene.remove(b.g); balls=[]; }
+
+/* ── レベル ── */
+let G=null;
+function levelBalls(n){ return Math.min(9, 2+Math.floor(n/1.2)); }
+function startLevel(n){
+  clearBalls();
+  const cnt=levelBalls(n);
+  // てまえに しろい たま
+  const cue=makeBall(0, HL*0.55, 0xf6f2ea, 0);
+  // まとの たまは さんかくに ならべる（おくがわ）
+  const rows=[1,2,3,4];
+  let idx=0, placed=0;
+  const baseZ=-HL*0.42, gap=BR*2.08;
+  for(let r=0;r<rows.length && placed<cnt;r++){
+    for(let c=0;c<rows[r] && placed<cnt;c++){
+      const x=(c-(rows[r]-1)/2)*gap;
+      const z=baseZ-r*gap*0.88;
+      makeBall(x+(Math.random()-0.5)*0.002, z, COLORS[placed%COLORS.length], placed+1);
+      placed++;
+    }
+  }
+  G={ lv:n, shots:0, left:cnt, moving:false, over:false, cue, scratch:0 };
+  document.getElementById("lvLbl").textContent="レベル "+n;
+  updateHUD();
+  setGuide("しろい たまを ひっぱって はなす");
+}
+function updateHUD(){
+  document.getElementById("leftLbl").textContent=G.left;
+  document.getElementById("shotLbl").textContent=G.shots;
+}
+function setGuide(t){ document.getElementById("guide").textContent=t; }
+function showBig(t){
+  const el=document.getElementById("big"); el.textContent=t; el.classList.add("on");
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"),1200);
+}
+
+/* ── ぶつかり（ほんとうの けいさん）── */
+function physics(dt){
+  const SUB=6, h=dt/SUB;
+  for(let s=0;s<SUB;s++){
+    for(const b of balls){
+      if(!b.alive) continue;
+      b.x+=b.vx*h; b.z+=b.vz*h;
+      // まさつ（ころがり）
+      const sp=Math.hypot(b.vx,b.vz);
+      if(sp>0){
+        const dec=Math.min(sp, 0.42*h*9.8*0.16 + sp*0.28*h);
+        const k=(sp-dec)/sp;
+        b.vx*=k; b.vz*=k;
+        if(Math.hypot(b.vx,b.vz)<0.008){ b.vx=0; b.vz=0; }
+      }
+      // クッション
+      if(b.x<-HW+BR && b.vx<0){ b.x=-HW+BR; b.vx=-b.vx*0.88; sCushion(); }
+      if(b.x> HW-BR && b.vx>0){ b.x= HW-BR; b.vx=-b.vx*0.88; sCushion(); }
+      if(b.z<-HL+BR && b.vz<0){ b.z=-HL+BR; b.vz=-b.vz*0.88; sCushion(); }
+      if(b.z> HL-BR && b.vz>0){ b.z= HL-BR; b.vz=-b.vz*0.88; sCushion(); }
+    }
+    // たまどうし（おなじ おもさの だんせい しょうとつ）
+    for(let i=0;i<balls.length;i++){
+      const a=balls[i]; if(!a.alive) continue;
+      for(let j=i+1;j<balls.length;j++){
+        const b=balls[j]; if(!b.alive) continue;
+        const dx=b.x-a.x, dz=b.z-a.z, d=Math.hypot(dx,dz);
+        if(d>=BR*2||d<1e-9) continue;
+        const nx=dx/d, nz=dz/d;
+        const rvx=a.vx-b.vx, rvz=a.vz-b.vz;
+        const vn=rvx*nx+rvz*nz;
+        // かさなりを ほどく
+        const ov=(BR*2-d)/2;
+        a.x-=nx*ov; a.z-=nz*ov; b.x+=nx*ov; b.z+=nz*ov;
+        if(vn<=0) continue;
+        const e=0.96;
+        const j2=-(1+e)*vn/2;      // おなじ おもさ
+        a.vx+=j2*nx; a.vz+=j2*nz;
+        b.vx-=j2*nx; b.vz-=j2*nz;
+        sClack(Math.abs(vn));
+      }
+    }
+    // ポケット
+    for(const b of balls){
+      if(!b.alive) continue;
+      for(const [px,pz] of POCKETS){
+        if(Math.hypot(b.x-px,b.z-pz)<POCKET*0.92){ pocket(b); break; }
+      }
+    }
+  }
+  // みための いち
+  for(const b of balls){
+    if(!b.alive) continue;
+    b.g.position.set(b.x,BR,b.z);
+    const sp=Math.hypot(b.vx,b.vz);
+    if(sp>0.001){
+      const ax=new THREE.Vector3(b.vz,0,-b.vx).normalize();
+      b.g.rotateOnWorldAxis(ax, sp*dt/BR);
+    }
+  }
+}
+function pocket(b){
+  b.alive=false; scene.remove(b.g); b.vx=0; b.vz=0;
+  sPocket();
+  if(b.num===0){
+    G.scratch++;
+    showBig("スクラッチ…");
+    setTimeout(()=>{
+      b.alive=true; b.x=0; b.z=HL*0.55; b.vx=0; b.vz=0;
+      b.g.position.set(b.x,BR,b.z); scene.add(b.g);
+    },700);
+  }else{
+    G.left--;
+    showBig("ナイス！");
+    updateHUD();
+  }
+}
+
+/* ── ねらい（ひっぱって はなす）── */
+let aiming=false, aimDir={x:0,z:-1}, aimPow=0;
+const view=document.getElementById("view");
+const ray=new THREE.Raycaster();
+const plane=new THREE.Plane(new THREE.Vector3(0,1,0), -BR);
+function toTable(e){
+  const r=view.getBoundingClientRect();
+  const nx=((e.clientX-r.left)/r.width)*2-1, ny=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera({x:nx,y:ny}, camera);
+  const p=new THREE.Vector3();
+  if(!ray.ray.intersectPlane(plane,p)) return null;
+  return p;
+}
+view.addEventListener("pointerdown",e=>{
+  ac();
+  if(!G||G.over||G.moving) return;
+  const p=toTable(e); if(!p) return;
+  aiming=true;
+  try{view.setPointerCapture(e.pointerId);}catch(_){}
+  updateAim(p);
+});
+view.addEventListener("pointermove",e=>{
+  if(!aiming) return;
+  const p=toTable(e); if(!p) return;
+  updateAim(p);
+});
+function updateAim(p){
+  const c=G.cue;
+  const dx=c.x-p.x, dz=c.z-p.z;
+  const d=Math.hypot(dx,dz);
+  if(d<1e-4) return;
+  aimDir={x:dx/d, z:dz/d};
+  aimPow=Math.min(1, d/0.62);
+  // ひっぱり せん（あかい）
+  const pg=pullLine.geometry.attributes.position.array;
+  pg[0]=c.x; pg[1]=BR; pg[2]=c.z;
+  pg[3]=c.x-aimDir.x*d*0.9; pg[4]=BR; pg[5]=c.z-aimDir.z*d*0.9;
+  pullLine.geometry.attributes.position.needsUpdate=true;
+  pullLine.visible=true;
+}
+function endAim(){
+  if(!aiming) return;
+  aiming=false; pullLine.visible=false;
+  if(aimPow<0.06){ setGuide("もうすこし ひっぱってね"); return; }
+  shoot();
+}
+view.addEventListener("pointerup",endAim);
+view.addEventListener("pointercancel",endAim);
+
+function shoot(){
+  const v=0.9+aimPow*3.9;
+  G.cue.vx=aimDir.x*v; G.cue.vz=aimDir.z*v;
+  G.shots++; G.moving=true;
+  updateHUD(); setGuide("");
+  sClack(v);
+}
+
+/* ── ガイドライン（すすむ みちと あたる ばしょ）── */
+function updateGuide(){
+  const show=!G.moving&&!G.over;
+  guideLine.visible=show; ghost.visible=false; aimLine.visible=false;
+  if(!show) return;
+  const c=G.cue, dx=aimDir.x, dz=aimDir.z;
+  // いちばん さきに あたる たまを さがす
+  let bestT=Infinity, hit=null;
+  for(const b of balls){
+    if(!b.alive||b===c) continue;
+    const ex=b.x-c.x, ez=b.z-c.z;
+    const proj=ex*dx+ez*dz;
+    if(proj<=0) continue;
+    const perp2=(ex*ex+ez*ez)-proj*proj;
+    const rr=(BR*2)*(BR*2);
+    if(perp2>rr) continue;
+    const t=proj-Math.sqrt(rr-perp2);
+    if(t>0&&t<bestT){ bestT=t; hit=b; }
+  }
+  // かべまでの きょり
+  let wallT=Infinity;
+  if(dx>1e-6) wallT=Math.min(wallT,(HW-BR-c.x)/dx);
+  if(dx<-1e-6) wallT=Math.min(wallT,(-HW+BR-c.x)/dx);
+  if(dz>1e-6) wallT=Math.min(wallT,(HL-BR-c.z)/dz);
+  if(dz<-1e-6) wallT=Math.min(wallT,(-HL+BR-c.z)/dz);
+  const T=Math.min(bestT,wallT);
+  const g=guideLine.geometry.attributes.position.array;
+  g[0]=c.x; g[1]=BR; g[2]=c.z;
+  g[3]=c.x+dx*T; g[4]=BR; g[5]=c.z+dz*T;
+  guideLine.geometry.attributes.position.needsUpdate=true;
+  if(hit&&bestT<=wallT){
+    const gx=c.x+dx*bestT, gz=c.z+dz*bestT;
+    ghost.position.set(gx,BR,gz); ghost.visible=true;
+    // まとの たまが とんでいく むき（ちゅうしんを むすんだ せん）
+    const ox=hit.x-gx, oz=hit.z-gz, od=Math.hypot(ox,oz)||1;
+    const a=aimLine.geometry.attributes.position.array;
+    a[0]=hit.x; a[1]=BR; a[2]=hit.z;
+    a[3]=hit.x+ox/od*0.34; a[4]=BR; a[5]=hit.z+oz/od*0.34;
+    aimLine.geometry.attributes.position.needsUpdate=true;
+    aimLine.visible=true;
+  }
+}
+
+/* ── ループ ── */
+let last=0, running=false;
+function loop(ts){
+  if(!running) return;
+  if(!last) last=ts;
+  const dt=Math.min(40, ts-last)/1000; last=ts;
+  if(G&&!G.over){
+    physics(dt);
+    const moving=balls.some(b=>b.alive&&(Math.abs(b.vx)>0.001||Math.abs(b.vz)>0.001));
+    if(G.moving&&!moving){
+      G.moving=false;
+      if(G.left<=0) win();
+      else setGuide("しろい たまを ひっぱって はなす");
+    }
+    updateGuide();
+  }
+  placeCamera();
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+function win(){
+  G.over=true; running=false;
+  const key=String(G.lv);
+  const prev=S.best[key];
+  const isBest=!prev||G.shots<prev;
+  if(isBest) S.best[key]=G.shots;
+  if(G.lv+1>S.lv) S.lv=G.lv+1;
+  save(); sWin();
+  const par=levelBalls(G.lv)+2;
+  const st=G.shots<=par?3:(G.shots<=par+3?2:1);
+  sheet({t:"レベル "+G.lv+" クリア！",
+    s:"うった かず <b style='font-size:22px;color:#ffd93b'>"+G.shots+"</b>かい"+
+      (G.scratch?"（スクラッチ "+G.scratch+"かい）":"")+
+      "<br>"+"★".repeat(st)+"☆".repeat(3-st)+(isBest?"<br>さいこう きろく！":"<br>これまでの さいこう "+S.best[key]+"かい"),
+    btns:[["やめる","gray",goStart],["もういっかい","gray",()=>startLevel(G.lv)],["つぎへ","",()=>startLevel(G.lv+1)]]});
+}
+
+/* ── がめん ── */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const ovl=document.getElementById("ovl"), sheetEl=document.getElementById("sheet");
+function sheet(o){
+  sheetEl.innerHTML="<h2>"+o.t+"</h2><div class='sub'>"+(o.s||"")+"</div>";
+  const row=document.createElement("div"); row.className="row";
+  (o.btns||[]).forEach(([label,cls,fn])=>{
+    const b=document.createElement("button"); b.className="btn "+cls; b.textContent=label;
+    b.addEventListener("click",()=>{ sTick(); fn(); }); row.appendChild(b);
+  });
+  sheetEl.appendChild(row); ovl.classList.add("show");
+}
+/* だい ぜんたいが かならず がめんに はいる いちに カメラを おく */
+function placeCamera(){
+  const vfov=camera.fov*Math.PI/180;
+  const needV=(TL/2+0.16)/Math.tan(vfov/2);
+  const hfov=2*Math.atan(Math.tan(vfov/2)*camera.aspect);
+  const needH=(TW/2+0.16)/Math.tan(hfov/2);
+  const dist=Math.max(needV,needH);
+  camera.position.set(0, dist*0.90, dist*0.46);
+  camera.lookAt(0,0,-0.02);
+}
+function resize(){
+  const r=view.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  renderer.setSize(r.width,r.height,false);
+  camera.aspect=r.width/r.height;
+  camera.fov=46;
+  camera.updateProjectionMatrix();
+  placeCamera();
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,150); });
+addEventListener("orientationchange",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,250); });
+
+function play(n){
+  ovl.classList.remove("show");
+  startLevel(n); show("play-s");
+  requestAnimationFrame(()=>{ resize(); running=true; last=0; requestAnimationFrame(loop); });
+}
+function goStart(){
+  running=false; ovl.classList.remove("show");
+  document.getElementById("btnGo").textContent = S.lv>1? ("レベル "+S.lv+" から") : "はじめる";
+  document.getElementById("btnFirst").style.display = S.lv>1? "block":"none";
+  const b1=S.best["1"];
+  document.getElementById("rec").textContent = b1? ("レベル1の さいしょうだすう "+b1+"かい"):"";
+  show("start-s");
+}
+document.getElementById("btnGo").addEventListener("click",()=>{ ac(); sTick(); play(S.lv); });
+document.getElementById("btnFirst").addEventListener("click",()=>{ ac(); sTick(); play(1); });
+document.getElementById("btnQuit").addEventListener("click",()=>{ sTick(); goStart(); });
+document.getElementById("btnRetry").addEventListener("click",()=>{ sTick(); play(G.lv); });
+
+/* ── テストよう ── */
+window.__T={
+  play:n=>play(n),
+  state:()=>({lv:G&&G.lv, left:G&&G.left, shots:G&&G.shots, moving:G&&G.moving, over:!!(G&&G.over),
+              scratch:G&&G.scratch,
+              balls:balls.filter(b=>b.alive).map(b=>({n:b.num,x:+b.x.toFixed(3),z:+b.z.toFixed(3),
+                v:+Math.hypot(b.vx,b.vz).toFixed(3)}))}),
+  aim:(dx,dz,pow)=>{ const d=Math.hypot(dx,dz)||1; aimDir={x:dx/d,z:dz/d}; aimPow=pow; },
+  shoot:()=>{ if(!G.moving&&!G.over){ shoot(); return true; } return false; },
+  // しろい たまから みて i ばんめの たまを ポケットに いれる ねらいを けいさん
+  aimAtPocket:(bi,pi)=>{
+    const c=G.cue, t=balls.filter(b=>b.alive&&b.num!==0)[bi||0]; if(!t) return null;
+    const [px,pz]=POCKETS[pi||0];
+    // まとの たまが ポケットへ むかう むき
+    let ox=px-t.x, oz=pz-t.z; const od=Math.hypot(ox,oz); ox/=od; oz/=od;
+    // ゴーストボールの いち（まとの たまの てまえ 2R）
+    const gx=t.x-ox*BR*2, gz=t.z-oz*BR*2;
+    let dx=gx-c.x, dz=gz-c.z; const dd=Math.hypot(dx,dz); dx/=dd; dz/=dd;
+    aimDir={x:dx,z:dz}; aimPow=Math.min(1,0.35+dd*0.5);
+    return {cut:Math.acos(Math.max(-1,Math.min(1,dx*ox+dz*oz)))*180/Math.PI, dist:+dd.toFixed(2)};
+  },
+  reset:()=>{ S={lv:1,best:{}}; save(); }
+};
+
+goStart(); resize();
+</script>
+</body>
+</html>
