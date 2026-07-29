@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fff3c4" />
+<link rel="apple-touch-icon" href="../../icon-180.png" />
+<link rel="icon" type="image/png" href="../../icon-180.png" />
+<meta name="apple-mobile-web-app-title" content="ボウリング" />
+<title>ボウリング｜こどもあそびば</title>
+<meta name="description" content="こども向けの 3D ボウリング。ゆびで スワイプして たまを なげよう。まがるボールも なげられる。10フレームの ほんかくスコア。むりょう・とうろくふよう・スマホ対応。" />
+<link rel="canonical" href="https://haruharu20190701.github.io/kids-games/games/bowling/" />
+<!-- OGP（SNSシェアじの みため用）-->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="こどもあそびば" />
+<meta property="og:title" content="ボウリング｜こどもあそびば" />
+<meta property="og:description" content="スワイプで なげる 3D ボウリング。ストライクを ねらおう！" />
+<meta property="og:url" content="https://haruharu20190701.github.io/kids-games/games/bowling/" />
+<meta property="og:image" content="https://haruharu20190701.github.io/kids-games/icon-1024.png" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  /* ── ボウリング（3D・three.js 同梱／えもじ なし）── */
+  :root{ --bg1:#241d33; --bg2:#141020; --ink:#f2ecff; --card:#2c2440; --line:#7a68a8; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;height:100dvh;overflow:hidden;touch-action:none;
+  }
+  #home{position:fixed;left:10px;top:9px;z-index:80;width:44px;height:44px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;background:#f2ecff;box-shadow:0 4px 0 #5d4f85;}
+  #home:active{transform:translateY(3px);box-shadow:0 1px 0 #5d4f85;}
+  #home canvas{display:block;image-rendering:pixelated;}
+  header{width:100%;max-width:640px;text-align:center;padding:9px 14px 0;flex:0 0 auto;}
+  .title{font-size:20px;font-weight:900;letter-spacing:3px;}
+  .btn{border:none;font-family:inherit;font-weight:900;color:#241f33;border-radius:10px;cursor:pointer;
+    background:linear-gradient(180deg,#ffe9a8,#ffc94d);box-shadow:0 4px 0 #b3822a;transition:transform .07s;}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #b3822a;}
+  .btn.green{background:linear-gradient(180deg,#b6f0a8,#5ad46a);box-shadow:0 4px 0 #2f8f3a;}
+  .btn.gray{background:linear-gradient(180deg,#dfe6ef,#a7b4c4);box-shadow:0 4px 0 #6d7d90;}
+  #app{flex:1;width:100%;max-width:640px;display:flex;flex-direction:column;min-height:0;padding:4px 8px 8px;}
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+  #start-s{align-items:center;justify-content:center;gap:14px;}
+  #start-s .lead{font-size:14px;font-weight:800;color:#c3b8e0;text-align:center;line-height:1.9;}
+  #start-s .btn{font-size:20px;padding:14px 30px;}
+  #start-s .rec{font-size:13px;font-weight:800;color:#a99cd0;}
+  /* スコアボード */
+  #board{display:flex;gap:1px;flex:0 0 auto;background:#4a3f6b;border:2px solid #7a68a8;overflow:hidden;margin:4px 0;}
+  .fr{flex:1;background:#2c2440;display:flex;flex-direction:column;min-width:0;}
+  .fr.cur{background:#4a3f6b;}
+  .fr .no{font-size:9px;font-weight:900;text-align:center;color:#b9aee0;line-height:1.3;}
+  .fr .th{display:flex;gap:1px;justify-content:center;height:17px;}
+  .fr .th span{flex:1;font-size:11px;font-weight:900;text-align:center;background:#1e1830;line-height:17px;}
+  .fr .tt{font-size:12px;font-weight:900;text-align:center;color:#ffd93b;line-height:1.4;}
+  #view{position:relative;flex:1;min-height:0;min-width:0;overflow:hidden;border:3px solid #7a68a8;}
+  #cv{display:block;width:100%;height:100%;touch-action:none;}
+  #guide{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;font-weight:900;
+    color:#ffe9a8;text-shadow:0 2px 4px rgba(0,0,0,.8);pointer-events:none;}
+  #big{position:absolute;left:0;right:0;top:18%;text-align:center;font-size:34px;font-weight:900;
+    color:#ffd93b;text-shadow:0 3px 0 #7a4a00,0 0 16px rgba(0,0,0,.7);opacity:0;transition:opacity .25s;pointer-events:none;}
+  #big.on{opacity:1;}
+  #power{position:absolute;right:8px;top:10%;bottom:22%;width:14px;background:rgba(10,8,20,.55);
+    border:2px solid #7a68a8;display:none;}
+  #power.on{display:block;}
+  #power i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#5ad46a,#ffd93b,#f0705a);}
+  #ctrl{display:flex;gap:6px;flex:0 0 auto;}
+  #ctrl .btn{flex:1;font-size:14px;padding:10px 4px;}
+  .ovl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,6,16,.86);z-index:90;padding:18px;}
+  .ovl.show{display:flex;}
+  .sheet{background:var(--card);border:3px solid var(--line);padding:16px;max-width:340px;width:100%;text-align:center;}
+  .sheet h2{margin:0 0 6px;font-size:21px;}
+  .sheet .sub{font-size:14px;font-weight:800;color:#c3b8e0;line-height:1.7;}
+  .sheet .row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .sheet .btn{font-size:16px;padding:10px 18px;}
+  @media (orientation:landscape) and (max-height:520px){
+    header{padding:3px 14px 0;} .title{font-size:16px;}
+    .fr .no{font-size:8px;} .fr .th span{font-size:9px;} .fr .tt{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+  <a id="home" href="../../index.html" title="メニューへ"><canvas id="homeCv" width="26" height="26"></canvas></a>
+  <header><div class="title">ボウリング</div></header>
+
+  <div id="app">
+    <section id="start-s" class="screen show">
+      <div class="lead">
+        ゆびで うえに スワイプして たまを なげよう。<br>
+        <b>ななめに スワイプ</b>すると ボールが まがる！<br>
+        10フレーム、ぜんぶで なんてん とれるかな？
+      </div>
+      <button class="btn green" id="btnGo">はじめる</button>
+      <div class="rec" id="rec"></div>
+    </section>
+
+    <section id="play-s" class="screen">
+      <div id="view">
+        <canvas id="cv"></canvas>
+        <div id="power"><i id="powerI"></i></div>
+        <div id="big"></div>
+        <div id="guide">ゆびで うえに スワイプ！</div>
+      </div>
+      <div id="board"></div>
+      <div id="ctrl">
+        <button class="btn gray" id="btnQuit">やめる</button>
+        <button class="btn" id="btnView">カメラ</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="ovl" id="ovl"><div class="sheet" id="sheet"></div></div>
+
+<script type="module">
+/* =========================================================
+   ボウリング（3D）
+   - three.js は リポジトリ どうこん（../../shared/three/・MIT／CDN不使用）
+   - なげかた：がめんを ゆびで うえに スワイプ。
+     ・スワイプの ながさ ＝ たまの はやさ
+     ・ななめ ＝ ころがりだす むき
+     ・さいごに よこに はらう ＝ カーブ（フック）が かかる
+   - ピンは 2Dの まるとして ぶつかり、たおれると アニメで こける
+     （ピンどうしも ぶつかる ＝ ちゃんと れんさで たおれる）
+   - スコアは ほんとうの ボウリングと おなじ（ストライク・スペアの ボーナスあり）
+   - さいこう とくてんは localStorage に ほぞん
+   ========================================================= */
+import * as THREE from "../../shared/three/three.module.min.js";
+
+/* いえアイコン */
+(function(){ const t=document.getElementById("homeCv").getContext("2d");
+  const P=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);};
+  P(3,11,20,14,"#c98d5a"); P(5,13,16,12,"#e8b07a"); P(1,11,24,2,"#8a5a2b");
+  for(let i=0;i<11;i++) P(12-i,11-i,2+i*2,1,"#c0392b");
+  P(10,16,6,9,"#7a4f2a"); P(14,20,1,1,"#ffd93b");
+})();
+
+/* ── セーブ ── */
+const SAVE="bowling.save";
+let S={best:0, games:0};
+try{ const d=JSON.parse(localStorage.getItem(SAVE)); if(d){ S.best=d.best|0; S.games=d.games|0; } }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(S)); }catch(e){} }
+
+/* ── おと ── */
+let actx=null;
+function ac(){ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended")actx.resume(); return actx; }
+function beep(f,d=0.07,t="sine",v=0.1){try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d);o.stop(a.currentTime+d);}catch(e){}}
+function noise(d=0.2,v=0.1,hp=300){try{const a=ac(),n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,1.6);
+  const s=a.createBufferSource(),g=a.createGain(),f=a.createBiquadFilter();
+  f.type="highpass"; f.frequency.value=hp; g.gain.value=v; s.buffer=b; s.connect(f); f.connect(g); g.connect(a.destination); s.start();}catch(e){}}
+const sRoll=()=>noise(0.5,0.05,150);
+const sHit=()=>{ noise(0.18,0.16,700); beep(180,0.1,"square",0.08); };
+const sPin=()=>{ noise(0.1,0.09,900); beep(300+Math.random()*250,0.06,"triangle",0.06); };
+const sGutter=()=>{ beep(140,0.3,"sine",0.08); };
+const sStrike=()=>[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.16,"triangle",0.16),i*100));
+const sSpare=()=>[659,880].forEach((f,i)=>setTimeout(()=>beep(f,0.15,"triangle",0.14),i*120));
+const sTick=()=>beep(620,0.04,"square",0.07);
+
+/* ── 3D ── */
+const cv=document.getElementById("cv");
+const renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x1a1428);
+scene.fog=new THREE.Fog(0x1a1428, 26, 46);
+const camera=new THREE.PerspectiveCamera(58,1,0.05,200);
+scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x2a2038, 0.9));
+const key=new THREE.DirectionalLight(0xfff2d0,0.9); key.position.set(3,10,-4); scene.add(key);
+const back=new THREE.PointLight(0x88aaff,0.6,30); back.position.set(0,4,20); scene.add(back);
+
+/* レーンの おおきさ（メートル）*/
+const LANE_HW=0.53, LANE_LEN=18.3, GUT=0.24, BR=0.108, PR=0.062;
+/* レーン */
+const laneMat=new THREE.MeshLambertMaterial({color:0xd9a35c});
+const lane=new THREE.Mesh(new THREE.BoxGeometry(LANE_HW*2, 0.1, LANE_LEN+2), laneMat);
+lane.position.set(0,-0.05,LANE_LEN/2-1); scene.add(lane);
+for(let i=1;i<=6;i++){                       // いた の つぎめ
+  const l=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.005,LANE_LEN+2), new THREE.MeshLambertMaterial({color:0xb8863f}));
+  l.position.set(-LANE_HW+i*(LANE_HW*2/7),0.001,LANE_LEN/2-1); scene.add(l);
+}
+/* ガター */
+for(const sgn of [-1,1]){
+  const g=new THREE.Mesh(new THREE.BoxGeometry(GUT,0.1,LANE_LEN+2), new THREE.MeshLambertMaterial({color:0x3a3350}));
+  g.position.set(sgn*(LANE_HW+GUT/2),-0.09,LANE_LEN/2-1); scene.add(g);
+  const w=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.5,LANE_LEN+2), new THREE.MeshLambertMaterial({color:0x2a2440}));
+  w.position.set(sgn*(LANE_HW+GUT+0.04),0.2,LANE_LEN/2-1); scene.add(w);
+}
+/* ねらいの ▲（レーンの まえの ほう）*/
+for(let i=-3;i<=3;i++){
+  if(i===0) continue;
+  const a=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.16,3), new THREE.MeshLambertMaterial({color:0x6b4a2a}));
+  a.rotation.x=-Math.PI/2; a.position.set(i*0.13,0.003,4.2+Math.abs(i)*0.25); scene.add(a);
+}
+/* ピンデッキ・おく */
+const deck=new THREE.Mesh(new THREE.BoxGeometry(LANE_HW*2+GUT*2, 0.1, 1.6), new THREE.MeshLambertMaterial({color:0xc9a06a}));
+deck.position.set(0,-0.05,LANE_LEN+0.3); scene.add(deck);
+const wall=new THREE.Mesh(new THREE.BoxGeometry(4,3,0.2), new THREE.MeshLambertMaterial({color:0x2a2440}));
+wall.position.set(0,1.2,LANE_LEN+1.4); scene.add(wall);
+const stripe=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.5,0.05), new THREE.MeshLambertMaterial({color:0x5a4a8a}));
+stripe.position.set(0,1.6,LANE_LEN+1.28); scene.add(stripe);
+
+/* ボール */
+const ballMesh=new THREE.Mesh(new THREE.SphereGeometry(BR,20,16), new THREE.MeshLambertMaterial({color:0x2f6ad0}));
+scene.add(ballMesh);
+const ballDot=new THREE.Mesh(new THREE.SphereGeometry(BR*0.22,8,6), new THREE.MeshLambertMaterial({color:0xf2ecff}));
+scene.add(ballDot);
+
+/* ピン（10ほん）*/
+function pinMesh(){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(PR*0.55,PR*0.8,0.22,12), new THREE.MeshLambertMaterial({color:0xf6f2ea}));
+  body.position.y=0.11; g.add(body);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(PR*0.42,PR*0.55,0.09,12), new THREE.MeshLambertMaterial({color:0xf6f2ea}));
+  neck.position.y=0.265; g.add(neck);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(PR*0.5,12,10), new THREE.MeshLambertMaterial({color:0xf6f2ea}));
+  head.position.y=0.335; g.add(head);
+  const r1=new THREE.Mesh(new THREE.CylinderGeometry(PR*0.46,PR*0.46,0.02,12), new THREE.MeshLambertMaterial({color:0xe8443a}));
+  r1.position.y=0.30; g.add(r1);
+  const r2=new THREE.Mesh(new THREE.CylinderGeometry(PR*0.5,PR*0.5,0.02,12), new THREE.MeshLambertMaterial({color:0xe8443a}));
+  r2.position.y=0.255; g.add(r2);
+  return g;
+}
+const PIN_BASE_Z=LANE_LEN-0.4, SP=0.305, ROW=0.264;
+const PIN_POS=[
+  [0,0],                                   // 1ばん
+  [-SP/2,ROW],[SP/2,ROW],                  // 2,3
+  [-SP,ROW*2],[0,ROW*2],[SP,ROW*2],        // 4,5,6
+  [-SP*1.5,ROW*3],[-SP/2,ROW*3],[SP/2,ROW*3],[SP*1.5,ROW*3], // 7-10
+];
+let pins=[];
+function buildPins(){
+  for(const p of pins) scene.remove(p.g);
+  pins=PIN_POS.map(([x,z],i)=>{
+    const g=pinMesh(); scene.add(g);
+    const p={i, x, z:PIN_BASE_Z+z, bx:x, bz:PIN_BASE_Z+z, vx:0, vz:0, down:false, tip:0, tipX:0, tipZ:1, g, standing:true};
+    g.position.set(p.x,0,p.z);
+    return p;
+  });
+}
+
+/* ── ゲームの じょうたい ── */
+let B={x:0,z:0,vx:0,vz:0,spin:0,rolling:false,gutter:false,y:BR};
+let G=null, camMode=0;
+
+function newGame(){
+  G={ id:(window.__gid=(window.__gid||0)+1), frame:0, ball:0, rolls:[], frames:Array.from({length:10},()=>({r:[],score:null})),
+      standing:10, thrown:0, waiting:false, over:false };
+  buildPins();
+  resetBall();
+  drawBoard();
+  setGuide("ゆびで うえに スワイプ！");
+}
+function resetBall(){
+  B={x:0,z:0.2,vx:0,vz:0,spin:0,rolling:false,gutter:false,y:BR};
+  ballMesh.position.set(B.x,BR,B.z);
+  ballMesh.visible=true; ballDot.visible=true;
+}
+function newRack(){
+  buildPins();
+  G.standing=10;
+}
+
+/* ── スコアボード ── */
+function markOf(fi,ri,v){
+  const f=G.frames[fi];
+  if(v===null||v===undefined) return "";
+  if(fi<9){
+    if(ri===0) return v===10?"X":(v===0?"-":String(v));
+    const sum=(f.r[0]||0)+v;
+    if(sum===10) return "/";
+    return v===0?"-":String(v);
+  }else{
+    if(v===10) return "X";
+    if(ri>0){ const prev=f.r[ri-1]||0; if(prev!==10 && prev+v===10) return "/"; }
+    return v===0?"-":String(v);
+  }
+}
+function calcScores(){
+  const r=[]; G.frames.forEach(f=>f.r.forEach(v=>r.push(v)));
+  let idx=0, total=0;
+  for(let i=0;i<10;i++){
+    const f=G.frames[i];
+    if(f.r.length===0){ f.score=null; continue; }
+    if(i<9){
+      if(f.r[0]===10){
+        if(r[idx+1]===undefined||r[idx+2]===undefined){ f.score=null; idx+=1; continue; }
+        total+=10+r[idx+1]+r[idx+2]; idx+=1;
+      }else if(f.r.length>=2){
+        if(f.r[0]+f.r[1]===10){
+          if(r[idx+2]===undefined){ f.score=null; idx+=2; continue; }
+          total+=10+r[idx+2];
+        }else total+=f.r[0]+f.r[1];
+        idx+=2;
+      }else{ f.score=null; idx+=1; continue; }
+    }else{
+      const need=(f.r[0]===10||((f.r[0]||0)+(f.r[1]||0)===10))?3:2;
+      if(f.r.length<need){ f.score=null; continue; }
+      total+=f.r.reduce((a,b)=>a+b,0);
+    }
+    f.score=total;
+  }
+  return total;
+}
+function drawBoard(){
+  calcScores();
+  const el=document.getElementById("board"); el.innerHTML="";
+  G.frames.forEach((f,i)=>{
+    const d=document.createElement("div"); d.className="fr"+(i===G.frame?" cur":"");
+    const cells=(i===9)?3:2;
+    let th="";
+    for(let k=0;k<cells;k++) th+="<span>"+markOf(i,k,f.r[k])+"</span>";
+    d.innerHTML="<div class='no'>"+(i+1)+"</div><div class='th'>"+th+"</div>"+
+      "<div class='tt'>"+(f.score===null||f.score===undefined?"":f.score)+"</div>";
+    el.appendChild(d);
+  });
+}
+function setGuide(t){ document.getElementById("guide").textContent=t; }
+function showBig(t){
+  const el=document.getElementById("big"); el.textContent=t; el.classList.add("on");
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"),1500);
+}
+
+/* ── なげる（スワイプ）── */
+let sw=null;
+const view=document.getElementById("view");
+view.addEventListener("pointerdown",e=>{
+  ac();
+  if(!G||G.over||B.rolling||G.waiting) return;
+  const r=view.getBoundingClientRect();
+  sw={x0:e.clientX,y0:e.clientY,t0:performance.now(),pts:[{x:e.clientX,y:e.clientY,t:performance.now()}],h:r.height};
+  document.getElementById("power").classList.add("on");
+  try{view.setPointerCapture(e.pointerId);}catch(_){}
+});
+view.addEventListener("pointermove",e=>{
+  if(!sw) return;
+  sw.pts.push({x:e.clientX,y:e.clientY,t:performance.now()});
+  if(sw.pts.length>16) sw.pts.shift();
+  const dy=Math.max(0, sw.y0-e.clientY);
+  const pw=Math.min(1, dy/(sw.h*0.42));
+  document.getElementById("powerI").style.height=(pw*100)+"%";
+  // なげる まえは たまを よこに うごかせる（たちいち）
+  const dx=(e.clientX-sw.x0)/ (sw.h*0.5);
+  B.x=Math.max(-LANE_HW+BR, Math.min(LANE_HW-BR, dx*0.9));
+  ballMesh.position.x=B.x;
+});
+function endSwipe(e){
+  if(!sw) return;
+  document.getElementById("power").classList.remove("on");
+  const p=sw.pts, last=p[p.length-1], first=p[0];
+  const dy=Math.max(0, sw.y0-last.y);
+  const pw=Math.min(1, dy/(sw.h*0.42));
+  sw=null;
+  if(pw<0.12){ setGuide("もっと つよく スワイプ！"); return; }
+  // むき：スワイプ ぜんたいの かたむき
+  const dxAll=last.x-first.x;
+  const ang=Math.max(-0.16, Math.min(0.16, dxAll/(view.getBoundingClientRect().height*0.9)));
+  // カーブ：さいごの ほうの よこの うごき
+  let lateral=0;
+  if(p.length>=4){
+    const a=p[p.length-4], b=last;
+    lateral=(b.x-a.x)/Math.max(1,(b.t-a.t))*1000;   // px/s
+  }
+  const spin=Math.max(-1,Math.min(1, lateral/900))*1.2;
+  throwBall(pw, ang, spin);
+}
+view.addEventListener("pointerup",endSwipe);
+view.addEventListener("pointercancel",endSwipe);
+
+function throwBall(power,ang,spin){
+  const v=4.6+power*4.6;
+  B.vz=v*Math.cos(ang); B.vx=v*Math.sin(ang);
+  B.spin=spin; B.rolling=true; B.gutter=false;
+  G.beforeStanding=G.standing;
+  G.thrown++;
+  sRoll();
+  setGuide("");
+}
+
+/* ── ぶつかり（2D）── */
+function collideBallPin(p){
+  const dx=p.x-B.x, dz=p.z-B.z, d=Math.hypot(dx,dz), rr=BR+PR;
+  if(d>rr||d<1e-6) return;
+  const nx=dx/d, nz=dz/d;
+  const rvx=B.vx-p.vx, rvz=B.vz-p.vz;
+  const vn=rvx*nx+rvz*nz;
+  if(vn<=0) return;
+  const mB=6.0, mP=1.2, e=0.62;
+  const j=-(1+e)*vn/(1/mB+1/mP);
+  B.vx+=j*nx/mB; B.vz+=j*nz/mB;
+  p.vx-=j*nx/mP; p.vz-=j*nz/mP;
+  const ov=rr-d;
+  p.x+=nx*ov*0.8; p.z+=nz*ov*0.8;
+  knock(p);
+  sHit();
+}
+function collidePins(a,b){
+  const dx=b.x-a.x, dz=b.z-a.z, d=Math.hypot(dx,dz), rr=PR*2;
+  if(d>rr||d<1e-6) return;
+  const nx=dx/d, nz=dz/d;
+  const rvx=a.vx-b.vx, rvz=a.vz-b.vz;
+  const vn=rvx*nx+rvz*nz;
+  if(vn<=0) return;
+  const e=0.78, m=1.2;
+  const j=-(1+e)*vn/(2/m);
+  a.vx+=j*nx/m; a.vz+=j*nz/m;
+  b.vx-=j*nx/m; b.vz-=j*nz/m;
+  const ov=(rr-d)/2;
+  a.x-=nx*ov; a.z-=nz*ov; b.x+=nx*ov; b.z+=nz*ov;
+  if(Math.hypot(a.vx,a.vz)>0.35) knock(a);
+  if(Math.hypot(b.vx,b.vz)>0.35) knock(b);
+  if(Math.random()<0.5) sPin();
+}
+function knock(p){
+  if(p.down) return;
+  const sp=Math.hypot(p.vx,p.vz);
+  if(sp<0.32) return;
+  p.down=true; p.standing=false;
+  p.tipX=p.vx/sp; p.tipZ=p.vz/sp;
+  G.standing--;
+  sPin();
+}
+
+/* ── ものり ── */
+let last=0, running=false, settleT=0;
+function step(dt){
+  if(B.rolling){
+    // カーブ（フック）：よこ ほうこうの かそくが だんだん きく
+    const prog=Math.min(1, B.z/LANE_LEN);
+    // ほんものの フックと おなじで、レーンの おわりの ほうで きゅうに まがる
+    B.vx+=B.spin*Math.pow(prog,3)*1.35*dt;
+    B.vz-=0.16*dt;                      // ころがり まさつ
+    B.x+=B.vx*dt; B.z+=B.vz*dt;
+    // ガター
+    if(!B.gutter && Math.abs(B.x)>LANE_HW-BR*0.6){
+      B.gutter=true; B.spin=0; B.vx=0;
+      B.x=Math.sign(B.x)*(LANE_HW+GUT*0.5);
+      sGutter(); setGuide("ガター…");
+    }
+    ballMesh.position.set(B.x, B.gutter? BR-0.09 : BR, B.z);
+    ballMesh.rotation.x+=B.vz*dt/BR;
+    ballDot.position.set(B.x+Math.sin(ballMesh.rotation.x)*BR*0.7, (B.gutter?BR-0.09:BR)+Math.cos(ballMesh.rotation.x)*BR*0.7, B.z);
+    // ピンとの ぶつかり
+    if(!B.gutter) for(const p of pins){ if(!p.down||Math.hypot(p.vx,p.vz)>0.05) collideBallPin(p); }
+    if(B.z>LANE_LEN+1.4 || B.vz<0.25){ B.rolling=false; G.waiting=true; settleT=0; }
+  }
+  // ピン
+  for(let i=0;i<pins.length;i++){
+    const p=pins[i];
+    if(p.down){
+      p.tip=Math.min(Math.PI/2, p.tip+dt*4.5);
+      p.g.rotation.z=-p.tipX*p.tip;
+      p.g.rotation.x=p.tipZ*p.tip;
+      p.g.position.y=-Math.sin(p.tip)*0.03;
+    }
+    if(Math.hypot(p.vx,p.vz)>0.02){
+      p.x+=p.vx*dt; p.z+=p.vz*dt;
+      const f=p.down?0.9:4.0;   // たおれた ピンは よく すべる（ほかの ピンを まきこむ）
+      p.vx-=p.vx*Math.min(1,f*dt); p.vz-=p.vz*Math.min(1,f*dt);
+      p.g.position.x=p.x; p.g.position.z=p.z;
+      if(Math.abs(p.x)>LANE_HW+GUT || p.z>LANE_LEN+1.2){ p.vx=0; p.vz=0; }
+    }
+    for(let j=i+1;j<pins.length;j++){
+      const q=pins[j];
+      if(p.tip>1.2 && q.tip>1.2) continue;
+      collidePins(p,q);
+    }
+  }
+  // たおれ おわりを まつ
+  if(G.waiting){
+    settleT+=dt;
+    let moving=false;
+    for(const p of pins) if(Math.hypot(p.vx,p.vz)>0.08||(p.down&&p.tip<Math.PI/2-0.05)) moving=true;
+    if(settleT>1.1 && !moving || settleT>3.2){ G.waiting=false; endRoll(); }
+  }
+}
+
+/* ── 1とうの おわり ── */
+function endRoll(){
+  const f=G.frames[G.frame];
+  // この とうきゅうで たおした かず ＝ なげる まえの のこり − いまの のこり
+  const pinsThis=Math.max(0,(G.beforeStanding===undefined?10:G.beforeStanding)-G.standing);
+  f.r.push(pinsThis);
+  drawBoard();
+
+  const isTenth=G.frame===9;
+  const sum=f.r.reduce((a,b)=>a+b,0);
+  if(f.r.length===1 && pinsThis===10){ showBig("ストライク！"); sStrike(); }
+  else if(!isTenth && f.r.length===2 && f.r[0]+f.r[1]===10){ showBig("スペア！"); sSpare(); }
+  else if(isTenth && f.r.length>=2 && f.r[f.r.length-2]!==10 && f.r[f.r.length-2]+pinsThis===10){ showBig("スペア！"); sSpare(); }
+  else if(pinsThis===0 && !B.gutter) showBig("あー…");
+
+  const gid=G.id;
+  setTimeout(()=>{
+    if(!G||G.id!==gid) return;
+    if(!isTenth){
+      if(f.r[0]===10 || f.r.length===2){ G.frame++; nextFrame(true); }
+      else nextFrame(false);
+    }else{
+      const need=(f.r[0]===10||((f.r[0]||0)+(f.r[1]||0)===10))?3:2;
+      if(f.r.length>=need){ finish(); return; }
+      // ストライク/スペアの あとは ピンを ぜんぶ たてなおす
+      const lastTwo=f.r[f.r.length-1];
+      const reset=(lastTwo===10)||(f.r.length===2 && f.r[0]+f.r[1]===10);
+      if(reset){ nextFrame(true); }
+      else nextFrame(false);
+    }
+  },1400);
+}
+function nextFrame(rack){
+  if(rack) newRack();
+  resetBall();
+  drawBoard();
+  setGuide(G.frame>=9?"さいごの フレーム！":"ゆびで うえに スワイプ！");
+}
+function finish(){
+  G.over=true; running=false;
+  const total=calcScores();
+  S.games++;
+  const isBest=total>S.best;
+  if(isBest) S.best=total;
+  save();
+  sStrike();
+  sheet({t:"ゲーム しゅうりょう", s:"とくてん <b style='font-size:26px;color:#ffd93b'>"+total+"</b>てん"+
+    (isBest?"<br>さいこう きろく こうしん！":"<br>さいこう きろく "+S.best+"てん"),
+    btns:[["やめる","gray",goStart],["もういっかい","green",()=>startGame()]]});
+}
+
+/* ── カメラ ── */
+function updateCam(){
+  if(camMode===0){
+    // うしろから ボールを おいかける
+    const z=Math.max(0, Math.min(B.z, LANE_LEN-2.6));
+    camera.position.set(B.x*0.35, 1.35, z-3.2);
+    camera.lookAt(B.x*0.3, 0.35, z+7);
+  }else{
+    // ピンを よこから
+    camera.position.set(1.9, 1.5, LANE_LEN-2.2);
+    camera.lookAt(0,0.3,LANE_LEN+0.1);
+  }
+}
+document.getElementById("btnView").addEventListener("click",()=>{ sTick(); camMode=(camMode+1)%2; });
+
+/* ── ループ ── */
+function loop(ts){
+  if(!running) return;
+  if(!last) last=ts;
+  const dt=Math.min(40, ts-last)/1000; last=ts;
+  const sub=4;
+  for(let i=0;i<sub;i++) step(dt/sub);
+  updateCam();
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+function resize(){
+  const r=view.getBoundingClientRect();
+  if(r.width<10||r.height<10) return;
+  renderer.setSize(r.width,r.height,false);
+  camera.aspect=r.width/r.height; camera.updateProjectionMatrix();
+}
+let rsT=null;
+addEventListener("resize",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,150); });
+addEventListener("orientationchange",()=>{ clearTimeout(rsT); rsT=setTimeout(resize,250); });
+
+/* ── がめん ── */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+const ovl=document.getElementById("ovl"), sheetEl=document.getElementById("sheet");
+function sheet(o){
+  sheetEl.innerHTML="<h2>"+o.t+"</h2><div class='sub'>"+(o.s||"")+"</div>";
+  const row=document.createElement("div"); row.className="row";
+  (o.btns||[]).forEach(([label,cls,fn])=>{
+    const b=document.createElement("button"); b.className="btn "+cls; b.textContent=label;
+    b.addEventListener("click",()=>{ sTick(); fn(); }); row.appendChild(b);
+  });
+  sheetEl.appendChild(row); ovl.classList.add("show");
+}
+function startGame(){
+  ovl.classList.remove("show");
+  newGame(); show("play-s");
+  requestAnimationFrame(()=>{ resize(); running=true; last=0; requestAnimationFrame(loop); });
+}
+function goStart(){
+  running=false; ovl.classList.remove("show");
+  document.getElementById("rec").textContent = S.best? ("さいこう "+S.best+"てん ／ "+S.games+"ゲーム"):"";
+  show("start-s");
+}
+document.getElementById("btnGo").addEventListener("click",()=>{ ac(); sTick(); startGame(); });
+document.getElementById("btnQuit").addEventListener("click",()=>{ sTick(); goStart(); });
+
+/* ── テストよう ── */
+window.__T={
+  start:()=>startGame(),
+  throw:(pw,ang,spin)=>{ if(!B.rolling&&!G.waiting){ throwBall(pw,ang,spin||0); return true; } return false; },
+  setX:x=>{ B.x=x; ballMesh.position.x=x; },
+  state:()=>({frame:G&&G.frame, ball:G&&G.frames[G.frame].r.length, standing:G&&G.standing,
+              rolling:B.rolling, waiting:G&&G.waiting, over:!!(G&&G.over),
+              rolls:G?G.frames.map(f=>f.r.slice()):[], scores:G?G.frames.map(f=>f.score):[],
+              total:G?calcScores():0, bx:B.x, bz:B.z}),
+  pins:()=>pins.map(p=>({x:+p.x.toFixed(3), z:+p.z.toFixed(3), down:p.down})),
+  reset:()=>{ S={best:0,games:0}; save(); }
+};
+
+goStart(); resize();
+</script>
+</body>
+</html>
