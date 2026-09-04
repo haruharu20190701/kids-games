@@ -153,6 +153,7 @@ const GAMES=[
   {slug:"amida",     nm:"あみだくじ",   unit:"かい",  th:[1,5,12],   read:()=>num("amidaBest")},
   {slug:"voice",     nm:"こえであそぼ", unit:"てん",  th:[3,10,25],  read:()=>num("voiceBest")},
   {slug:"escape",    nm:"どうぶつから にげろ", unit:"ウェーブ", th:[3,7,12], read:()=>(obj("escape.save").bestWave|0)},
+  {slug:"pushpop",   nm:"プッシュポップ", unit:"かい",  th:[100,800,3000], read:()=>(obj("pushpop.save").pops|0)},
   {slug:"scope",     nm:"スコープシュート", unit:"ステージ", th:[2,5,9],  read:()=>Math.max(0,(obj("scope.save").stage|0)-1)},
   {slug:"bowling",   nm:"ボウリング",   unit:"てん",  th:[40,80,130], read:()=>(obj("bowling.save").best|0)},
   {slug:"billiards", nm:"ビリヤード",   unit:"レベル",th:[2,5,9],    read:()=>Math.max(0,(obj("billiards.save").lv|0)-1)},
@@ -232,6 +233,7 @@ const MISSIONS=[
   {slug:"mushi",     nm:"むしバトル",   verb:"しゅ つかまえる",need:[1,2],read:()=>arr("mushibattle.caught").length},
   {slug:"dino",      nm:"きょうりゅう", verb:"しゅ ほりだす",need:[1,2], read:()=>arr("dinoFound").length},
   {slug:"escape",    nm:"どうぶつから にげろ", verb:"ウェーブ すすむ", need:[1,2], read:()=>(obj("escape.save").bestWave|0)},
+  {slug:"pushpop",   nm:"プッシュポップ", verb:"かい ポップ", need:[60,120], read:()=>(obj("pushpop.save").pops|0)},
 ];
 function buildDaily(){
   let d=obj(DKEY);
